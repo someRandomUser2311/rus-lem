@@ -1,0 +1,22 @@
+[[tests]]
+key = "t10"
+asserts = [{ check = "compile_error", code = "E0603", message = "A crate outside `module_lab` can still call `pricing::fee_for`. Leave `fee_for` without `pub` so only code inside `pricing` can use it." }]
+
+[[tests]]
+key = "t11"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["type:Vec", "type:VecDeque", "type:HashMap", "type:HashSet", "type:BTreeMap", "type:BTreeSet", "macro:vec", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "try", "call:leak", "call:forget", "call:map", "call:and_then", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:zip", "call:sum", "call:product", "call:any", "call:all", "call:position", "call:windows", "call:chunks", "macro:include", "attr:path"], message = "Use only what Chapters 1–7 teach: modules, paths, `use` and `pub use` are new and welcome, but no Vec or other collections, no traits or trait implementations, no explicit lifetimes, no unsafe code, no `?` operator, no closure-taking adapters such as map or filter, and no `#[path]` or `include!` to bend the module tree." },
+  { check = "uses", what = ["fn:fee_for"], inside = "mod:pricing", file = "src/lib.rs", message = "Define the helper `fee_for` inside `pub mod pricing`." },
+  { check = "forbids", what = ["pub:fee_for"], file = "src/lib.rs", message = "`fee_for` must stay private: remove its `pub`." },
+  { check = "uses", what = ["call:fee_for"], within = "quote", file = "src/lib.rs", message = "`quote` should call `fee_for` instead of repeating the formula." },
+]
+
+[[wrong]]
+name = "helper-public"
+fails = ["t10", "t11"]
+
+[[wrong]]
+name = "cap-too-late"
+fails = ["t07"]
+

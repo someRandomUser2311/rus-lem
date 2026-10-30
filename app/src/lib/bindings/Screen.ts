@@ -13,6 +13,11 @@ export type Screen = {
  */
 key: string, kind: ScreenKind, heading: string, text_md: string, code: CodeBlock | null, 
 /**
+ * A multi-file example (a package): every file, in order, each with its path in
+ * `file`. `code` is then empty.
+ */
+files?: Array<CodeBlock>, 
+/**
  * Keyed by background: python, js, java, c, go.
  */
 coming_from: { [key in string]: string }, 

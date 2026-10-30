@@ -9,6 +9,7 @@
   import { panelStates } from '../lib/viz'
   import BookPanel from '../components/BookPanel.svelte'
   import CodeView from '../components/CodeView.svelte'
+  import CodeFiles from '../components/CodeFiles.svelte'
   import ComingFrom from '../components/ComingFrom.svelte'
   import ErrorExplainer from '../components/ErrorExplainer.svelte'
   import Md from '../components/Md.svelte'
@@ -60,6 +61,11 @@
   const teachingTotal = $derived(lesson ? lesson.screens.filter(s => s.kind !== 'check').length : 0)
   const nextSet = $derived(`Q${id.slice(1)}`)
   // Error screens mark the lines rustc points at (` --> src/main.rs:3:28`).
+  // The file a compiler message points at (` --> src/lib.rs:2:5`): an error screen's
+  // package opens on it.
+  function diagnosticFile(d: string | null | undefined): string | null {
+    return d?.match(/-->\s*([^:\s]+):\d+/)?.[1] ?? null
+  }
   const errLines = $derived(screen?.kind === 'error' && screen.diagnostic ? [...screen.diagnostic.matchAll(/-->\s*[^:\s]+:(\d+):\d+/g)].map(m => Number(m[1])) : [])
 
   async function next() {
@@ -154,6 +160,8 @@
                   <div class="col wide">
                     {#if screen.code}
                       <CodeView code={screen.code} hl={stepData?.hl ?? []} err={stepData?.err.length ? stepData.err : errLines} notes={stepData?.notes ?? []} links={stepData?.links ?? []} />
+                    {:else if screen.files?.length}
+                      <CodeFiles files={screen.files} file={stepData?.file ?? diagnosticFile(screen.diagnostic)} hl={stepData?.hl ?? []} err={stepData?.err.length ? stepData.err : errLines} notes={stepData?.notes ?? []} />
                     {/if}
                     {#if screen.kind === 'error' && screen.diagnostic}
                       <ErrorExplainer diagnostic={screen.diagnostic} annotations={screen.annotations} />

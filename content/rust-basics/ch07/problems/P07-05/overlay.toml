@@ -1,0 +1,34 @@
+[[tests]]
+key = "t16"
+asserts = [{ check = "compile_error", code = "E0451", message = "A crate outside `module_lab` can still build a `Ticket` with a struct literal. Keep both fields private so callers must use `Ticket::new`." }]
+
+[[tests]]
+key = "t17"
+asserts = [{ check = "compile_error", code = "E0616", message = "A crate outside `module_lab` can still read `ticket.price`. Keep the field private; callers use `fare()`." }]
+
+[[tests]]
+key = "t18"
+run = { kind = "suite", script = "t18" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t19"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["type:Vec", "type:VecDeque", "type:HashMap", "type:HashSet", "type:BTreeMap", "type:BTreeSet", "macro:vec", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "try", "call:leak", "call:forget", "call:map", "call:and_then", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:zip", "call:sum", "call:product", "call:any", "call:all", "call:position", "call:windows", "call:chunks", "macro:include", "attr:path"], message = "Use only what Chapters 1–7 teach: modules, paths, `use` and `pub use` are new and welcome, but no Vec or other collections, no traits or trait implementations, no explicit lifetimes, no unsafe code, no `?` operator, no closure-taking adapters such as map or filter, and no `#[path]` or `include!` to bend the module tree." },
+  { check = "uses", what = ["mod:model"], file = "src/lib.rs", message = "Keep the types in `pub mod model { … }`." },
+  { check = "uses", what = ["pub:Ticket", "pub:Fare"], inside = "mod:model", file = "src/lib.rs", message = "`Ticket` and `Fare` must both be `pub`, so callers outside `model` can name them." },
+  { check = "forbids", what = ["pub_field:name", "pub_field:price"], file = "src/lib.rs", message = "`Ticket`'s fields must stay private: remove `pub` from `name` and `price`." },
+  { check = "uses", what = ["pub:new", "pub:name", "pub:fare"], inside = "impl:Ticket", file = "src/lib.rs", message = "`Ticket::new`, `name` and `fare` must be `pub`." },
+  { check = "uses", what = ["pub:cents"], inside = "impl:Fare", file = "src/lib.rs", message = "`Fare::cents` must be `pub`." },
+  { check = "uses", what = ["fn:summary"], file = "src/lib.rs", message = "Define `summary` at the crate root." },
+]
+
+[[wrong]]
+name = "public-fields"
+fails = ["t16", "t17", "t19"]
+
+[[wrong]]
+name = "no-trim"
+fails = ["t01", "t05", "t11", "t12", "t13", "t18"]
+

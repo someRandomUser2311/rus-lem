@@ -98,11 +98,14 @@ pub fn run(ch: &Chapter, vendor: Option<&Path>) -> Result<bool> {
         );
     let mut quiz_count = 0;
     for q in questions {
-        let (Some(v), Some(code)) = (&q.verify, &q.code) else {
-            continue;
+        let Some(v) = &q.verify else { continue };
+        let r = match (&q.code, q.files.is_empty()) {
+            (Some(code), _) => verify_program(&tc, vendor, &qdir, &q.id, &code.text, v),
+            (None, false) => verify_package(&tc, vendor, &qdir, &q.id, &q.files, v),
+            (None, true) => continue,
         };
         quiz_count += 1;
-        if let Err(e) = verify_program(&tc, vendor, &qdir, &q.id, &code.text, v) {
+        if let Err(e) = r {
             errors.push(format!("{}: {e}", q.id));
         }
     }
@@ -111,6 +114,40 @@ pub fn run(ch: &Chapter, vendor: Option<&Path>) -> Result<bool> {
     let mut lesson_count = 0;
     for l in &ch.lessons {
         for s in &l.screens {
+            if !s.files.is_empty() {
+                // A package: it builds, or fails with the error screen's first line.
+                lesson_count += 1;
+                let id = format!("{}-{}", l.id, s.key);
+                let v = match (&s.kind, &s.diagnostic) {
+                    (ScreenKind::Error, Some(diag)) => {
+                        let first = diag.lines().next().unwrap_or("").to_string();
+                        Verify {
+                            compiles: false,
+                            error_code: first
+                                .split(['[', ']'])
+                                .nth(1)
+                                .map(str::to_string)
+                                .filter(|c| c.starts_with('E')),
+                            error_line: None,
+                            error_message: Some(first),
+                            stdout: None,
+                            bin: None,
+                        }
+                    }
+                    _ => Verify {
+                        compiles: true,
+                        error_code: None,
+                        error_line: None,
+                        error_message: None,
+                        stdout: None,
+                        bin: None,
+                    },
+                };
+                if let Err(e) = verify_package(&tc, vendor, &qdir, &id, &s.files, &v) {
+                    errors.push(format!("{id}: {e}"));
+                }
+                continue;
+            }
             let Some(code) = &s.code else { continue };
             if code.lang != "rust" || !code.text.contains("fn main") {
                 continue;
@@ -141,6 +178,7 @@ pub fn run(ch: &Chapter, vendor: Option<&Path>) -> Result<bool> {
                             error_line: None,
                             error_message: Some(first),
                             stdout: None,
+                            bin: None,
                         },
                     )
                 }
@@ -156,6 +194,7 @@ pub fn run(ch: &Chapter, vendor: Option<&Path>) -> Result<bool> {
                         error_line: None,
                         error_message: None,
                         stdout: None,
+                        bin: None,
                     },
                 ),
             };
@@ -258,6 +297,59 @@ fn verify_program(
             .map_err(|e| e.to_string())?;
         (c, exe)
     };
+    check_build(tc, &c, &exe, dir, v)
+}
+
+/// A multi-file program: a Cargo package from these files (a `Cargo.toml` among them, or
+/// the package `module-lab`). Its output is the package's own binary's.
+fn verify_package(
+    tc: &Toolchain,
+    vendor: Option<&Path>,
+    dir: &std::path::Path,
+    id: &str,
+    files: &[CodeBlock],
+    v: &Verify,
+) -> std::result::Result<(), String> {
+    let dir = dir.join(id.replace('.', "_"));
+    let _ = std::fs::remove_dir_all(dir.join("src"));
+    std::fs::create_dir_all(dir.join("src")).map_err(|e| e.to_string())?;
+    let mut manifest = "[package]\nname = \"module-lab\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\n".to_string();
+    for f in files {
+        let Some(path) = f.file.as_deref() else {
+            return Err("a file of this package has no path".into());
+        };
+        if path == "Cargo.toml" {
+            manifest = f.text.clone();
+            continue;
+        }
+        let p = dir.join(path);
+        if let Some(parent) = p.parent() {
+            std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+        }
+        std::fs::write(&p, &f.text).map_err(|e| e.to_string())?;
+    }
+    std::fs::write(dir.join("Cargo.toml"), &manifest).map_err(|e| e.to_string())?;
+    let name = toml::from_str::<toml::Value>(&manifest)
+        .ok()
+        .and_then(|m| m["package"]["name"].as_str().map(str::to_string))
+        .unwrap_or_else(|| "module-lab".into());
+    // One target folder for every package: they share no dependencies, only build time.
+    let target = dir.parent().unwrap_or(&dir).join("target");
+    let c = tc
+        .cargo(&dir, "build", Some(&target), vendor, None)
+        .map_err(|e| e.to_string())?;
+    let exe = target.join("debug").join(v.bin.as_deref().unwrap_or(&name));
+    check_build(tc, &c, &exe, &dir, v)
+}
+
+/// Checks a build against the expected facts, running the program for its output.
+fn check_build(
+    tc: &Toolchain,
+    c: &rb_runner::Compiled,
+    exe: &Path,
+    dir: &Path,
+    v: &Verify,
+) -> std::result::Result<(), String> {
     if c.ok != v.compiles {
         return Err(if c.ok {
             "compiles, but the answer says it doesn't".into()
@@ -284,8 +376,13 @@ fn verify_program(
             ));
         }
         if let Some(want) = &v.error_message {
+            // The first error's headline (a package build may print warnings first).
             let got = strip_ansi(&c.rendered);
-            let got_first = got.lines().next().unwrap_or("");
+            let got_first = got
+                .lines()
+                .find(|l| l.starts_with("error"))
+                .or_else(|| got.lines().next())
+                .unwrap_or("");
             // A spec message in a code span can't hold rustc's own backticks.
             if got_first.trim() != want.trim() && got_first.replace('`', "").trim() != want.trim() {
                 return Err(format!(
@@ -297,7 +394,7 @@ fn verify_program(
     }
     if let Some(want) = &v.stdout {
         let out = tc
-            .run_program(&exe, dir, b"", &[], &[], &Limits::default(), None)
+            .run_program(exe, dir, b"", &[], &[], &Limits::default(), None)
             .map_err(|e| e.to_string())?;
         let norm = |s: &str| {
             s.lines()
@@ -357,7 +454,7 @@ fn check_problem(grader: &Grader, p: &Problem) -> Result<ProblemReport> {
                 r.verdict,
                 failed.join("; "),
                 if r.verdict == Verdict::CompileError {
-                    strip_ansi(&r.compile.rendered)
+                    format!("{}{}", strip_ansi(&r.compile.rendered), r.compile.log)
                 } else {
                     String::new()
                 }

@@ -5,6 +5,10 @@ import type { PanelOp } from "./PanelOp";
 
 export type Step = { n: number, 
 /**
+ * In a multi-file screen, the file `hl` and `err` refer to.
+ */
+file?: string | null, 
+/**
  * Highlighted code lines (1-based).
  */
 hl: Array<number>, 

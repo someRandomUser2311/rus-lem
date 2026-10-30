@@ -49,8 +49,17 @@
 //! | `pat_or`, `pat_range`, `pat_range_incl` | an or-pattern `a \| b`; a range pattern; an inclusive one (`1..=9`) |
 //! | `pat_wild`, `pat_bind`, `arm_guard` | a `match` arm that is `_`, that binds everything to a name, that has an `if` guard |
 //! | `try` | the `?` operator |
+//! | `item:fn`, `item:const`, `item:use` | a function (also a method), a constant, a `use` declaration |
+//! | `mod:NAME`, `mod_file:NAME`, `mod_decl:NAME` | an inline module `mod NAME { … }`; a body-less `mod NAME;` (its body is in a file); either |
+//! | `pub:NAME`, `pub_restricted:NAME` | a `pub` item (function, struct, enum, module, constant); also a `pub(crate)`/`pub(super)` one, which is both |
+//! | `pub_field:NAME` | inside `struct:NAME`: a field with a visibility modifier |
+//! | `use:PATH`, `pub_use:PATH` | one name a `use` (or `pub use`) brings in, its path written out whole: `crate::a::b`, `a::B as C`, `a::*` (`a::{self}` is `a`) |
+//! | `use_glob`, `use_group` | a `use` with a glob `*`; with a braced group `{…}` |
+//! | `call_path:PATH`, `path:PATH` | a call through a path of two or more segments (`crate::a::f`, `super::f`); any such path expression (`super::LIMIT`) |
+//! | `lit:N` | an integer literal with value N |
+//! | `attr:path` | a `#[path = "…"]` attribute |
 //!
-//! Contexts are `fn:NAME`, the loop facts, `if`, `block_expr`, `let:NAME` (its
+//! Contexts are `fn:NAME`, `mod:NAME`, the loop facts, `if`, `block_expr`, `let:NAME` (its
 //! initialiser), `const:NAME`, `struct:NAME`, `enum:NAME`, `impl:TYPE`, `struct_lit:NAME`,
 //! `match`, `if_let` (its pattern and `then` block), `while_let` and `let_else` (its
 //! pattern and `else` block).
@@ -99,6 +108,13 @@ struct Facts {
     lets: BTreeSet<String>,
     /// Types with an `impl` block so far.
     impls: BTreeSet<String>,
+}
+
+/// A path's segments joined by `::`, without generic arguments.
+fn path_text(p: &syn::Path) -> String {
+    let segs: Vec<String> = p.segments.iter().map(|s| s.ident.to_string()).collect();
+    let lead = if p.leading_colon.is_some() { "::" } else { "" };
+    format!("{lead}{}", segs.join("::"))
 }
 
 fn ty_text(t: &syn::Type) -> String {
@@ -230,6 +246,60 @@ impl Facts {
         self.lets = outer;
     }
 
+    /// `pub:NAME` (and `pub_restricted:NAME`) for an item with a visibility modifier.
+    fn visibility(&mut self, name: &str, vis: &syn::Visibility) {
+        match vis {
+            syn::Visibility::Public(_) => self.fact(format!("pub:{name}")),
+            syn::Visibility::Restricted(_) => {
+                self.fact(format!("pub:{name}"));
+                self.fact(format!("pub_restricted:{name}"));
+            }
+            syn::Visibility::Inherited => {}
+        }
+    }
+
+    /// The names a `use` tree brings in, each with its whole path.
+    fn use_tree(&mut self, prefix: &str, t: &syn::UseTree, public: bool) {
+        let join = |p: &str, s: &str| {
+            if p.is_empty() {
+                s.to_string()
+            } else {
+                format!("{p}::{s}")
+            }
+        };
+        let leaf = |v: &mut Self, path: String| {
+            v.fact(format!("use:{path}"));
+            if public {
+                v.fact(format!("pub_use:{path}"));
+            }
+        };
+        match t {
+            syn::UseTree::Path(p) => {
+                self.use_tree(&join(prefix, &p.ident.to_string()), &p.tree, public)
+            }
+            syn::UseTree::Name(n) if n.ident == "self" => leaf(self, prefix.to_string()),
+            syn::UseTree::Name(n) => leaf(self, join(prefix, &n.ident.to_string())),
+            syn::UseTree::Rename(r) => {
+                let from = if r.ident == "self" {
+                    prefix.to_string()
+                } else {
+                    join(prefix, &r.ident.to_string())
+                };
+                leaf(self, format!("{from} as {}", r.rename));
+            }
+            syn::UseTree::Glob(_) => {
+                self.fact("use_glob");
+                leaf(self, join(prefix, "*"));
+            }
+            syn::UseTree::Group(g) => {
+                self.fact("use_group");
+                for t in &g.items {
+                    self.use_tree(prefix, t, public);
+                }
+            }
+        }
+    }
+
     fn derives(&mut self, attrs: &[syn::Attribute]) {
         for a in attrs {
             if a.path().is_ident("derive") {
@@ -273,15 +343,54 @@ impl Facts {
 
 impl<'ast> Visit<'ast> for Facts {
     fn visit_item_fn(&mut self, f: &'ast syn::ItemFn) {
+        self.visibility(&f.sig.ident.to_string(), &f.vis);
         self.function(&f.sig, &f.block, |v| syn::visit::visit_item_fn(v, f));
     }
 
     fn visit_impl_item_fn(&mut self, f: &'ast syn::ImplItemFn) {
+        self.fact("item:fn");
+        self.visibility(&f.sig.ident.to_string(), &f.vis);
         self.function(&f.sig, &f.block, |v| syn::visit::visit_impl_item_fn(v, f));
+    }
+
+    fn visit_item_mod(&mut self, m: &'ast syn::ItemMod) {
+        let name = m.ident.to_string();
+        self.visibility(&name, &m.vis);
+        self.fact(format!("mod_decl:{name}"));
+        if m.attrs.iter().any(|a| a.path().is_ident("path")) {
+            self.fact("attr:path");
+        }
+        match &m.content {
+            None => self.fact(format!("mod_file:{name}")),
+            Some(_) => {
+                self.fact(format!("mod:{name}"));
+                self.within(format!("mod:{name}"), |v| syn::visit::visit_item_mod(v, m));
+            }
+        }
+    }
+
+    fn visit_item_use(&mut self, u: &'ast syn::ItemUse) {
+        let public = !matches!(u.vis, syn::Visibility::Inherited);
+        let prefix = if u.leading_colon.is_some() { "::" } else { "" };
+        // A leading `::` stays on the first segment.
+        match prefix {
+            "" => self.use_tree("", &u.tree, public),
+            _ => {
+                let mut t = String::new();
+                let tree = &u.tree;
+                t.push_str(&quote::quote!(#tree).to_string().replace(' ', ""));
+                self.fact(format!("use:::{t}"));
+            }
+        }
+    }
+
+    fn visit_lit_int(&mut self, l: &'ast syn::LitInt) {
+        self.fact(format!("lit:{}", l.base10_digits()));
     }
 
     fn visit_item_struct(&mut self, s: &'ast syn::ItemStruct) {
         let name = s.ident.to_string();
+        self.visibility(&name, &s.vis);
         self.fact(format!("struct:{name}"));
         match &s.fields {
             syn::Fields::Unnamed(_) => self.fact(format!("tuple_struct:{name}")),
@@ -293,6 +402,9 @@ impl<'ast> Visit<'ast> for Facts {
             for f in &s.fields {
                 if let Some(id) = &f.ident {
                     v.fact(format!("field:{id}:{}", ty_text(&f.ty)));
+                    if !matches!(f.vis, syn::Visibility::Inherited) {
+                        v.fact(format!("pub_field:{id}"));
+                    }
                 }
             }
             syn::visit::visit_item_struct(v, s)
@@ -301,6 +413,7 @@ impl<'ast> Visit<'ast> for Facts {
 
     fn visit_item_enum(&mut self, e: &'ast syn::ItemEnum) {
         let name = e.ident.to_string();
+        self.visibility(&name, &e.vis);
         self.fact(format!("enum:{name}"));
         self.within(format!("enum:{name}"), |v| {
             v.derives(&e.attrs);
@@ -411,6 +524,7 @@ impl<'ast> Visit<'ast> for Facts {
 
     fn visit_item_const(&mut self, c: &'ast syn::ItemConst) {
         let name = c.ident.to_string();
+        self.visibility(&name, &c.vis);
         self.fact(format!("const:{name}"));
         self.fact(format!("const_ty:{}", ty_text(&c.ty)));
         self.within(format!("const:{name}"), |v| {
@@ -533,6 +647,9 @@ impl<'ast> Visit<'ast> for Facts {
         {
             let name = last.ident.to_string();
             self.fact(format!("call:{name}"));
+            if p.path.segments.len() > 1 {
+                self.fact(format!("call_path:{}", path_text(&p.path)));
+            }
             if p.path.segments.len() == 1
                 && let Some(f) = self.current_fn()
             {
@@ -550,6 +667,9 @@ impl<'ast> Visit<'ast> for Facts {
     fn visit_expr_path(&mut self, p: &'ast syn::ExprPath) {
         if let Some(last) = p.path.segments.last() {
             self.fact(format!("ident:{}", last.ident));
+        }
+        if p.path.segments.len() > 1 {
+            self.fact(format!("path:{}", path_text(&p.path)));
         }
         syn::visit::visit_expr_path(self, p);
     }
@@ -637,6 +757,9 @@ impl<'ast> Visit<'ast> for Facts {
             syn::Item::Static(_) => Some("static"),
             syn::Item::Mod(_) => Some("mod"),
             syn::Item::Union(_) => Some("union"),
+            syn::Item::Fn(_) => Some("fn"),
+            syn::Item::Const(_) => Some("const"),
+            syn::Item::Use(_) => Some("use"),
             _ => None,
         };
         if let Some(k) = kind {
@@ -851,6 +974,59 @@ mod tests {
         assert!(has(&f, "try", &["fn:h"]));
         assert!(has(&f, "while_let", &["fn:h"]));
         assert!(has(&f, "pat:Some", &["while_let"]));
+    }
+
+    #[test]
+    fn module_facts() {
+        let f = facts(
+            "pub mod fees;
+             mod text;
+             #[path = \"x.rs\"] mod odd;
+             pub use fees::{charge, rate::{self, CENTS as C}};
+             pub use text::*;
+             const OFFSET: u64 = 7;
+             pub mod reports {
+                 pub(crate) fn absolute(n: u32) -> u64 { crate::arithmetic::double(n) + super::OFFSET }
+                 fn hidden() {}
+                 pub struct T { pub a: u8, b: u8 }
+             }",
+        );
+        for m in [
+            "mod_file:fees",
+            "mod_file:text",
+            "mod_decl:reports",
+            "pub:fees",
+            "attr:path",
+        ] {
+            assert!(has(&f, m, &[]), "{m}");
+        }
+        assert!(!has(&f, "pub:text", &[]));
+        assert!(has(&f, "mod:reports", &[]));
+        assert!(has(&f, "pub:absolute", &["mod:reports"]));
+        assert!(has(&f, "pub_restricted:absolute", &["mod:reports"]));
+        assert!(!has(&f, "pub:hidden", &[]));
+        assert!(has(&f, "fn:hidden", &["mod:reports"]));
+        assert!(has(&f, "pub_field:a", &["mod:reports", "struct:T"]));
+        assert!(!has(&f, "pub_field:b", &[]));
+        for u in [
+            "pub_use:fees::charge",
+            "pub_use:fees::rate",
+            "pub_use:fees::rate::CENTS as C",
+            "pub_use:text::*",
+            "use_glob",
+            "use_group",
+        ] {
+            assert!(has(&f, u, &[]), "{u}");
+        }
+        assert_eq!(f.iter().filter(|x| x.what == "item:use").count(), 2);
+        assert!(has(
+            &f,
+            "call_path:crate::arithmetic::double",
+            &["fn:absolute"]
+        ));
+        assert!(has(&f, "path:super::OFFSET", &["fn:absolute"]));
+        assert!(has(&f, "lit:7", &[]));
+        assert!(has(&f, "item:fn", &["mod:reports"]));
     }
 
     #[test]

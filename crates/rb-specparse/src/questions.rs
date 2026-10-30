@@ -44,7 +44,7 @@ pub fn question(sec: &Section, report: &mut Report) -> Option<Question> {
 
     // Prompt: everything under **Question** up to the next bold label.
     let prompt_lines = md::block_after(lines, "**Question**").unwrap_or_default();
-    let (prompt_md, code) = split_prompt(&prompt_lines);
+    let (prompt_md, code, files) = split_prompt(&prompt_lines);
 
     let options = md::block_after(lines, "**Options**")
         .map(|b| lettered(&b))
@@ -150,6 +150,11 @@ pub fn question(sec: &Section, report: &mut Report) -> Option<Question> {
                 error_line: None,
                 error_message: None,
                 stdout: Some(text.clone()),
+                bin: prompt_md
+                    .split("cargo run --bin ")
+                    .nth(1)
+                    .and_then(|r| r.split(|c: char| c == '`' || c.is_whitespace()).next())
+                    .map(str::to_string),
             }),
             _ => None,
         },
@@ -224,6 +229,7 @@ pub fn question(sec: &Section, report: &mut Report) -> Option<Question> {
         concepts,
         prompt_md,
         code,
+        files,
         options,
         left,
         answer,
@@ -241,8 +247,40 @@ pub fn question(sec: &Section, report: &mut Report) -> Option<Question> {
     Some(q)
 }
 
-fn split_prompt(lines: &[&str]) -> (String, Option<CodeBlock>) {
+/// The prompt text and its code: one fence, or several each after a "File `path`:"
+/// line (a package's files).
+fn split_prompt(lines: &[&str]) -> (String, Option<CodeBlock>, Vec<CodeBlock>) {
     let fences = md::fences(lines);
+    let labelled = |l: &str| l.trim_start().starts_with("File `") && l.trim_end().ends_with(':');
+    if fences.len() > 1 && lines.iter().filter(|l| labelled(l)).count() == fences.len() {
+        let mut text = Vec::new();
+        let mut files = Vec::new();
+        let mut pending = None;
+        let mut i = 0;
+        while i < lines.len() {
+            let l = lines[i];
+            if labelled(l) {
+                pending = md::code_spans(l).into_iter().next();
+            } else if md::is_fence(l) {
+                let f = md::fences(&lines[i..]).into_iter().next().unwrap();
+                i += f.text.lines().count() + 2;
+                files.push(CodeBlock {
+                    file: pending.take(),
+                    lang: if f.info.is_empty() {
+                        "text".into()
+                    } else {
+                        f.info.clone()
+                    },
+                    text: f.text.clone(),
+                });
+                continue;
+            } else {
+                text.push(l);
+            }
+            i += 1;
+        }
+        return (md::text(&text), None, files);
+    }
     if fences.len() == 1 {
         let mut text = Vec::new();
         let mut in_fence = false;
@@ -267,9 +305,10 @@ fn split_prompt(lines: &[&str]) -> (String, Option<CodeBlock>) {
                 },
                 text: f.text.clone(),
             }),
+            Vec::new(),
         )
     } else {
-        (md::text(lines), None)
+        (md::text(lines), None, Vec::new())
     }
 }
 
@@ -419,6 +458,7 @@ fn compile_facts(lines: &[&str], answer: &Answer) -> Verify {
         error_line: None,
         error_message: None,
         stdout: None,
+        bin: None,
     };
     if let Some(l) = lines.iter().find(|l| l.starts_with("**Compiler error:**")) {
         let rest = l["**Compiler error:**".len()..].trim();
@@ -502,7 +542,7 @@ fn check(q: &Question, report: &mut Report) {
             }
         }
         QuestionKind::SpotBug => {
-            if q.code.is_none() {
+            if q.code.is_none() && q.files.is_empty() {
                 report.error(format!("{id}: spot the bug needs code"));
             }
         }
@@ -552,4 +592,24 @@ pub fn question_sets(text: &str, chapter: u32, report: &mut Report) -> Vec<Quest
         });
     }
     out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::split_prompt;
+
+    #[test]
+    fn multi_file_prompt() {
+        let text = "The package has these files. Does it build?\n\nFile `src/lib.rs`:\n\n```rust\nmod garden;\n```\n\nFile `src/garden.rs`:\n\n```rust\npub fn beds() -> u32 {\n    2\n}\n```";
+        let lines: Vec<&str> = text.lines().collect();
+        let (prompt, code, files) = split_prompt(&lines);
+        assert!(code.is_none());
+        assert_eq!(prompt.trim(), "The package has these files. Does it build?");
+        assert_eq!(files.len(), 2);
+        assert_eq!(files[0].file.as_deref(), Some("src/lib.rs"));
+        assert_eq!(files[0].text, "mod garden;");
+        assert_eq!(files[1].file.as_deref(), Some("src/garden.rs"));
+        assert_eq!(files[1].lang, "rust");
+        assert!(files[1].text.contains("pub fn beds"));
+    }
 }

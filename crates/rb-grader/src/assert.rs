@@ -456,7 +456,50 @@ pub(crate) fn check(a: &Assertion, obs: &Observation, problem: &Problem) -> Resu
                 name(other)
             ))),
         },
-        Observation::Source { info, files } => {
+        Observation::Source {
+            info,
+            files,
+            per_file,
+        } => {
+            if let Assertion::RustFiles { files: want } = a {
+                let have: Vec<&String> = files.iter().filter(|f| f.ends_with(".rs")).collect();
+                let missing: Vec<&String> = want.iter().filter(|w| !have.contains(w)).collect();
+                let extra: Vec<&String> = have.into_iter().filter(|h| !want.contains(h)).collect();
+                if missing.is_empty() && extra.is_empty() {
+                    return Ok(());
+                }
+                let list = |v: &[&String]| {
+                    v.iter()
+                        .map(|f| format!("`{f}`"))
+                        .collect::<Vec<_>>()
+                        .join(", ")
+                };
+                let mut msg = format!(
+                    "The package's Rust files should be exactly {}.",
+                    list(&want.iter().collect::<Vec<_>>())
+                );
+                if !missing.is_empty() {
+                    msg.push_str(&format!(" Missing: {}.", list(&missing)));
+                }
+                if !extra.is_empty() {
+                    msg.push_str(&format!(" Not expected: {}.", list(&extra)));
+                }
+                return Err(fail(msg));
+            }
+            // A check about one file reads only that file.
+            let scoped = match a {
+                Assertion::Uses { file, .. }
+                | Assertion::Forbids { file, .. }
+                | Assertion::Count { file, .. } => file.as_deref(),
+                _ => None,
+            };
+            let info = match scoped {
+                Some(f) => match per_file.iter().find(|(p, _)| p == f) {
+                    Some((_, i)) => i,
+                    None => return Err(fail(format!("The file `{f}` doesn't exist."))),
+                },
+                None => info,
+            };
             if let Assertion::FilesAllowlist { files: allowed } = a {
                 let extra: Vec<&String> = files.iter().filter(|f| !allowed.contains(f)).collect();
                 return if extra.is_empty() {
@@ -522,11 +565,26 @@ pub(crate) fn check(a: &Assertion, obs: &Observation, problem: &Problem) -> Resu
                     info.macro_mention_forbid(macros, name)
                 }
                 Assertion::CallInLoop { name } => info.call_in_loop(name),
+                Assertion::Count {
+                    what,
+                    eq,
+                    within,
+                    inside,
+                    message,
+                    ..
+                } => info.fact_exactly(
+                    what,
+                    *eq as usize,
+                    within.as_deref(),
+                    inside.as_deref(),
+                    message.as_deref(),
+                ),
                 Assertion::Uses {
                     what,
                     within,
                     inside,
                     message,
+                    ..
                 } => info.uses(
                     what,
                     within.as_deref(),
@@ -537,6 +595,7 @@ pub(crate) fn check(a: &Assertion, obs: &Observation, problem: &Problem) -> Resu
                     what,
                     within,
                     message,
+                    ..
                 } => info.forbids(what, within.as_deref(), message.as_deref()),
                 Assertion::Todo { note } => Err(format!("This test isn't converted yet: {note}")),
                 other => Err(format!(

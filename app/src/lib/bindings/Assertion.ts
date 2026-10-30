@@ -12,6 +12,10 @@ message: string | null, } | { "check": "stderr_empty" } | { "check": "stderr_con
  */
 shadows: boolean, } | { "check": "match_on", method: string, } | { "check": "banned_method", name: string, } | { "check": "banned_arithmetic" } | { "check": "macro_mention_forbid", macros: Array<string>, name: string, } | { "check": "call_in_loop", name: string, } | { "check": "uses", what: Array<string>, within: string | null, inside: string | null, 
 /**
+ * Only this file of a package (`src/lib.rs`).
+ */
+file?: string | null, 
+/**
  * Shown when the rule is broken.
  */
-message: string | null, } | { "check": "forbids", what: Array<string>, within: string | null, message: string | null, } | { "check": "manifest_eq", key: string, value: string, } | { "check": "manifest_table_empty", table: string, } | { "check": "manifest_forbid_keys", keys: Array<string>, } | { "check": "files_allowlist", files: Array<string>, } | { "check": "build_ok" } | { "check": "file_exists", path: string, } | { "check": "todo", note: string, };
+message: string | null, } | { "check": "forbids", what: Array<string>, within: string | null, file?: string | null, message: string | null, } | { "check": "count", what: string, eq: number, within: string | null, inside: string | null, file?: string | null, message: string | null, } | { "check": "rust_files", files: Array<string>, } | { "check": "manifest_eq", key: string, value: string, } | { "check": "manifest_table_empty", table: string, } | { "check": "manifest_forbid_keys", keys: Array<string>, } | { "check": "files_allowlist", files: Array<string>, } | { "check": "build_ok" } | { "check": "file_exists", path: string, } | { "check": "todo", note: string, };

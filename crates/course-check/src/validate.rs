@@ -57,11 +57,21 @@ pub fn static_errors(course: &Course, ch: &Chapter) -> Vec<String> {
                         ));
                     }
                 }
-                let lines = s
-                    .code
-                    .as_ref()
-                    .map(|c| c.text.lines().count() as u32)
-                    .unwrap_or(0);
+                // A multi-file screen's step names its file.
+                let code = match &st.file {
+                    Some(f) => s
+                        .files
+                        .iter()
+                        .find(|c| c.file.as_deref() == Some(f.as_str())),
+                    None => s.code.as_ref(),
+                };
+                if st.file.is_some() && code.is_none() {
+                    e.push(format!(
+                        "{} {} step {}: no file {:?} on this screen",
+                        l.id, s.key, st.n, st.file
+                    ));
+                }
+                let lines = code.map(|c| c.text.lines().count() as u32).unwrap_or(0);
                 for h in st.hl.iter().chain(&st.err) {
                     if *h == 0 || *h > lines {
                         e.push(format!(

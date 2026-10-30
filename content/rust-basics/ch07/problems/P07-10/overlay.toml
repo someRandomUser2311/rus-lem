@@ -1,0 +1,43 @@
+[[tests]]
+key = "t21"
+asserts = [{ check = "compile_error", code = "E0603", message = "A crate outside `module_lab` can still reach `text::normalize`. Declare `mod text;` without `pub`." }]
+
+[[tests]]
+key = "t22"
+asserts = [{ check = "compile_error", code = "E0425", message = "`module_lab::normalize` still exists at the crate root. Move it into `src/text.rs` and don't re-export it." }]
+
+[[tests]]
+key = "t23"
+run = { kind = "suite", script = "t23" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t24"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["type:Vec", "type:VecDeque", "type:HashMap", "type:HashSet", "type:BTreeMap", "type:BTreeSet", "macro:vec", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "try", "call:leak", "call:forget", "call:map", "call:and_then", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:zip", "call:sum", "call:product", "call:any", "call:all", "call:position", "call:windows", "call:chunks", "macro:include", "attr:path"], message = "Use only what Chapters 1–7 teach: modules, paths, `use` and `pub use` are new and welcome, but no Vec or other collections, no traits or trait implementations, no explicit lifetimes, no unsafe code, no `?` operator, no closure-taking adapters such as map or filter, and no `#[path]` or `include!` to bend the module tree." },
+  { check = "rust_files", files = ["src/lib.rs", "src/text.rs", "src/reports.rs"] },
+  { check = "uses", what = ["mod_file:text", "mod_file:reports", "pub:reports"], file = "src/lib.rs", message = "`src/lib.rs` should declare `mod text;` and `pub mod reports;` with no bodies." },
+  { check = "forbids", what = ["pub:text"], file = "src/lib.rs", message = "`text` stays private: declare it without `pub`." },
+  { check = "count", what = "item:fn", eq = 0, file = "src/lib.rs", message = "`src/lib.rs` defines no functions." },
+  { check = "uses", what = ["pub_use:reports::render as numbered_labels"], file = "src/lib.rs", message = "Re-export with `pub use reports::render as numbered_labels;`." },
+]
+
+[[tests]]
+key = "t25"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["type:Vec", "type:VecDeque", "type:HashMap", "type:HashSet", "type:BTreeMap", "type:BTreeSet", "macro:vec", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "try", "call:leak", "call:forget", "call:map", "call:and_then", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:zip", "call:sum", "call:product", "call:any", "call:all", "call:position", "call:windows", "call:chunks", "macro:include", "attr:path"], message = "Use only what Chapters 1–7 teach: modules, paths, `use` and `pub use` are new and welcome, but no Vec or other collections, no traits or trait implementations, no explicit lifetimes, no unsafe code, no `?` operator, no closure-taking adapters such as map or filter, and no `#[path]` or `include!` to bend the module tree." },
+  { check = "uses", what = ["item:use"], file = "src/reports.rs", message = "`src/reports.rs` should bring `text` into scope with `use crate::text;` (or `use super::text;`)." },
+  { check = "uses", what = ["call_path:text::normalize"], within = "render", file = "src/reports.rs", message = "`render` should call `text::normalize` for each label." },
+  { check = "forbids", what = ["call:trim", "call:split_whitespace", "call:is_whitespace", "call:trim_start", "call:trim_end"], within = "render", file = "src/reports.rs", message = "`render` should leave whitespace handling to `text::normalize`." },
+]
+
+[[wrong]]
+name = "text-public"
+fails = ["t21", "t24"]
+
+[[wrong]]
+name = "numbers-skipped-entries"
+fails = ["t03", "t11", "t15", "t23"]
+

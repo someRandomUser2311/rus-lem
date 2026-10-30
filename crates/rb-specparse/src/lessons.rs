@@ -62,6 +62,7 @@ fn lesson(sec: &Section, report: &mut Report) -> Option<Lesson> {
                         heading: String::new(),
                         text_md: String::new(),
                         code: None,
+                        files: Vec::new(),
                         coming_from: BTreeMap::new(),
                         panels: Vec::new(),
                         steps: Vec::new(),
@@ -94,9 +95,13 @@ fn lesson(sec: &Section, report: &mut Report) -> Option<Lesson> {
                     completion.xp = quoted().parse().unwrap_or(20);
                 } else if item.starts_with("Primary button") {
                     completion.button = quoted();
-                } else if item.starts_with("Message on first-try") {
+                } else if item.starts_with("Message on first-try")
+                    || item.starts_with("First-try message")
+                {
                     completion.first_try = quoted();
-                } else if item.starts_with("Message after several") {
+                } else if item.starts_with("Message after several")
+                    || item.starts_with("Retry message")
+                {
                     completion.many_tries = quoted();
                 }
             }
@@ -157,7 +162,7 @@ fn screen(
         .map(|b| md::text(&b))
         .unwrap_or_default();
 
-    let code = code_block(lines, earlier);
+    let (code, files) = code_blocks(lines, earlier);
     let coming_from = coming_from(lines);
     let visual_md = md::block_after(lines, "**Visual (static):**").map(|b| md::text(&b));
 
@@ -167,12 +172,10 @@ fn screen(
             if row.len() < 4 {
                 continue;
             }
-            let hl: Vec<u32> = row[1]
-                .split(',')
-                .filter_map(|n| n.trim().parse().ok())
-                .collect();
+            let (file, hl) = highlighted(&row[1]);
             steps.push(Step {
                 n: steps.len() as u32 + 1,
+                file,
                 hl,
                 err: Vec::new(),
                 caption_md: row[3].clone(),
@@ -195,6 +198,7 @@ fn screen(
                 heading,
                 text_md,
                 code,
+                files,
                 coming_from,
                 panels: Vec::new(),
                 steps,
@@ -292,6 +296,7 @@ fn screen(
         heading,
         text_md,
         code,
+        files,
         coming_from,
         panels: Vec::new(),
         steps,
@@ -309,6 +314,56 @@ fn lang(info: &str) -> String {
     } else {
         info.to_string()
     }
+}
+
+/// "3", "2–7", "1, 4" or, in a multi-file screen, "src/main.rs:2" / "src/lib.rs:1–3":
+/// the file (if named) and the lines.
+fn highlighted(cell: &str) -> (Option<String>, Vec<u32>) {
+    let cell = cell.trim();
+    let (file, lines) = match cell.rsplit_once(':') {
+        Some((f, l)) if f.contains('.') || f.contains('/') => (Some(f.trim().to_string()), l),
+        _ => (None, cell),
+    };
+    let mut hl = Vec::new();
+    for part in lines.split(',') {
+        let part = part.trim();
+        match part.split_once(['–', '-']) {
+            Some((a, b)) => {
+                if let (Ok(a), Ok(b)) = (a.trim().parse::<u32>(), b.trim().parse::<u32>()) {
+                    hl.extend(a..=b);
+                }
+            }
+            None => hl.extend(part.parse::<u32>().ok()),
+        }
+    }
+    (file, hl)
+}
+
+/// The screen's code: one `**Code**` block, or several (a package's files), each
+/// labelled with its path.
+fn code_blocks(lines: &[&str], earlier: &[Screen]) -> (Option<CodeBlock>, Vec<CodeBlock>) {
+    let labels: Vec<usize> = lines
+        .iter()
+        .enumerate()
+        .filter(|(_, l)| l.starts_with("**Code**"))
+        .map(|(i, _)| i)
+        .collect();
+    if labels.len() < 2 {
+        return (code_block(lines, earlier), Vec::new());
+    }
+    let files: Vec<CodeBlock> = labels
+        .iter()
+        .filter_map(|&i| code_block(&lines[i..], earlier))
+        .collect();
+    // A package names a different file in every block; otherwise the first block is the
+    // screen's code (later ones are variations of it).
+    let mut paths: Vec<&str> = files.iter().filter_map(|f| f.file.as_deref()).collect();
+    paths.sort();
+    paths.dedup();
+    if paths.len() != files.len() {
+        return (code_block(lines, earlier), Vec::new());
+    }
+    (None, files)
 }
 
 fn code_block(lines: &[&str], earlier: &[Screen]) -> Option<CodeBlock> {

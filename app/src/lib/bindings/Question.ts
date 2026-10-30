@@ -9,6 +9,11 @@ import type { WrongAnswer } from "./WrongAnswer";
 
 export type Question = { id: string, uid: string, kind: QuestionKind, difficulty: number, concepts: Array<string>, prompt_md: string, code: CodeBlock | null, 
 /**
+ * A multi-file program (a package): every file with its path. `code` is then empty,
+ * and a compile error's line is in whichever file the compiler reports.
+ */
+files?: Array<CodeBlock>, 
+/**
  * Choice types, arrange (shuffled lines) and the right column of match pairs.
  */
 options: Array<Choice>, 

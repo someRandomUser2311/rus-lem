@@ -32,4 +32,4 @@ expect?: string | null,
  * The expected value is exact Rust of the call's type: its untyped literals
  * (`4294967295`) take that type instead of defaulting to `i32`.
  */
-typed?: boolean, } | { "kind": "fixture", main: string, } | { "kind": "build", command: string, } | { "kind": "source" } | { "kind": "manifest" } | { "kind": "todo" };
+typed?: boolean, } | { "kind": "fixture", main: string, remove?: Array<string>, } | { "kind": "build", command: string, } | { "kind": "source" } | { "kind": "manifest" } | { "kind": "todo" };

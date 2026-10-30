@@ -711,7 +711,14 @@ impl SourceInfo {
         }
     }
 
+    /// How often `what` appears; `a|b` counts either alternative.
     fn fact_count(&self, what: &str, within: Option<&str>, inside: Option<&str>) -> usize {
+        if what.contains('|') {
+            return what
+                .split('|')
+                .map(|w| self.fact_count(w, within, inside))
+                .sum();
+        }
         let within = within.map(|f| format!("fn:{f}"));
         self.facts
             .iter()
@@ -769,6 +776,31 @@ impl SourceInfo {
     }
 
     /// None of the constructs in `what` appear (in function `within` when given).
+    /// `what` appears exactly `eq` times (in function `within`, inside `inside`).
+    pub fn fact_exactly(
+        &self,
+        what: &str,
+        eq: usize,
+        within: Option<&str>,
+        inside: Option<&str>,
+        message: Option<&str>,
+    ) -> Check {
+        let n = self.fact_count(what, within, inside);
+        if n == eq {
+            return Ok(());
+        }
+        if let Some(m) = message {
+            return Err(m.to_string());
+        }
+        Err(format!(
+            "Your code should have {} exactly {eq} time{}{}, but it has it {n} time{}.",
+            facts_shown(what),
+            if eq == 1 { "" } else { "s" },
+            within.map(|f| format!(" in `{f}`")).unwrap_or_default(),
+            if n == 1 { "" } else { "s" },
+        ))
+    }
+
     pub fn forbids(&self, what: &[String], within: Option<&str>, message: Option<&str>) -> Check {
         match what.iter().find(|w| self.has_fact(w, within, None)) {
             None => Ok(()),
@@ -784,6 +816,13 @@ impl SourceInfo {
 
 /// A fact or context in words, for messages.
 fn facts_shown(what: &str) -> String {
+    if what.contains('|') {
+        return what
+            .split('|')
+            .map(facts_shown)
+            .collect::<Vec<_>>()
+            .join(" or ");
+    }
     let (kind, arg) = what.split_once(':').unwrap_or((what, ""));
     match kind {
         "while" => "a `while` loop".into(),
@@ -821,7 +860,12 @@ fn facts_shown(what: &str) -> String {
         "fn" => format!("the function `{arg}`"),
         "type" => format!("the type `{arg}`"),
         "macro" => format!("the `{arg}!` macro"),
-        "item" => format!("a `{arg}` definition"),
+        "item" => match arg {
+            "fn" => "a function".into(),
+            "const" => "a constant".into(),
+            "use" => "a `use` declaration".into(),
+            _ => format!("a `{arg}` definition"),
+        },
         "lifetime" => "an explicit lifetime annotation (`'a`)".into(),
         "unsafe" => "`unsafe` code".into(),
         "struct" => format!("the struct `{arg}`"),
@@ -861,6 +905,20 @@ fn facts_shown(what: &str) -> String {
         "try" => "the `?` operator".into(),
         "shorthand" => format!("the field init shorthand `{arg}`"),
         "update" => "struct update syntax (`..base`)".into(),
+        "mod" => format!("the inline module `mod {arg} {{ … }}`"),
+        "mod_file" => format!("the declaration `mod {arg};` (its body in its own file)"),
+        "mod_decl" => format!("a `mod {arg}` declaration"),
+        "pub" => format!("`pub` on `{arg}`"),
+        "pub_restricted" => format!("`pub(crate)` or `pub(super)` on `{arg}`"),
+        "pub_field" => format!("`pub` on the field `{arg}`"),
+        "use" => format!("`use {arg};`"),
+        "pub_use" => format!("`pub use {arg};`"),
+        "use_glob" => "a glob import (`use …::*`)".into(),
+        "use_group" => "a nested `use` with braces (`use a::{b, c}`)".into(),
+        "call_path" => format!("a call to `{arg}`"),
+        "path" => format!("the path `{arg}`"),
+        "lit" => format!("the literal `{arg}`"),
+        "attr" => format!("a `#[{arg}]` attribute"),
         _ => format!("`{what}`"),
     }
 }

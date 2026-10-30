@@ -359,6 +359,26 @@ pub struct GradeOutcome {
     pub review_xp: i64,
 }
 
+/// A path a learner may create: `src/…/name.rs`, lowercase Rust identifiers only, so it
+/// can't leave the package or replace the manifest.
+pub fn learner_module_path(path: &str) -> bool {
+    let Some(rest) = path.strip_prefix("src/") else {
+        return false;
+    };
+    let Some(stem) = rest.strip_suffix(".rs") else {
+        return false;
+    };
+    let ident = |s: &str| {
+        !s.is_empty()
+            && s.len() <= 40
+            && !s.starts_with(|c: char| c.is_ascii_digit())
+            && s.chars()
+                .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '_')
+    };
+    let parts: Vec<&str> = stem.split('/').collect();
+    parts.len() <= 4 && parts.iter().all(|p| ident(p))
+}
+
 pub fn grade(
     st: &AppState,
     id: String,
@@ -370,10 +390,16 @@ pub fn grade(
 ) -> R<GradeOutcome> {
     let ch = st.chapter_of(&id)?;
     let p = ch.problem(&id).ok_or("no problem")?.clone();
-    // Only the problem's own files can be submitted.
+    // Only the problem's own files can be submitted, plus, in a multi-file Cargo problem,
+    // the module files the learner creates under `src/`.
     let files: Vec<SourceFile> = files
         .into_iter()
-        .filter(|f| p.starter.iter().any(|s| s.path == f.path))
+        .filter(|f| {
+            p.starter.iter().any(|s| s.path == f.path)
+                || (p.mode == rb_content::BuildMode::Cargo
+                    && p.kind == "multi-file"
+                    && learner_module_path(&f.path))
+        })
         .collect();
     let tc = st
         .toolchain
@@ -698,5 +724,36 @@ pub fn lsp_send(st: &AppState, message: String) -> R<()> {
 pub fn lsp_stop(st: &AppState) {
     if let Some(mut s) = st.lsp.lock().unwrap().take() {
         s.stop();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::learner_module_path;
+
+    #[test]
+    fn learner_module_paths() {
+        for ok in [
+            "src/text.rs",
+            "src/fees/rate.rs",
+            "src/kitchen/menu.rs",
+            "src/a_1.rs",
+        ] {
+            assert!(learner_module_path(ok), "{ok}");
+        }
+        for bad in [
+            "Cargo.toml",
+            "src/../Cargo.toml",
+            "/etc/passwd",
+            "src/Text.rs",
+            "src/1x.rs",
+            "src/.rs",
+            "src/a b.rs",
+            "src/text.txt",
+            "src//x.rs",
+            "build.rs",
+        ] {
+            assert!(!learner_module_path(bad), "{bad}");
+        }
     }
 }

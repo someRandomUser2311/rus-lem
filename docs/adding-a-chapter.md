@@ -63,12 +63,14 @@ fails = ["t09"]
 | `suite` | Many inputs, each a fresh process. Either `cases = [{ stdin, fixture, stdout }]` written out, or a seeded `generator` (the course's LCG: `seed`, `cases`, `lines`, `items`, optional `fixture` draw); with `reference = true` course-check fills in each case's expected output by running the reference solution. |
 | `build` | `command = "build" \| "check"`. |
 | `source`, `manifest` | Look at the code or `Cargo.toml` only. |
+| `fixture` | A test program (`main`) built against the learner's code. In a Cargo package it's an outside crate that uses the library by its crate name (`module_lab::text::normalize("x")`), so privacy applies; with `compile_error` it's a compiler probe (`E0603`). `remove = ["src/fees/rate.rs"]` deletes files from a copy first; an empty `main` just builds the library. |
 
 Unless a test states otherwise (`exit_code`, `stderr_contains`, `stderr_empty`), every execution must exit 0 with nothing on stderr.
 
 **Problem fields an overlay can set**
 
-- `mode = "cargo"`: a Cargo problem. The spec's `main.rs` starter becomes `src/main.rs`, next to the chapter's `chNN/Cargo.toml`. Solutions and wrong variants may leave out files the starter supplies.
+- `mode = "cargo"`: a Cargo problem. The spec's `main.rs` starter becomes `src/main.rs`, next to the problem's own `problems/<ID>/Cargo.toml` or else the chapter's `chNN/Cargo.toml`. Solutions and wrong variants may leave out files the starter supplies.
+- Multi-file Cargo problems (kind `multi-file`, from Chapter 7): the spec labels each fence with a first-line `// src/text.rs`. Learners can create and delete their own `src/…/*.rs` files. Calls run in a harness whose crate root is the learner's `src/lib.rs` itself, so rows write `crate::measure::square(3)` (or the package's crate name). A wrong variant is the whole package.
 - `fixtures = ["secret_number"]`: the bindings fixture runs replace (each must be declared exactly once, with a type).
 - `checkpoints = true` and `parts = [...]`: each part is graded on its own submission (tests carry `part = n`); the problem is Accepted with the last part. Reference solutions of earlier parts go in `part-<n>/`.
 - `checkers/<name>.rs`: a checker program for output a fixed expectation can't judge (random results). It gets the stdin and stdout file paths and exits 0 to pass, otherwise prints why.
@@ -78,6 +80,7 @@ Unless a test states otherwise (`exit_code`, `stderr_contains`, `stderr_empty`),
 | Group | Checks |
 |---|---|
 | Output | `stdout_eq`, `stdout_pieces`, `stdout_matches` (regex), `same_as_reference` (suites), `checker`, `line_eq`, `line_count`, `line_chars`, `ends_with`, `contains`, `not_contains`, `not_starts_with`, `no_trailing_whitespace`, `stderr_empty`, `stderr_contains`, `exit_code` |
+| Source (by fact) | `uses`, `forbids` and `count` (exactly n) over the facts in `crates/rb-srccheck/src/facts.rs`: modules (`mod:NAME`, `mod_file:NAME`), visibility (`pub:NAME`, `pub_field:NAME`), imports (`use:crate::a::b`, `pub_use:…`, `use_glob`, `use_group`), paths (`call_path:super::f`, `path:super::X`), literals (`lit:25`) and more; `file = "src/fees.rs"` limits a check to one file and `a\|b` accepts either fact. `rust_files` requires an exact set of Rust files. |
 | Source | `macro_count`, `macro_sequence`, `fmt_literal_forbid`, `fmt_inline_placeholders`, `macro_mention_forbid`, `lets_unchanged`, `let_init`, `call_count`, `call_chain`, `call_in_loop`, `match_on`, `banned_keyword`, `required_keyword`, `banned_method`, `banned_arithmetic` |
 | Project | `manifest_eq`, `manifest_table_empty`, `manifest_forbid_keys`, `files_allowlist`, `build_ok`, `file_exists` |
 
@@ -100,6 +103,7 @@ steps = [
 ]
 ```
 
+- **Multi-file screens:** a screen with several `**Code** (\`path\`):` blocks for different files shows them as tabs; step rows written `src/lib.rs:2` switch to that file.
 - **Panels:** `terminal` (printed output) and `scene` (boxes and arrows; `layout = "row" | "tree" | "grid"`; nodes with `kind = box | file | folder | code`, `parent`, `state`).
 - **Ops:** `print`, `badge`, `node` (`hidden`, `style`, `lit`, `ghost`, `badge`, `note`, `value`; an empty string clears a badge or value), `edge`, `reset`. `value` shows a variable's or result's value in code font.
 - **Step extras:** `notes` (badges next to code lines) and `links` (arrows between code spans).

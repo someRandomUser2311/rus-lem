@@ -584,6 +584,7 @@ fn test_row(
         (Some(f), _) => (
             Run::Fixture {
                 main: f.main.clone(),
+                remove: Vec::new(),
             },
             match &f.error {
                 Some(code) => vec![Assertion::CompileError {
@@ -699,6 +700,7 @@ fn rust_row(
         return Some((
             Run::Fixture {
                 main: format!("fn main() {{\n    {caller}\n}}"),
+                remove: Vec::new(),
             },
             vec![Assertion::CompileError {
                 code: code.to_string(),

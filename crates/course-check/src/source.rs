@@ -16,6 +16,7 @@
 //!     generators/<name>.rs          generator programs for suites (`script = "<name>"`)
 //!     helpers.rs                    Rust items added to the call harness
 //!   ch02/Cargo.toml                 the manifest of the chapter's Cargo problems (`mode = "cargo"`)
+//!   ch07/problems/P07-01/Cargo.toml  a Cargo problem's own manifest (instead of the chapter's)
 //!   vendor/                         vendored crates (`cargo vendor`) for offline builds
 //! ```
 //!
@@ -126,12 +127,16 @@ impl Source {
                     p["starter"] = serde_json::to_value(read_files(&st)?)?;
                 }
                 if p["mode"] == "cargo" {
-                    cargo_starter(p, &dir, &id)?;
+                    cargo_starter(p, &dir, &pd, &id)?;
                 }
                 let starter: Vec<SourceFile> = serde_json::from_value(p["starter"].clone())?;
                 let sol = pd.join("solution");
                 if sol.exists() {
                     p["solution"] = serde_json::to_value(complete(read_files(&sol)?, &starter))?;
+                } else if p["mode"] == "cargo" {
+                    // The spec's solution, with the starter's manifest.
+                    let given: Vec<SourceFile> = serde_json::from_value(p["solution"].clone())?;
+                    p["solution"] = serde_json::to_value(complete(given, &starter))?;
                 }
                 let mut parts = serde_json::Map::new();
                 for n in 1..=20 {
@@ -178,8 +183,8 @@ impl Source {
 }
 
 /// A Cargo problem's starter: the spec gives only `main.rs`; it becomes `src/main.rs`
-/// next to the chapter's `Cargo.toml`.
-fn cargo_starter(p: &mut Value, chapter_dir: &Path, id: &str) -> Result<()> {
+/// next to the problem's own `Cargo.toml`, or else the chapter's.
+fn cargo_starter(p: &mut Value, chapter_dir: &Path, problem_dir: &Path, id: &str) -> Result<()> {
     let Some(files) = p["starter"].as_array_mut() else {
         return Ok(());
     };
@@ -189,7 +194,12 @@ fn cargo_starter(p: &mut Value, chapter_dir: &Path, id: &str) -> Result<()> {
         }
     }
     if !files.iter().any(|f| f["path"] == "Cargo.toml") {
-        let manifest = chapter_dir.join("Cargo.toml");
+        let own = problem_dir.join("Cargo.toml");
+        let manifest = if own.exists() {
+            own
+        } else {
+            chapter_dir.join("Cargo.toml")
+        };
         let text = std::fs::read_to_string(&manifest).with_context(|| {
             format!("{id} is a Cargo problem; {} is missing", manifest.display())
         })?;

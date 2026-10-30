@@ -228,7 +228,14 @@
           "steps": [
             {
               "n": 1,
-              "hl": [],
+              "hl": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
               "err": [],
               "caption_md": "The `struct` definition is only a blueprint. It says which fields a `User` has, but no `User` exists yet.",
               "visual_md": "Type `User`: active: bool, username: String, email: String, sign_in_count: u64; Instances: none; stdout: empty",
@@ -238,7 +245,14 @@
             },
             {
               "n": 2,
-              "hl": [],
+              "hl": [
+                9,
+                10,
+                11,
+                12,
+                13,
+                14
+              ],
               "err": [],
               "caption_md": "`User { ... }` creates an **instance**. You give every field a value as `name: value`. The order doesn't have to match the definition.",
               "visual_md": "Owner `user1`: active=true, username=\"ferris\", email=\"ferris@example.com\", sign_in_count=1; stdout: empty",
@@ -433,7 +447,14 @@
             },
             {
               "n": 2,
-              "hl": [],
+              "hl": [
+                10,
+                11,
+                12,
+                13,
+                14,
+                15
+              ],
               "err": [],
               "caption_md": "`username: name` moves the `String` into the struct. Now `user1` owns both texts through its fields, and `name` can't be used.",
               "visual_md": "`name`: moved; `user1.username` → existing buffer \"ferris\" (6 bytes); `user1.email` → buffer \"ferris@example.com\" (18 bytes); user1.active=true, user1.sign_in_count=1",
@@ -698,8 +719,8 @@
       "completion": {
         "xp": 20,
         "button": "[Continue to Q5.1](questions.md#q5-1)",
-        "first_try": "",
-        "many_tries": ""
+        "first_try": "You completed the checks on the first try. Continue with the follow-up questions.",
+        "many_tries": "Done in {tries} check attempts. Review the feedback whenever needed."
       },
       "read_more": []
     },
@@ -780,7 +801,14 @@
           "steps": [
             {
               "n": 1,
-              "hl": [],
+              "hl": [
+                9,
+                10,
+                11,
+                12,
+                13,
+                14
+              ],
               "err": [],
               "caption_md": "`user1` owns two heap texts through its `username` and `email` fields.",
               "visual_md": "`user1.username` → \"ferris\"; `user1.email` → \"ferris@example.com\"; user1.active=true, user1.sign_in_count=1",
@@ -790,7 +818,12 @@
             },
             {
               "n": 2,
-              "hl": [],
+              "hl": [
+                15,
+                16,
+                17,
+                18
+              ],
               "err": [],
               "caption_md": "`..user1` fills `active`, `username` and `sign_in_count`. The `bool` and the `u64` are copied. The `username` `String` is **moved**: `user2` owns `ferris` now.",
               "visual_md": "`user1.username`: moved into user2; `user1.email` → \"ferris@example.com\" remains; `user2.username` → existing \"ferris\" buffer; `user2.email` → new \"crab@example.com\" buffer; Both active=true and sign_in_count=1",
@@ -800,7 +833,11 @@
             },
             {
               "n": 3,
-              "hl": [],
+              "hl": [
+                19,
+                20,
+                21
+              ],
               "err": [],
               "caption_md": "`user1.email` and `user1.sign_in_count` still work: `email` was never moved, and `u64` is `Copy`. Only `user1.username`, and `user1` as a whole, can't be used.",
               "visual_md": "Usable reads: user1.email, user1.sign_in_count, user2.username; Unavailable: user1.username and the whole user1 value; stdout lines: ferris@example.com / 1 / ferris",
@@ -1117,8 +1154,8 @@
       "completion": {
         "xp": 20,
         "button": "[Continue to Q5.2](questions.md#q5-2)",
-        "first_try": "",
-        "many_tries": ""
+        "first_try": "You completed the checks on the first try. Continue with the follow-up questions.",
+        "many_tries": "Done in {tries} check attempts. Review the feedback whenever needed."
       },
       "read_more": []
     },
@@ -1697,8 +1734,8 @@
       "completion": {
         "xp": 20,
         "button": "[Continue to Q5.3](questions.md#q5-3)",
-        "first_try": "",
-        "many_tries": ""
+        "first_try": "You completed the checks on the first try. Continue with the follow-up questions.",
+        "many_tries": "Done in {tries} check attempts. Review the feedback whenever needed."
       },
       "read_more": []
     },
@@ -2190,8 +2227,8 @@
       "completion": {
         "xp": 20,
         "button": "[Continue to Q5.4](questions.md#q5-4)",
-        "first_try": "",
-        "many_tries": ""
+        "first_try": "You completed the checks on the first try. Continue with the follow-up questions.",
+        "many_tries": "Done in {tries} check attempts. Review the feedback whenever needed."
       },
       "read_more": []
     },
@@ -2262,7 +2299,12 @@
             },
             {
               "n": 2,
-              "hl": [],
+              "hl": [
+                9,
+                10,
+                11,
+                12
+              ],
               "err": [],
               "caption_md": "`Self { ... }` builds a new `Rectangle`. If you rename the struct later, code that says `Self` doesn't need to change.",
               "visual_md": "Constructing return value: Rectangle { width:3, height:3 }; Receiver: none",
@@ -2589,8 +2631,8 @@
       "completion": {
         "xp": 20,
         "button": "[Continue to Q5.5](questions.md#q5-5)",
-        "first_try": "",
-        "many_tries": ""
+        "first_try": "You completed the checks on the first try. Continue with the follow-up questions.",
+        "many_tries": "Done in {tries} check attempts. Review the feedback whenever needed."
       },
       "read_more": []
     }

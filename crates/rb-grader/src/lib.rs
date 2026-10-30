@@ -168,6 +168,8 @@ pub(crate) enum Observation {
     Source {
         info: Result<rb_srccheck::SourceInfo, String>,
         files: Vec<String>,
+        /// Each Rust file on its own, for checks about one file.
+        per_file: Vec<(String, Result<rb_srccheck::SourceInfo, String>)>,
     },
     Manifest(Result<toml::Value, String>),
 }
@@ -234,6 +236,28 @@ fn expect_call(call: &str, expect: &str, typed: bool) -> String {
 /// each call it prints, after anything the call printed: [`VALUE_MARK`], `=` and the
 /// value's `{:?}` (or `!` and the panic message), the microseconds taken, and [`END_MARK`].
 fn harness_source(file: &str, calls: &[&str], helpers: &str) -> String {
+    harness_with(
+        &format!(
+            "#![allow(dead_code)]\n#[path = \"{file}\"]\nmod solution;\n#[allow(unused_imports)]\nuse solution::*;\n"
+        ),
+        calls,
+        helpers,
+    )
+}
+
+/// The harness for a Cargo package's library: the learner's `src/lib.rs` itself is the
+/// crate root, so `crate::…` paths and file modules (`mod text;` → `src/text.rs`) mean
+/// what they mean in the package, and the crate also answers to its own name.
+fn library_harness_source(lib: &str, crate_name: &str, calls: &[&str], helpers: &str) -> String {
+    harness_with(
+        &format!("{lib}\n\nextern crate self as {crate_name};\n"),
+        calls,
+        helpers,
+    )
+}
+
+/// `prelude` (the learner's code) followed by the helpers and the harness proper.
+fn harness_with(prelude: &str, calls: &[&str], helpers: &str) -> String {
     let mut arms = String::new();
     for (i, c) in calls.iter().enumerate() {
         // `{ setup; tail }` is formatted inside its block: `tail` may borrow from `setup`.
@@ -244,22 +268,17 @@ fn harness_source(file: &str, calls: &[&str], helpers: &str) -> String {
         arms.push_str(&format!("        {i} => {arm},\n"));
     }
     format!(
-        r#"#![allow(dead_code)]
-#[path = "{file}"]
-mod solution;
-#[allow(unused_imports)]
-use solution::*;
-
+        r#"{prelude}
 {helpers}
 
-fn case(i: usize) -> String {{
+fn __rb_case(i: usize) -> String {{
     match i {{
 {arms}        _ => String::new(),
     }}
 }}
 
 thread_local! {{
-    static PANIC: std::cell::RefCell<String> = Default::default();
+    static __RB_PANIC: std::cell::RefCell<String> = Default::default();
 }}
 
 fn main() {{
@@ -275,17 +294,17 @@ fn main() {{
             .location()
             .map(|l| format!(" at {{}}:{{}}:{{}}", l.file(), l.line(), l.column()))
             .unwrap_or_default();
-        PANIC.with(|p| *p.borrow_mut() = format!("thread 'main' panicked{{at}}:\n{{msg}}"));
+        __RB_PANIC.with(|p| *p.borrow_mut() = format!("thread 'main' panicked{{at}}:\n{{msg}}"));
     }}));
     for a in std::env::args().skip(1) {{
         let Ok(i) = a.parse::<usize>() else {{ continue }};
         let t = std::time::Instant::now();
-        let r = std::panic::catch_unwind(|| case(i));
+        let r = std::panic::catch_unwind(|| __rb_case(i));
         let us = t.elapsed().as_micros();
         let mut out = std::io::stdout().lock();
         let _ = match r {{
             Ok(v) => write!(out, "{mark}={{us}} {{v}}{end}"),
-            Err(_) => write!(out, "{mark}!{{us}} {{}}{end}", PANIC.with(|p| p.borrow().clone())),
+            Err(_) => write!(out, "{mark}!{{us}} {{}}{end}", __RB_PANIC.with(|p| p.borrow().clone())),
         }};
         let _ = out.flush();
     }}
@@ -375,7 +394,8 @@ impl Grader<'_> {
         };
         let calls: Vec<String> = tests.iter().flat_map(|t| calls_of(&t.run)).collect();
         let calls: Vec<&str> = calls.iter().map(String::as_str).collect();
-        let needs_plain = tests.iter().any(|t| runs_program(&t.run));
+        let needs_plain = tests.iter().any(|t| runs_program(&t.run))
+            || (problem.mode == BuildMode::Cargo && !calls.is_empty());
         if needs_plain || !calls.is_empty() {
             on_event(GradeEvent::Phase {
                 text: "Compiling".into(),
@@ -668,7 +688,11 @@ impl Grader<'_> {
         problem: &Problem,
         dir: &Path,
         main: &str,
+        remove: &[String],
     ) -> Result<(Compiled, Option<PathBuf>)> {
+        if problem.mode == BuildMode::Cargo {
+            return self.compile_consumer(dir, main, remove);
+        }
         let file = problem
             .starter
             .iter()
@@ -696,6 +720,68 @@ impl Grader<'_> {
         Ok((c.clone(), c.ok.then_some(exe)))
     }
 
+    /// In a Cargo package: builds the library (after deleting the `remove` files from a
+    /// copy of the package), then `main` as another crate that links it by crate name.
+    fn compile_consumer(
+        &self,
+        dir: &Path,
+        main: &str,
+        remove: &[String],
+    ) -> Result<(Compiled, Option<PathBuf>)> {
+        let n = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.as_nanos())
+            .unwrap_or(0);
+        let base = if remove.is_empty() {
+            dir.to_path_buf()
+        } else {
+            let copy = dir.join(format!(".probe_{n}"));
+            copy_tree(&dir.join("src"), &copy.join("src"))?;
+            for r in remove {
+                let _ = std::fs::remove_file(copy.join(r));
+            }
+            copy
+        };
+        let lib = base.join("src/lib.rs");
+        if !lib.exists() {
+            return Ok((no_library(), None));
+        }
+        let name = crate_name(dir);
+        let bin = dir.join(".bin");
+        std::fs::create_dir_all(&bin)?;
+        let rlib = bin.join(format!("lib{name}_{n}.rlib"));
+        let c = self.toolchain.compile_rustc(
+            &lib,
+            &rlib,
+            self.edition,
+            &[
+                "--crate-type",
+                "lib",
+                "--crate-name",
+                &name,
+                "-A",
+                "warnings",
+            ],
+        )?;
+        if !c.ok {
+            return Ok((c, None));
+        }
+        let main = if main.trim().is_empty() {
+            "fn main() {}"
+        } else {
+            main
+        };
+        let src = bin.join(format!("probe_{n}.rs"));
+        std::fs::write(&src, format!("#![allow(unused)]\n{main}\n"))?;
+        let exe = bin.join(format!("probe_{n}"));
+        let extern_arg = format!("{name}={}", rlib.display());
+        let c =
+            self.toolchain
+                .compile_rustc(&src, &exe, self.edition, &["--extern", &extern_arg])?;
+        let _ = std::fs::remove_file(&src);
+        Ok((c.clone(), c.ok.then_some(exe)))
+    }
+
     /// Builds the harness that calls the learner's functions. Returns the compile result
     /// and, when it compiled, the executable with each call's index.
     #[allow(clippy::type_complexity)]
@@ -713,14 +799,27 @@ impl Grader<'_> {
                 unique.push(c);
             }
         }
-        let file = problem
-            .starter
-            .iter()
-            .find(|f| f.path.ends_with(".rs"))
-            .map(|f| f.path.as_str())
-            .unwrap_or("lib.rs");
-        let src = dir.join("harness.rs");
-        std::fs::write(&src, harness_source(file, &unique, &problem.helpers))?;
+        let src = if problem.mode == BuildMode::Cargo {
+            let Ok(lib) = std::fs::read_to_string(dir.join("src/lib.rs")) else {
+                return Ok((no_library(), None));
+            };
+            let src = dir.join("src/__rb_harness.rs");
+            std::fs::write(
+                &src,
+                library_harness_source(&lib, &crate_name(dir), &unique, &problem.helpers),
+            )?;
+            src
+        } else {
+            let file = problem
+                .starter
+                .iter()
+                .find(|f| f.path.ends_with(".rs"))
+                .map(|f| f.path.as_str())
+                .unwrap_or("lib.rs");
+            let src = dir.join("harness.rs");
+            std::fs::write(&src, harness_source(file, &unique, &problem.helpers))?;
+            src
+        };
         let bin = dir.join(".bin");
         std::fs::create_dir_all(&bin)?;
         let exe = bin.join(if cfg!(windows) {
@@ -730,7 +829,7 @@ impl Grader<'_> {
         });
         let c = self
             .toolchain
-            .compile_rustc(&src, &exe, self.edition, &[])?;
+            .compile_rustc(&src, &exe, self.edition, &["-A", "dead_code"])?;
         let harness = c.ok.then_some((exe, index));
         Ok((c, harness))
     }
@@ -943,8 +1042,8 @@ impl Grader<'_> {
                 }
                 Observation::Runs { items, suite: true }
             }
-            Run::Fixture { main } => {
-                let (c, exe) = self.compile_fixture_program(problem, dir, main)?;
+            Run::Fixture { main, remove } => {
+                let (c, exe) = self.compile_fixture_program(problem, dir, main, remove)?;
                 match exe {
                     Some(exe) if c.ok => {
                         let out = self.execute(problem, &exe, dir, "", &[], &BTreeMap::new())?;
@@ -981,6 +1080,11 @@ impl Grader<'_> {
                 Observation::Source {
                     info: rb_srccheck::parse(&rust),
                     files: files.iter().map(|f| f.path.clone()).collect(),
+                    per_file: files
+                        .iter()
+                        .filter(|f| f.path.ends_with(".rs"))
+                        .map(|f| (f.path.clone(), rb_srccheck::parse(&f.text)))
+                        .collect(),
                 }
             }
             Run::Manifest => {
@@ -994,9 +1098,43 @@ impl Grader<'_> {
             Run::Todo => Observation::Source {
                 info: Err("this test hasn't been converted yet".into()),
                 files: Vec::new(),
+                per_file: Vec::new(),
             },
         })
     }
+}
+
+/// The package's library crate name: its `Cargo.toml` package name with `-` as `_`.
+fn crate_name(dir: &Path) -> String {
+    std::fs::read_to_string(dir.join("Cargo.toml"))
+        .ok()
+        .and_then(|t| toml::from_str::<toml::Value>(&t).ok())
+        .and_then(|m| m.get("package")?.get("name")?.as_str().map(str::to_string))
+        .unwrap_or_else(|| "main".into())
+        .replace('-', "_")
+}
+
+/// The build result when tests call the library but there's no `src/lib.rs`.
+fn no_library() -> Compiled {
+    Compiled {
+        ok: false,
+        rendered: "error: these tests call the package's library crate, but `src/lib.rs` doesn't exist yet\n".into(),
+        ..Default::default()
+    }
+}
+
+fn copy_tree(from: &Path, to: &Path) -> Result<()> {
+    std::fs::create_dir_all(to)?;
+    for e in std::fs::read_dir(from)? {
+        let e = e?;
+        let p = e.path();
+        if p.is_dir() {
+            copy_tree(&p, &to.join(e.file_name()))?;
+        } else {
+            std::fs::copy(&p, to.join(e.file_name()))?;
+        }
+    }
+    Ok(())
 }
 
 fn names(bindings: &[String]) -> String {

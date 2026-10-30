@@ -1,0 +1,19 @@
+[[tests]]
+key = "t06"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["type:Vec", "type:VecDeque", "type:HashMap", "type:HashSet", "type:BTreeMap", "type:BTreeSet", "macro:vec", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "try", "call:leak", "call:forget", "call:map", "call:and_then", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:zip", "call:sum", "call:product", "call:any", "call:all", "call:position", "call:windows", "call:chunks", "macro:include", "attr:path"], message = "Use only what Chapters 1–7 teach: modules, paths, `use` and `pub use` are new and welcome, but no Vec or other collections, no traits or trait implementations, no explicit lifetimes, no unsafe code, no `?` operator, no closure-taking adapters such as map or filter, and no `#[path]` or `include!` to bend the module tree." },
+  { check = "uses", what = ["mod:measure", "pub:measure"], file = "src/lib.rs", message = "Define the module inline in `src/lib.rs` as `pub mod measure { … }`." },
+  { check = "uses", what = ["fn:square", "pub:square"], inside = "mod:measure", file = "src/lib.rs", message = "`square` should be a `pub fn` inside `mod measure`." },
+  { check = "count", what = "fn:square", eq = 1, file = "src/lib.rs", message = "Move `square` into `measure`: no second `square` may remain at the crate root." },
+  { check = "count", what = "item:use", eq = 0, file = "src/lib.rs", message = "Don't re-export `square` with `use`: callers should name it `measure::square`." },
+]
+
+[[wrong]]
+name = "narrow-multiply"
+fails = ["t04", "t05"]
+
+[[wrong]]
+name = "root-copy-reexported"
+fails = ["t06"]
+

@@ -1,0 +1,41 @@
+[[tests]]
+key = "t14"
+run = { kind = "fixture", main = "", remove = ["src/fees/rate.rs"] }
+asserts = [{ check = "compile_error", code = "E0583", message = "Your package still builds without `src/fees/rate.rs`, so `rate` isn't a file module. Declare `mod rate;` in `src/fees.rs` and put the constant in `src/fees/rate.rs`." }]
+
+[[tests]]
+key = "t15"
+run = { kind = "suite", script = "t15" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t16"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["type:Vec", "type:VecDeque", "type:HashMap", "type:HashSet", "type:BTreeMap", "type:BTreeSet", "macro:vec", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "try", "call:leak", "call:forget", "call:map", "call:and_then", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:zip", "call:sum", "call:product", "call:any", "call:all", "call:position", "call:windows", "call:chunks", "macro:include", "attr:path"], message = "Use only what Chapters 1–7 teach: modules, paths, `use` and `pub use` are new and welcome, but no Vec or other collections, no traits or trait implementations, no explicit lifetimes, no unsafe code, no `?` operator, no closure-taking adapters such as map or filter, and no `#[path]` or `include!` to bend the module tree." },
+  { check = "rust_files", files = ["src/lib.rs", "src/text.rs", "src/fees.rs", "src/fees/rate.rs"] },
+  { check = "uses", what = ["mod_file:text", "pub:text", "mod_file:fees", "pub:fees"], file = "src/lib.rs", message = "`src/lib.rs` should declare `pub mod text;` and `pub mod fees;` with no bodies." },
+  { check = "forbids", what = ["mod:text", "mod:fees"], file = "src/lib.rs", message = "Move the module bodies into their files; `src/lib.rs` keeps only `pub mod text;` and `pub mod fees;`." },
+  { check = "uses", what = ["mod_file:rate"], file = "src/fees.rs", message = "`src/fees.rs` should declare `mod rate;`." },
+  { check = "forbids", what = ["mod:rate"], file = "src/fees.rs", message = "Put `rate`'s body in `src/fees/rate.rs`, not inline." },
+]
+
+[[tests]]
+key = "t17"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["type:Vec", "type:VecDeque", "type:HashMap", "type:HashSet", "type:BTreeMap", "type:BTreeSet", "macro:vec", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "try", "call:leak", "call:forget", "call:map", "call:and_then", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:zip", "call:sum", "call:product", "call:any", "call:all", "call:position", "call:windows", "call:chunks", "macro:include", "attr:path"], message = "Use only what Chapters 1–7 teach: modules, paths, `use` and `pub use` are new and welcome, but no Vec or other collections, no traits or trait implementations, no explicit lifetimes, no unsafe code, no `?` operator, no closure-taking adapters such as map or filter, and no `#[path]` or `include!` to bend the module tree." },
+  { check = "uses", what = ["pub_use:text::label as normalized_label", "pub_use:fees::charge"], file = "src/lib.rs", message = "`src/lib.rs` should have `pub use text::label as normalized_label;` and `pub use fees::charge;`." },
+  { check = "count", what = "item:fn", eq = 0, file = "src/lib.rs", message = "`src/lib.rs` defines no functions; it only declares modules and re-exports." },
+  { check = "uses", what = ["path:rate::CENTS"], within = "charge", file = "src/fees.rs", message = "`charge` should read the rate as `rate::CENTS`." },
+  { check = "forbids", what = ["lit:25"], file = "src/fees.rs", message = "Don't repeat `25` in `src/fees.rs`; the rate lives only in `src/fees/rate.rs`." },
+]
+
+[[wrong]]
+name = "rate-inline"
+fails = ["t14", "t16", "t17"]
+
+[[wrong]]
+name = "wrapping-charge"
+fails = ["t08", "t10", "t15"]
+

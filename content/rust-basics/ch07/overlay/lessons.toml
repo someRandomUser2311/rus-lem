@@ -1,0 +1,269 @@
+# Chapter 7 lesson visuals, authored from the "Visual state" columns of lessons.md.
+# Merged onto chapter.gen.json: lessons by `id`, screens by `key`, steps by `n`.
+# A "tree" panel is the spec's Module tree: a package or crate as the root, its crates or
+# modules as children (`sub` says which: "package", "binary crate", "library crate",
+# "module", "fn", "use"), drawn by `parent`. A `pub` item carries a "pub" badge; a module
+# whose body lives in another file notes that file. The node a step is about lights up; a
+# path being followed lights each segment in turn, and a dashed edge is a shortcut a `use`
+# creates or a call from one crate into another.
+# Output is printed at the step whose line produces it.
+
+# ---------------------------------------------------------------- L7.1
+[[lessons]]
+id = "L7.1"
+read_more = ["ch07-00-managing-growing-projects-with-packages-crates-and-modules.md", "ch07-01-packages-and-crates.md"]
+
+# Screen 1 · A package describes the build
+[[lessons.screens]]
+key = "s1"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "tree"
+layout = "tree"
+nodes = [
+  { id = "pkg", label = "module-lab", sub = "package" },
+  { id = "bin", label = "module-lab", sub = "binary crate", parent = "pkg", state = { hidden = true } },
+  { id = "main", label = "main", sub = "fn", parent = "bin", state = { hidden = true } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "tree", op = "node", id = "pkg", lit = true, note = "Cargo.toml: name, version, edition" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "tree", op = "node", id = "pkg", lit = false, note = "" },
+  { panel = "tree", op = "node", id = "bin", hidden = false, lit = true, note = "root: src/main.rs" },
+  { panel = "tree", op = "node", id = "main", hidden = false },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "tree", op = "node", id = "bin", lit = false },
+  { panel = "tree", op = "node", id = "main", lit = true, badge = "runs" },
+  { panel = "out", op = "print", text = "binary crate\n" },
+]
+
+# Screen 3 · One package can contain both
+[[lessons.screens]]
+key = "s3"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "tree"
+layout = "tree"
+nodes = [
+  { id = "pkg", label = "module-lab", sub = "package" },
+  { id = "lib", label = "module_lab", sub = "library crate", parent = "pkg", state = { note = "root: src/lib.rs" } },
+  { id = "double", label = "double", sub = "fn", parent = "lib", state = { badge = "pub" } },
+  { id = "bin", label = "module-lab", sub = "binary crate", parent = "pkg", state = { note = "root: src/main.rs" } },
+  { id = "main", label = "main", sub = "fn", parent = "bin" },
+]
+edges = [
+  { id = "call", from = "main", to = "double", label = "module_lab::double", hidden = true, style = "dashed" },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "tree", op = "node", id = "lib", lit = true },
+  { panel = "tree", op = "node", id = "bin", lit = true },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "tree", op = "node", id = "lib", lit = false },
+  { panel = "tree", op = "node", id = "bin", lit = false },
+  { panel = "tree", op = "node", id = "main", lit = true },
+  { panel = "tree", op = "edge", id = "call", hidden = false },
+  { panel = "tree", op = "node", id = "double", lit = true },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "tree", op = "node", id = "main", lit = false, value = "result = 6" },
+  { panel = "tree", op = "node", id = "double", lit = false, value = "6" },
+  { panel = "out", op = "print", text = "6\n" },
+]
+
+# ---------------------------------------------------------------- L7.2
+[[lessons]]
+id = "L7.2"
+read_more = ["ch07-02-defining-modules-to-control-scope-and-privacy.md"]
+
+# Screen 1 · Group related functions
+[[lessons.screens]]
+key = "s1"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "tree"
+layout = "tree"
+nodes = [
+  { id = "crate", label = "crate", sub = "root: src/main.rs" },
+  { id = "account", label = "account", sub = "module", parent = "crate" },
+  { id = "balance", label = "balance", sub = "fn", parent = "account", state = { hidden = true } },
+  { id = "main", label = "main", sub = "fn", parent = "crate" },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "tree", op = "node", id = "account", lit = true, note = "new module" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "tree", op = "node", id = "account", lit = false, note = "" },
+  { panel = "tree", op = "node", id = "balance", hidden = false, lit = true, badge = "pub" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "tree", op = "node", id = "main", lit = true },
+  { panel = "tree", op = "node", id = "account", lit = true },
+  { panel = "tree", op = "node", id = "balance", value = "3" },
+  { panel = "out", op = "print", text = "3\n" },
+]
+
+# ---------------------------------------------------------------- L7.3
+[[lessons]]
+id = "L7.3"
+read_more = ["ch07-03-paths-for-referring-to-an-item-in-the-module-tree.md"]
+
+# Screen 1 · Start an absolute path at the crate root
+[[lessons.screens]]
+key = "s1"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "tree"
+layout = "tree"
+nodes = [
+  { id = "crate", label = "crate", sub = "root: src/main.rs" },
+  { id = "units", label = "units", sub = "module", parent = "crate" },
+  { id = "convert", label = "convert", sub = "module", parent = "units", state = { badge = "pub" } },
+  { id = "twice", label = "twice", sub = "fn", parent = "convert", state = { badge = "pub" } },
+  { id = "main", label = "main", sub = "fn", parent = "crate" },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "tree", op = "node", id = "crate", lit = true, note = "crate:: starts here" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "tree", op = "node", id = "units", lit = true, note = "sibling of main: visible" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "tree", op = "node", id = "convert", lit = true },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "tree", op = "node", id = "twice", lit = true, value = "6" },
+  { panel = "out", op = "print", text = "6\n" },
+]
+
+# ---------------------------------------------------------------- L7.4
+[[lessons]]
+id = "L7.4"
+read_more = ["ch07-04-bringing-paths-into-scope-with-the-use-keyword.md"]
+
+# Screen 1 · Bring a module into scope
+[[lessons.screens]]
+key = "s1"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "tree"
+layout = "tree"
+nodes = [
+  { id = "crate", label = "crate", sub = "root: src/main.rs" },
+  { id = "foh", label = "front_of_house", sub = "module", parent = "crate" },
+  { id = "hosting", label = "hosting", sub = "module", parent = "foh", state = { badge = "pub" } },
+  { id = "add", label = "add_to_waitlist", sub = "fn", parent = "hosting", state = { badge = "pub" } },
+  { id = "short", label = "hosting", sub = "use", parent = "crate", state = { hidden = true } },
+  { id = "main", label = "main", sub = "fn", parent = "crate" },
+]
+edges = [
+  { id = "use", from = "short", to = "hosting", label = "use crate::front_of_house::hosting", hidden = true, style = "dashed" },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "tree", op = "node", id = "short", hidden = false, lit = true, note = "a new name in the root's scope" },
+  { panel = "tree", op = "edge", id = "use", hidden = false },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "tree", op = "node", id = "short", lit = false, note = "" },
+  { panel = "tree", op = "node", id = "main", lit = true },
+  { panel = "tree", op = "node", id = "hosting", lit = true },
+  { panel = "tree", op = "node", id = "add", lit = true, value = "3" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "tree", op = "node", id = "main", value = "waiting = 3" },
+  { panel = "out", op = "print", text = "3 waiting\n" },
+]
+
+# ---------------------------------------------------------------- L7.5
+[[lessons]]
+id = "L7.5"
+read_more = ["ch07-05-separating-modules-into-different-files.md"]
+
+# Screen 2 · After: the body moves to src/garden.rs
+[[lessons.screens]]
+key = "s2"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "tree"
+layout = "tree"
+nodes = [
+  { id = "crate", label = "module_lab", sub = "root: src/lib.rs" },
+  { id = "garden", label = "garden", sub = "module", parent = "crate", state = { badge = "pub", note = "body in another file" } },
+  { id = "beds", label = "beds", sub = "fn", parent = "garden", state = { hidden = true, badge = "pub" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "tree", op = "node", id = "garden", lit = true },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "tree", op = "node", id = "garden", note = "src/garden.rs" },
+  { panel = "tree", op = "node", id = "beds", hidden = false },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "tree", op = "node", id = "crate", lit = true },
+  { panel = "tree", op = "node", id = "beds", lit = true, value = "2" },
+  { panel = "out", op = "print", text = "2\n" },
+]

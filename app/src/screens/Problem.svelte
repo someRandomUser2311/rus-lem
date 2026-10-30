@@ -51,7 +51,9 @@
     try {
       const v = await api.problem(id)
       p = v
-      files = (v.draft && v.draft.length === v.starter.length ? v.draft : v.starter).map(f => ({ ...f }))
+      // A draft is kept while it still has every starter file (it may add module files).
+      const draft = v.draft && v.starter.every(s => v.draft!.some(d => d.path === s.path)) ? v.draft : null
+      files = (draft ?? v.starter).map(f => ({ ...f }))
       part = v.checkpoints ? firstOpenPart(v) : null
       active = files[0]?.path ?? ''
       outcome = null
@@ -138,6 +140,42 @@
     } finally {
       running = null
     }
+  }
+
+  // Multi-file Cargo problems: the learner creates module files (`src/text.rs`) and may
+  // delete the ones they created; starter files stay.
+  const canAddFiles = $derived(!!p && p.cargo && p.kind === 'multi-file')
+  let newPath = $state<string | null>(null)
+  let newPathError = $state('')
+  const MODULE_PATH = /^src\/([a-z_][a-z0-9_]*\/){0,3}[a-z_][a-z0-9_]*\.rs$/
+
+  function addFile() {
+    if (newPath === null) return
+    const path = newPath.trim()
+    if (!MODULE_PATH.test(path)) {
+      newPathError = 'Use a path like src/text.rs or src/fees/rate.rs (lowercase letters, digits and _).'
+      return
+    }
+    if (files.some(f => f.path === path)) {
+      newPathError = `${path} already exists.`
+      return
+    }
+    files = [...files, { path, text: '' }].sort((a, b) => a.path.localeCompare(b.path))
+    newPath = null
+    newPathError = ''
+    editor?.load(files)
+    active = path
+    void api.saveDraft(id, files)
+    if (lsp) void connectLsp()
+  }
+
+  function removeFile(path: string) {
+    if (!confirm(`Delete ${path}? Its code will be lost.`)) return
+    files = files.filter(f => f.path !== path)
+    if (active === path) active = files[0]?.path ?? ''
+    editor?.load(files)
+    void api.saveDraft(id, files)
+    if (lsp) void connectLsp()
   }
 
   function resetCode() {
@@ -267,8 +305,31 @@
       <section class="mid">
         <nav class="tabs files">
           {#each files as f}
-            <button class:on={active === f.path} onclick={() => (active = f.path)}>{f.path}</button>
+            <span class="filetab" class:on={active === f.path}>
+              <button class:on={active === f.path} onclick={() => (active = f.path)}>{f.path}</button>
+              {#if canAddFiles && !p?.starter.some(s => s.path === f.path)}
+                <button class="del" title="Delete {f.path}" aria-label="Delete {f.path}" disabled={!!running} onclick={() => removeFile(f.path)}>×</button>
+              {/if}
+            </span>
           {/each}
+          {#if canAddFiles}
+            {#if newPath === null}
+              <button class="add" title="Create a module file" disabled={!!running} onclick={() => { newPath = 'src/'; newPathError = '' }}>+ New file</button>
+            {:else}
+              <!-- svelte-ignore a11y_autofocus -->
+              <input
+                class="newpath"
+                bind:value={newPath}
+                autofocus
+                spellcheck="false"
+                aria-label="New file path"
+                placeholder="src/text.rs"
+                onkeydown={e => { if (e.key === 'Enter') addFile(); else if (e.key === 'Escape') { newPath = null; newPathError = '' } }}
+              />
+              <button class="add" onclick={addFile}>Create</button>
+              {#if newPathError}<span class="patherr" role="alert">{newPathError}</span>{/if}
+            {/if}
+          {/if}
           <span class="spacer"></span>
           {#if lsp}<span class="ra on" title="rust-analyzer is running">rust-analyzer</span>{:else if lspError}<span class="ra" title={lspError}>rust-analyzer unavailable</span>{/if}
         </nav>
@@ -383,6 +444,13 @@
   .tabs.files { border-color: var(--code-line); }
   .tabs.files button { font-family: var(--mono); font-weight: 500; color: var(--code-head); }
   .tabs.files button.on { background: var(--code-line); color: var(--code-ink); }
+  .tabs.files { flex-wrap: wrap; }
+  .filetab { display: inline-flex; align-items: center; border-radius: 8px; }
+  .filetab.on { background: var(--code-line); }
+  .tabs.files .filetab button.del { padding: 4px 8px 4px 0; font-size: 15px; line-height: 1; }
+  .tabs.files button.add { font-family: var(--sans); font-weight: 700; color: var(--code-head); border: 1px dashed var(--code-line); }
+  .newpath { font: 13px var(--mono); background: var(--code-bg); color: var(--code-ink); border: 1px solid var(--code-line); border-radius: 8px; padding: 6px 8px; width: 180px; }
+  .patherr { font-size: 12px; color: #F7768E; }
   .ra { font-size: 11px; color: var(--code-dim); padding-right: 6px; }
   .ra.on { color: #5BD08A; }
   .editor-wrap { flex: 1; min-height: 0; }

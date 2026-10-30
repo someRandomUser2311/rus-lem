@@ -181,6 +181,10 @@ pub struct Screen {
     pub text_md: String,
     #[serde(default)]
     pub code: Option<CodeBlock>,
+    /// A multi-file example (a package): every file, in order, each with its path in
+    /// `file`. `code` is then empty.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub files: Vec<CodeBlock>,
     /// Keyed by background: python, js, java, c, go.
     #[serde(default)]
     pub coming_from: BTreeMap<String, String>,
@@ -208,6 +212,9 @@ pub struct Screen {
 #[ts(export)]
 pub struct Step {
     pub n: u32,
+    /// In a multi-file screen, the file `hl` and `err` refer to.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file: Option<String>,
     /// Highlighted code lines (1-based).
     #[serde(default)]
     pub hl: Vec<u32>,
@@ -448,6 +455,10 @@ pub struct Question {
     pub prompt_md: String,
     #[serde(default)]
     pub code: Option<CodeBlock>,
+    /// A multi-file program (a package): every file with its path. `code` is then empty,
+    /// and a compile error's line is in whichever file the compiler reports.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub files: Vec<CodeBlock>,
     /// Choice types, arrange (shuffled lines) and the right column of match pairs.
     #[serde(default)]
     pub options: Vec<Choice>,
@@ -522,6 +533,10 @@ pub struct Verify {
     pub error_message: Option<String>,
     #[serde(default)]
     pub stdout: Option<String>,
+    /// A package's output: the binary the question runs (`cargo run --bin admin`); the
+    /// package's own binary when empty.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bin: Option<String>,
 }
 
 // ---------------------------------------------------------------- problems
@@ -713,8 +728,15 @@ pub enum Run {
         typed: bool,
     },
     /// A test program: the learner's file as a module, plus this `main`. If it
-    /// compiles, it runs with empty stdin.
-    Fixture { main: String },
+    /// compiles, it runs with empty stdin. In a Cargo package with a library, `main`
+    /// is another crate that uses the library by its crate name (`module_lab::…`), so
+    /// privacy applies as it does to any outside caller; `remove` deletes package files
+    /// first, and an empty `main` builds only the library.
+    Fixture {
+        main: String,
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        remove: Vec<String>,
+    },
     /// Run a Cargo command and look at its result and the files it leaves.
     Build { command: String },
     /// Look at the learner's source files only.
@@ -1022,6 +1044,9 @@ pub enum Assertion {
         within: Option<String>,
         #[serde(default)]
         inside: Option<String>,
+        /// Only this file of a package (`src/lib.rs`).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        file: Option<String>,
         /// Shown when the rule is broken.
         #[serde(default)]
         message: Option<String>,
@@ -1031,8 +1056,27 @@ pub enum Assertion {
         what: Vec<String>,
         #[serde(default)]
         within: Option<String>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        file: Option<String>,
         #[serde(default)]
         message: Option<String>,
+    },
+    /// A construct (see `Uses`) appears exactly `eq` times.
+    Count {
+        what: String,
+        eq: u32,
+        #[serde(default)]
+        within: Option<String>,
+        #[serde(default)]
+        inside: Option<String>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        file: Option<String>,
+        #[serde(default)]
+        message: Option<String>,
+    },
+    /// The package's Rust source files are exactly these.
+    RustFiles {
+        files: Vec<String>,
     },
     // ---- project
     ManifestEq {

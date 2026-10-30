@@ -6,6 +6,7 @@
   import type { Question } from '../lib/bindings/Question'
   import type { Response } from '../lib/bindings/Response'
   import CodeView from './CodeView.svelte'
+  import CodeFiles from './CodeFiles.svelte'
   import Md from './Md.svelte'
 
   let {
@@ -130,6 +131,8 @@
   <Md src={q.prompt_md} cls="prompt" />
   {#if q.code && q.kind !== 'spot_bug'}
     <CodeView code={q.code} />
+  {:else if q.files?.length}
+    <CodeFiles files={q.files} stacked />
   {/if}
 
   {#if choice}
