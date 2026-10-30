@@ -1,0 +1,13 @@
+[[tests]]
+key = "t18"
+run = { kind = "suite", script = "t18" }
+asserts = [{ check = "returns" }]
+
+[[wrong]]
+name = "upper-median"
+fails = ["t05", "t09", "t12", "t14", "t16", "t17", "t18"]
+
+[[wrong]]
+name = "largest-mode-on-tie"
+fails = ["t01", "t05", "t06", "t08", "t09", "t12", "t14", "t16", "t18"]
+

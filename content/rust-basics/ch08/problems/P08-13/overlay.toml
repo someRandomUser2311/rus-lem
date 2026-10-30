@@ -1,0 +1,8 @@
+[[wrong]]
+name = "strips-every-hash"
+fails = ["t05"]
+
+[[wrong]]
+name = "drops-empty-lines"
+fails = ["t03", "t06", "t10"]
+

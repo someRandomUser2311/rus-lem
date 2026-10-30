@@ -1,0 +1,4 @@
+[[wrong]]
+name = "dedup-without-sort"
+fails = ["t01", "t02", "t05", "t07", "t08", "t10"]
+

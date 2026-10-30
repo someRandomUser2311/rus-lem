@@ -919,6 +919,7 @@ fn facts_shown(what: &str) -> String {
         "path" => format!("the path `{arg}`"),
         "lit" => format!("the literal `{arg}`"),
         "attr" => format!("a `#[{arg}]` attribute"),
+        "closure" => "a closure (`|x| …`)".into(),
         _ => format!("`{what}`"),
     }
 }

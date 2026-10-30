@@ -1,0 +1,4 @@
+[[wrong]]
+name = "adds-in-i32"
+fails = ["t05", "t06", "t07"]
+

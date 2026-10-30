@@ -250,10 +250,33 @@ fn harness_source(file: &str, calls: &[&str], helpers: &str) -> String {
 /// what they mean in the package, and the crate also answers to its own name.
 fn library_harness_source(lib: &str, crate_name: &str, calls: &[&str], helpers: &str) -> String {
     harness_with(
-        &format!("{lib}\n\nextern crate self as {crate_name};\n"),
+        &format!("{lib}\n\n{}", self_alias(lib, crate_name)),
         calls,
         helpers,
     )
+}
+
+/// `extern crate self as NAME;`, unless the root already has an item called NAME (the
+/// `library` package's `pub mod library;`): then calls must use `crate::` paths.
+fn self_alias(lib: &str, crate_name: &str) -> String {
+    let taken = syn::parse_file(lib).is_ok_and(|f| {
+        f.items.iter().any(|i| {
+            let id = match i {
+                syn::Item::Mod(m) => &m.ident,
+                syn::Item::Fn(f) => &f.sig.ident,
+                syn::Item::Struct(s) => &s.ident,
+                syn::Item::Enum(e) => &e.ident,
+                syn::Item::Const(c) => &c.ident,
+                _ => return false,
+            };
+            id == crate_name
+        })
+    });
+    if taken {
+        String::new()
+    } else {
+        format!("extern crate self as {crate_name};\n")
+    }
 }
 
 /// `prelude` (the learner's code) followed by the helpers and the harness proper.

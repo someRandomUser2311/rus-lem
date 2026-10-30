@@ -1,0 +1,4 @@
+[[wrong]]
+name = "first-insert-wins"
+fails = ["t04"]
+

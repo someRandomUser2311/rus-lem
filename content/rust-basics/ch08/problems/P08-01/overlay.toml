@@ -1,0 +1,8 @@
+[[wrong]]
+name = "list-misses-repeat"
+fails = ["t01", "t03", "t04", "t06"]
+
+[[wrong]]
+name = "filled-one-short"
+fails = ["t02", "t07"]
+

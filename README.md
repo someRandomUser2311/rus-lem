@@ -2,7 +2,7 @@
 
 A desktop app that teaches Rust from *The Rust Programming Language*: short visual lessons, quick questions, and coding problems graded by real tests with the learner's own Rust toolchain. Fully local and offline. Tauri 2, Svelte 5, Rust.
 
-The course content is specified in `../rust-basics-course-plan/` (the reviewed Markdown plan). Rusticoder turns it into data with `course-check`, validates it by compiling and running everything, and bundles it into the app. **Chapters 1–7 are bundled.** The other chapters show as "Coming soon" until they're added (see [docs/adding-a-chapter.md](docs/adding-a-chapter.md)); adding one needs no app code.
+The course content is specified in `../rust-basics-course-plan/` (the reviewed Markdown plan). Rusticoder turns it into data with `course-check`, validates it by compiling and running everything, and bundles it into the app. **Chapters 1–8 are bundled.** The other chapters show as "Coming soon" until they're added (see [docs/adding-a-chapter.md](docs/adding-a-chapter.md)); adding one needs no app code.
 
 ## Requirements
 

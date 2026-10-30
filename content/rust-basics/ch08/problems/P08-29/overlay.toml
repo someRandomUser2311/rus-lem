@@ -1,0 +1,9 @@
+[[tests]]
+key = "t13"
+run = { kind = "suite", script = "t13" }
+asserts = [{ check = "returns" }]
+
+[[wrong]]
+name = "i32-totals"
+fails = ["t07", "t08", "t12", "t13"]
+

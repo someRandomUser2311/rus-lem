@@ -1,0 +1,476 @@
+# Chapter 8 lesson visuals, authored from the "Visual state" columns of lessons.md.
+# Merged onto chapter.gen.json: lessons by `id`, screens by `key`, steps by `n`.
+# A "mem" panel is the spec's Memory diagram: stack boxes for the bindings (their `value`
+# shows ptr/len/cap) and heap boxes for buffers; a freed buffer is ghosted. A "vars" panel
+# is a code stepper's variable table: one node per binding, `value` its current value; a
+# binding that went out of scope is ghosted. A "table" panel is a hash map: one node per
+# bucket or per key, `value` the stored value. Bucket numbers are illustrative, as the spec
+# says; real ones differ from run to run. Output is printed at the step whose line prints it.
+
+# ---------------------------------------------------------------- L8.1
+[[lessons]]
+id = "L8.1"
+read_more = ["ch08-00-common-collections.md", "ch08-01-vectors.md"]
+
+# Screen 3 · Pushing may move the elements
+[[lessons.screens]]
+key = "s3"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "mem"
+layout = "grid"
+nodes = [
+  { id = "v", label = "v", sub = "Vec<i32> (stack)", state = { value = "ptr → A · len 3 · cap 3" } },
+  { id = "a", label = "buffer A", sub = "heap", state = { value = "[1, 2, 3]" } },
+  { id = "b", label = "buffer B", sub = "heap", state = { hidden = true } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "mem", op = "node", id = "v", lit = true },
+  { panel = "mem", op = "node", id = "a", lit = true, badge = "full" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "mem", op = "node", id = "a", lit = false, ghost = true, badge = "freed" },
+  { panel = "mem", op = "node", id = "b", hidden = false, lit = true, value = "[1, 2, 3, 4, _, _]", badge = "new" },
+  { panel = "mem", op = "node", id = "v", value = "ptr → B · len 4 · cap ≥ 4" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "mem", op = "node", id = "b", value = "[1, 2, 3, 4, 5, _]", badge = "" },
+  { panel = "mem", op = "node", id = "v", value = "ptr → B · len 5" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "mem", op = "node", id = "v", lit = false },
+  { panel = "mem", op = "node", id = "b", lit = false },
+  { panel = "out", op = "print", text = "[1, 2, 3, 4, 5] has 5 elements\n" },
+]
+
+# ---------------------------------------------------------------- L8.2
+[[lessons]]
+id = "L8.2"
+read_more = ["ch08-01-vectors.md"]
+
+# Screen 1 · Reading every element with `for x in &v`
+[[lessons.screens]]
+key = "s1"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "vars"
+layout = "grid"
+nodes = [
+  { id = "v", label = "v", sub = "Vec<i32>", state = { value = "[100, 32, 57]" } },
+  { id = "x", label = "x", sub = "&i32", state = { hidden = true } },
+  { id = "total", label = "total", sub = "i32", state = { value = "0" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "vars", op = "node", id = "total", lit = true },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "vars", op = "node", id = "v", note = "100 borrowed" },
+  { panel = "vars", op = "node", id = "x", hidden = false, lit = true, value = "&100" },
+  { panel = "vars", op = "node", id = "total", value = "100" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "vars", op = "node", id = "v", note = "32 borrowed" },
+  { panel = "vars", op = "node", id = "x", value = "&32" },
+  { panel = "vars", op = "node", id = "total", value = "132" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "vars", op = "node", id = "v", note = "57 borrowed" },
+  { panel = "vars", op = "node", id = "x", value = "&57" },
+  { panel = "vars", op = "node", id = "total", value = "189" },
+]
+[[lessons.screens.steps]]
+n = 5
+ops = [
+  { panel = "vars", op = "node", id = "v", note = "" },
+  { panel = "vars", op = "node", id = "x", lit = false, ghost = true, badge = "out of scope" },
+  { panel = "vars", op = "node", id = "total", lit = false },
+  { panel = "out", op = "print", text = "189 from 3 items\n" },
+]
+
+# Screen 5 · One vector, different kinds of values
+[[lessons.screens]]
+key = "s5"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "type"
+layout = "tree"
+nodes = [
+  { id = "cell", label = "enum Cell", sub = "one type" },
+  { id = "int", label = "Int(i32)", sub = "variant", parent = "cell" },
+  { id = "float", label = "Float(f64)", sub = "variant", parent = "cell" },
+  { id = "text", label = "Text(String)", sub = "variant", parent = "cell" },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "row"
+layout = "row"
+nodes = [
+  { id = "c0", label = "row[0]", sub = "Int", state = { hidden = true, value = "3" } },
+  { id = "c1", label = "row[1]", sub = "Text", state = { hidden = true, value = "\"blue\"" } },
+  { id = "c2", label = "row[2]", sub = "Float", state = { hidden = true, value = "10.12" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "type", op = "node", id = "cell", lit = true },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "type", op = "node", id = "cell", lit = false },
+  { panel = "row", op = "node", id = "c0", hidden = false },
+  { panel = "row", op = "node", id = "c1", hidden = false },
+  { panel = "row", op = "node", id = "c2", hidden = false },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "row", op = "node", id = "c0", lit = true },
+  { panel = "type", op = "node", id = "int", lit = true, badge = "matched" },
+  { panel = "out", op = "print", text = "int 3\n" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "row", op = "node", id = "c0", lit = false },
+  { panel = "type", op = "node", id = "int", lit = false, badge = "" },
+  { panel = "row", op = "node", id = "c1", lit = true },
+  { panel = "type", op = "node", id = "text", lit = true, badge = "matched" },
+  { panel = "out", op = "print", text = "text blue\n" },
+]
+[[lessons.screens.steps]]
+n = 5
+ops = [
+  { panel = "row", op = "node", id = "c1", lit = false },
+  { panel = "type", op = "node", id = "text", lit = false, badge = "" },
+  { panel = "row", op = "node", id = "c2", lit = true },
+  { panel = "type", op = "node", id = "float", lit = true, badge = "matched" },
+  { panel = "out", op = "print", text = "float 10.12\n" },
+]
+
+# ---------------------------------------------------------------- L8.3
+[[lessons]]
+id = "L8.3"
+read_more = ["ch08-02-strings.md"]
+
+# Screen 3 · Growing a string with `push_str` and `push`
+[[lessons.screens]]
+key = "s3"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "mem"
+layout = "grid"
+nodes = [
+  { id = "s", label = "s", sub = "String (stack)", state = { value = "ptr · len 3 · cap 3" } },
+  { id = "heap", label = "s's text", sub = "heap", state = { value = "foo" } },
+  { id = "extra", label = "extra", sub = "&str (stack)", state = { hidden = true, value = "ptr · len 3" } },
+  { id = "lit", label = "\"bar\"", sub = "in the program", state = { hidden = true, value = "bar" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "mem", op = "node", id = "s", lit = true, note = "owns →" },
+  { panel = "mem", op = "node", id = "heap", lit = true },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "mem", op = "node", id = "s", lit = false },
+  { panel = "mem", op = "node", id = "heap", lit = false },
+  { panel = "mem", op = "node", id = "extra", hidden = false, lit = true, note = "⇢ borrows" },
+  { panel = "mem", op = "node", id = "lit", hidden = false },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "mem", op = "node", id = "extra", lit = false },
+  { panel = "mem", op = "node", id = "heap", lit = true, value = "foobar", badge = "push_str" },
+  { panel = "mem", op = "node", id = "s", value = "ptr · len 6" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "mem", op = "node", id = "heap", value = "foobar!", badge = "push" },
+  { panel = "mem", op = "node", id = "s", value = "ptr · len 7" },
+]
+[[lessons.screens.steps]]
+n = 5
+ops = [
+  { panel = "mem", op = "node", id = "heap", lit = false, badge = "" },
+  { panel = "out", op = "print", text = "foobar! bar\n" },
+]
+
+# Screen 4 · `+` takes the left string
+[[lessons.screens]]
+key = "s4"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "own"
+layout = "grid"
+nodes = [
+  { id = "s1", label = "s1", sub = "String", state = { value = "\"Hello, \"", note = "owner" } },
+  { id = "s2", label = "s2", sub = "String", state = { value = "\"world!\"", note = "owner" } },
+  { id = "s3", label = "s3", sub = "String", state = { hidden = true } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "own", op = "node", id = "s1", lit = true },
+  { panel = "own", op = "node", id = "s2", lit = true },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "own", op = "node", id = "s1", lit = false },
+  { panel = "own", op = "node", id = "s2", note = "&s2: &String → &str", badge = "&" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "own", op = "node", id = "s1", ghost = true, badge = "moved · unusable", note = "" },
+  { panel = "own", op = "node", id = "s3", hidden = false, lit = true, value = "\"Hello, world!\"", note = "owns s1's old buffer" },
+  { panel = "own", op = "node", id = "s2", lit = false, badge = "", note = "still the owner" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "own", op = "node", id = "s3", lit = false },
+  { panel = "out", op = "print", text = "Hello, world! world!\n" },
+]
+
+# ---------------------------------------------------------------- L8.4
+[[lessons]]
+id = "L8.4"
+read_more = ["ch08-02-strings.md"]
+
+# Screen 2 · The bytes behind the text
+[[lessons.screens]]
+key = "s2"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "bytes"
+layout = "grid"
+nodes = [
+  { id = "a", label = "a = \"Hola\"", sub = "4 bytes, 1 per letter", state = { hidden = true, value = "H:72 o:111 l:108 a:97" } },
+  { id = "b", label = "b = \"Здравствуйте\"", sub = "24 bytes, 2 per letter", state = { hidden = true, value = "З:208 151 · д:208 180 · р:209 128 · …" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "bytes", op = "node", id = "a", hidden = false, lit = true },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "bytes", op = "node", id = "a", lit = false },
+  { panel = "bytes", op = "node", id = "b", hidden = false, lit = true },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "bytes", op = "node", id = "b", badge = "b[0] would be 208: half a letter", style = "red" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "bytes", op = "node", id = "b", lit = false, badge = "", style = "" },
+  { panel = "out", op = "print", text = "4 24\n" },
+]
+
+# ---------------------------------------------------------------- L8.5
+[[lessons]]
+id = "L8.5"
+read_more = ["ch08-03-hash-maps.md"]
+
+# Screen 1 · Keys go into buckets
+[[lessons.screens]]
+key = "s1"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "table"
+layout = "grid"
+nodes = [
+  { id = "b0", label = "bucket 0", state = { ghost = true } },
+  { id = "b1", label = "bucket 1", state = { ghost = true } },
+  { id = "b2", label = "bucket 2", state = { ghost = true } },
+  { id = "b3", label = "bucket 3", state = { ghost = true } },
+  { id = "b4", label = "bucket 4", state = { ghost = true } },
+  { id = "b5", label = "bucket 5", state = { ghost = true } },
+  { id = "b6", label = "bucket 6", state = { ghost = true } },
+  { id = "b7", label = "bucket 7", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "table", op = "node", id = "b0", note = "an empty table (bucket numbers are made up)" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "table", op = "node", id = "b0", note = "" },
+  { panel = "table", op = "node", id = "b5", ghost = false, lit = true, value = "\"Blue\" → 10", badge = "hash(\"Blue\") → 5" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "table", op = "node", id = "b5", lit = false, badge = "" },
+  { panel = "table", op = "node", id = "b2", ghost = false, lit = true, value = "\"Yellow\" → 50", badge = "hash(\"Yellow\") → 2" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "table", op = "node", id = "b2", lit = false, badge = "" },
+  { panel = "out", op = "print", text = "2 teams\n" },
+]
+
+# ---------------------------------------------------------------- L8.6
+[[lessons]]
+id = "L8.6"
+read_more = ["ch08-03-hash-maps.md"]
+
+# Screen 2 · Insert only if the key is missing
+[[lessons.screens]]
+key = "s2"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "table"
+layout = "grid"
+nodes = [
+  { id = "b2", label = "bucket 2", state = { ghost = true } },
+  { id = "b5", label = "bucket 5", state = { ghost = true } },
+  { id = "entry", label = "entry", sub = "Entry", state = { hidden = true } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "table", op = "node", id = "b5", ghost = false, lit = true, value = "\"Blue\" → 10" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "table", op = "node", id = "b5", lit = false },
+  { panel = "table", op = "node", id = "entry", hidden = false, value = "\"Yellow\": Vacant" },
+  { panel = "table", op = "node", id = "b2", ghost = false, lit = true, style = "green", value = "\"Yellow\" → 50", badge = "inserted" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "table", op = "node", id = "b2", lit = false, style = "", badge = "" },
+  { panel = "table", op = "node", id = "entry", value = "\"Blue\": Occupied" },
+  { panel = "table", op = "node", id = "b5", lit = true, badge = "kept 10 (50 ignored)" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "table", op = "node", id = "b5", lit = false, badge = "" },
+  { panel = "table", op = "node", id = "entry", hidden = true },
+  { panel = "out", op = "print", text = "Some(50) Some(10)\n" },
+]
+
+# Screen 3 · Updating from the old value: counting words
+[[lessons.screens]]
+key = "s3"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "table"
+layout = "grid"
+nodes = [
+  { id = "word", label = "word", sub = "&str", state = { hidden = true } },
+  { id = "the", label = "\"the\"", sub = "key", state = { hidden = true } },
+  { id = "cat", label = "\"cat\"", sub = "key", state = { hidden = true } },
+  { id = "saw", label = "\"saw\"", sub = "key", state = { hidden = true } },
+  { id = "dog", label = "\"dog\"", sub = "key", state = { hidden = true } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "table", op = "node", id = "word", hidden = false, value = "\"the\"" },
+  { panel = "table", op = "node", id = "the", hidden = false, lit = true, value = "1" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "table", op = "node", id = "word", value = "\"cat\"" },
+  { panel = "table", op = "node", id = "the", lit = false },
+  { panel = "table", op = "node", id = "cat", hidden = false, lit = true, value = "1" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "table", op = "node", id = "word", value = "\"saw\"" },
+  { panel = "table", op = "node", id = "cat", lit = false },
+  { panel = "table", op = "node", id = "saw", hidden = false, lit = true, value = "1" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "table", op = "node", id = "word", value = "\"the\"" },
+  { panel = "table", op = "node", id = "saw", lit = false },
+  { panel = "table", op = "node", id = "the", lit = true, value = "2", badge = "+1" },
+]
+[[lessons.screens.steps]]
+n = 5
+ops = [
+  { panel = "table", op = "node", id = "word", value = "\"dog\"" },
+  { panel = "table", op = "node", id = "the", lit = false, badge = "" },
+  { panel = "table", op = "node", id = "dog", hidden = false, lit = true, value = "1" },
+]
+[[lessons.screens.steps]]
+n = 6
+ops = [
+  { panel = "table", op = "node", id = "dog", lit = false },
+  { panel = "table", op = "node", id = "word", ghost = true },
+  { panel = "out", op = "print", text = "Some(2) Some(1)\n" },
+]

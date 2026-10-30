@@ -1,0 +1,4 @@
+[[wrong]]
+name = "counts-bytes-twice"
+fails = ["t02", "t04", "t05", "t08"]
+

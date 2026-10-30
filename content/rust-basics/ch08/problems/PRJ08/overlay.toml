@@ -1,0 +1,52 @@
+checkpoints = true
+
+[[tests]]
+key = "t41"
+part = 4
+
+[[tests]]
+key = "t42"
+part = 4
+
+[[tests]]
+key = "t43"
+part = 4
+
+[[tests]]
+key = "t44"
+part = 4
+
+[[tests]]
+key = "t41"
+run = { kind = "suite", script = "t41" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t43"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["closure", "call:map", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:sum", "call:product", "call:sort_by", "call:sort_by_key", "call:sort_unstable_by", "call:retain", "call:unwrap_or_else", "call:and_modify", "call:or_insert_with", "type:BTreeMap", "type:BTreeSet", "type:VecDeque", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "try", "call:leak", "call:forget", "macro:include", "attr:path"], message = "Use only what Chapters 1–8 teach: Vec, String and HashMap/HashSet with loops, match and the methods the lessons show — no closures or the adapters that take them (map, filter, collect, sort_by, retain, unwrap_or_else, and_modify), no BTreeMap or VecDeque, no traits or trait implementations, no explicit lifetimes, no unsafe code and no `?` operator." },
+  { check = "uses", what = ["field:departments:HashMap<String,Vec<String>>", "field:homes:HashMap<String,String>"], inside = "struct:Directory", message = "Keep `Directory`'s two fields from the starter: `departments: HashMap<String, Vec<String>>` and `homes: HashMap<String, String>`." },
+  { check = "forbids", what = ["pub_field:departments", "pub_field:homes"], message = "Keep `Directory`'s fields private; callers use its methods." },
+]
+
+[[tests]]
+key = "t44"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["closure", "call:map", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:sum", "call:product", "call:sort_by", "call:sort_by_key", "call:sort_unstable_by", "call:retain", "call:unwrap_or_else", "call:and_modify", "call:or_insert_with", "type:BTreeMap", "type:BTreeSet", "type:VecDeque", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "try", "call:leak", "call:forget", "macro:include", "attr:path"], message = "Use only what Chapters 1–8 teach: Vec, String and HashMap/HashSet with loops, match and the methods the lessons show — no closures or the adapters that take them (map, filter, collect, sort_by, retain, unwrap_or_else, and_modify), no BTreeMap or VecDeque, no traits or trait implementations, no explicit lifetimes, no unsafe code and no `?` operator." },
+  { check = "forbids", what = ["closure"], message = "Write the loops yourself: no closures (`|x| …`) in this project." },
+]
+
+[[wrong]]
+name = "department-unsorted"
+part = 4
+fails = ["t28", "t33", "t39", "t41"]
+
+[[wrong]]
+name = "departments-unsorted"
+part = 4
+fails = ["t41"]
+
+may_fail = ["t01", "t02", "t03", "t04", "t05", "t06", "t07", "t08", "t09", "t10", "t11", "t12", "t13", "t14", "t15", "t16", "t17", "t18", "t19", "t20", "t21", "t22", "t23", "t24", "t25", "t26", "t27", "t28", "t29", "t30", "t31", "t32", "t33", "t34", "t35", "t36", "t37", "t38", "t39", "t40", "t42", "t43", "t44"]
+

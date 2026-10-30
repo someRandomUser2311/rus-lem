@@ -1,0 +1,4 @@
+[[wrong]]
+name = "skips-boundary-check"
+fails = ["t03", "t04"]
+

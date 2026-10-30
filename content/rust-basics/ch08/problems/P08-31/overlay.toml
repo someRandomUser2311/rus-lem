@@ -1,0 +1,9 @@
+[[tests]]
+key = "t18"
+run = { kind = "suite", script = "t18" }
+asserts = [{ check = "returns" }]
+
+[[wrong]]
+name = "bytes-not-scalars"
+fails = ["t02", "t08", "t09", "t10", "t11", "t14", "t16", "t18"]
+

@@ -1,0 +1,4 @@
+[[wrong]]
+name = "first-score-wins"
+fails = ["t03"]
+

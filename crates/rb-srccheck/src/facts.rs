@@ -58,6 +58,7 @@
 //! | `call_path:PATH`, `path:PATH` | a call through a path of two or more segments (`crate::a::f`, `super::f`); any such path expression (`super::LIMIT`) |
 //! | `lit:N` | an integer literal with value N |
 //! | `attr:path` | a `#[path = "…"]` attribute |
+//! | `closure` | a closure expression (`\|x\| …`) |
 //!
 //! Contexts are `fn:NAME`, `mod:NAME`, the loop facts, `if`, `block_expr`, `let:NAME` (its
 //! initialiser), `const:NAME`, `struct:NAME`, `enum:NAME`, `impl:TYPE`, `struct_lit:NAME`,
@@ -382,6 +383,11 @@ impl<'ast> Visit<'ast> for Facts {
                 self.fact(format!("use:::{t}"));
             }
         }
+    }
+
+    fn visit_expr_closure(&mut self, c: &'ast syn::ExprClosure) {
+        self.fact("closure");
+        syn::visit::visit_expr_closure(self, c);
     }
 
     fn visit_lit_int(&mut self, l: &'ast syn::LitInt) {
@@ -1027,6 +1033,8 @@ mod tests {
         assert!(has(&f, "path:super::OFFSET", &["fn:absolute"]));
         assert!(has(&f, "lit:7", &[]));
         assert!(has(&f, "item:fn", &["mod:reports"]));
+        let c = facts("fn f(v: &[i32]) -> usize { let g = |x: &i32| *x > 0; v.len() }");
+        assert!(has(&c, "closure", &["fn:f"]));
     }
 
     #[test]

@@ -1,0 +1,146 @@
+checkpoints = true
+
+[[tests]]
+key = "t03"
+part = 4
+
+[[tests]]
+key = "t08"
+part = 4
+
+[[tests]]
+key = "t09"
+part = 4
+
+[[tests]]
+key = "t20"
+part = 4
+
+[[tests]]
+key = "t35"
+part = 4
+
+[[tests]]
+key = "t36"
+part = 4
+
+[[tests]]
+key = "t37"
+part = 4
+
+[[tests]]
+key = "t38"
+part = 4
+
+[[tests]]
+key = "t39"
+part = 4
+
+[[tests]]
+key = "t40"
+part = 4
+
+[[tests]]
+key = "t41"
+part = 4
+
+[[tests]]
+key = "t42"
+part = 4
+
+[[tests]]
+key = "t43"
+part = 4
+
+[[tests]]
+key = "t44"
+part = 4
+
+[[tests]]
+key = "t45"
+part = 4
+
+[[tests]]
+key = "t46"
+part = 4
+
+[[tests]]
+key = "t47"
+part = 4
+
+[[tests]]
+key = "t48"
+part = 4
+
+[[tests]]
+key = "t49"
+part = 4
+
+[[tests]]
+key = "t50"
+part = 4
+
+[[tests]]
+key = "t37"
+run = { kind = "suite", script = "t37" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t38"
+run = { kind = "suite", script = "t38" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t39"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["closure", "call:map", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:sum", "call:product", "call:sort_by", "call:sort_by_key", "call:sort_unstable_by", "call:retain", "call:unwrap_or_else", "call:and_modify", "call:or_insert_with", "type:BTreeMap", "type:BTreeSet", "type:VecDeque", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "try", "call:leak", "call:forget", "macro:include", "attr:path"], message = "Use only what Chapters 1–8 teach: Vec, String and HashMap/HashSet with loops, match and the methods the lessons show — no closures or the adapters that take them (map, filter, collect, sort_by, retain, unwrap_or_else, and_modify), no BTreeMap or VecDeque, no traits or trait implementations, no explicit lifetimes, no unsafe code and no `?` operator." },
+  { check = "rust_files", files = ["src/lib.rs", "src/fees.rs", "src/text.rs", "src/book.rs", "src/member.rs", "src/library.rs", "src/main.rs"] },
+  { check = "uses", what = ["mod_file:fees", "mod_file:text", "mod_file:book", "mod_file:member", "mod_file:library", "pub:fees", "pub:text", "pub:book", "pub:member", "pub:library"], file = "src/lib.rs", message = "`src/lib.rs` declares `pub mod fees;`, `pub mod text;`, `pub mod book;`, `pub mod member;` and `pub mod library;`, each without a body." },
+]
+
+[[tests]]
+key = "t40"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["closure", "call:map", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:sum", "call:product", "call:sort_by", "call:sort_by_key", "call:sort_unstable_by", "call:retain", "call:unwrap_or_else", "call:and_modify", "call:or_insert_with", "type:BTreeMap", "type:BTreeSet", "type:VecDeque", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "try", "call:leak", "call:forget", "macro:include", "attr:path"], message = "Use only what Chapters 1–8 teach: Vec, String and HashMap/HashSet with loops, match and the methods the lessons show — no closures or the adapters that take them (map, filter, collect, sort_by, retain, unwrap_or_else, and_modify), no BTreeMap or VecDeque, no traits or trait implementations, no explicit lifetimes, no unsafe code and no `?` operator." },
+  { check = "uses", what = ["pub_use:book::Book", "pub_use:book::Status", "pub_use:member::Member", "pub_use:library::Library"], file = "src/lib.rs", message = "Re-export at the root: `pub use book::{Book, Status};`, `pub use member::Member;` and `pub use library::Library;`." },
+  { check = "count", what = "item:fn", eq = 0, file = "src/lib.rs", message = "`src/lib.rs` holds only module declarations and re-exports." },
+  { check = "forbids", what = ["item:struct", "item:enum", "item:impl", "item:const", "item:type"], file = "src/lib.rs", message = "`src/lib.rs` holds only module declarations and re-exports." },
+]
+
+[[tests]]
+key = "t41"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["closure", "call:map", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:sum", "call:product", "call:sort_by", "call:sort_by_key", "call:sort_unstable_by", "call:retain", "call:unwrap_or_else", "call:and_modify", "call:or_insert_with", "type:BTreeMap", "type:BTreeSet", "type:VecDeque", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "try", "call:leak", "call:forget", "macro:include", "attr:path"], message = "Use only what Chapters 1–8 teach: Vec, String and HashMap/HashSet with loops, match and the methods the lessons show — no closures or the adapters that take them (map, filter, collect, sort_by, retain, unwrap_or_else, and_modify), no BTreeMap or VecDeque, no traits or trait implementations, no explicit lifetimes, no unsafe code and no `?` operator." },
+  { check = "uses", what = ["field:books:Vec<Book>", "field:members:HashMap<u32,Member>", "field:next_book_id:u32"], inside = "struct:Library", file = "src/library.rs", message = "`Library` has the three private fields `books: Vec<Book>`, `members: HashMap<u32, Member>` and `next_book_id: u32`." },
+  { check = "forbids", what = ["pub_field:books", "pub_field:members", "pub_field:next_book_id"], file = "src/library.rs", message = "Keep `Library`'s fields private; callers use its methods." },
+]
+
+[[tests]]
+key = "t42"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["closure", "call:map", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:sum", "call:product", "call:sort_by", "call:sort_by_key", "call:sort_unstable_by", "call:retain", "call:unwrap_or_else", "call:and_modify", "call:or_insert_with", "type:BTreeMap", "type:BTreeSet", "type:VecDeque", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "try", "call:leak", "call:forget", "macro:include", "attr:path"], message = "Use only what Chapters 1–8 teach: Vec, String and HashMap/HashSet with loops, match and the methods the lessons show — no closures or the adapters that take them (map, filter, collect, sort_by, retain, unwrap_or_else, and_modify), no BTreeMap or VecDeque, no traits or trait implementations, no explicit lifetimes, no unsafe code and no `?` operator." },
+  { check = "uses", what = ["use:crate::book::Book|use:crate::Book", "use:crate::book::Status|use:crate::Status", "use:crate::member::Member|use:crate::Member", "use:crate::text::sort_key", "use:crate::text::title_matches"], file = "src/library.rs", message = "`src/library.rs` brings `Book`, `Status`, `Member`, `sort_key` and `title_matches` in with `use crate::…`." },
+  { check = "count", what = "struct:Book", eq = 1, message = "Define `Book` once, in `src/book.rs`." },
+  { check = "count", what = "struct:Member", eq = 1, message = "Define `Member` once, in `src/member.rs`." },
+  { check = "count", what = "fn:sort_key", eq = 1, message = "Use `text::sort_key`; don't copy it." },
+  { check = "count", what = "fn:title_matches", eq = 1, message = "Use `text::title_matches`; don't copy it." },
+  { check = "count", what = "fn:due_day", eq = 1, message = "Keep the LM7 fee helpers only in `src/fees.rs`." },
+]
+
+[[tests]]
+key = "t43"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["closure", "call:map", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:sum", "call:product", "call:sort_by", "call:sort_by_key", "call:sort_unstable_by", "call:retain", "call:unwrap_or_else", "call:and_modify", "call:or_insert_with", "type:BTreeMap", "type:BTreeSet", "type:VecDeque", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "try", "call:leak", "call:forget", "macro:include", "attr:path"], message = "Use only what Chapters 1–8 teach: Vec, String and HashMap/HashSet with loops, match and the methods the lessons show — no closures or the adapters that take them (map, filter, collect, sort_by, retain, unwrap_or_else, and_modify), no BTreeMap or VecDeque, no traits or trait implementations, no explicit lifetimes, no unsafe code and no `?` operator." },
+  { check = "forbids", what = ["closure"], message = "Write the loops yourself: no closures (`|x| …`) in the package." },
+]
+
+[[wrong]]
+name = "fields-public"
+part = 4
+fails = ["t35", "t41"]
+

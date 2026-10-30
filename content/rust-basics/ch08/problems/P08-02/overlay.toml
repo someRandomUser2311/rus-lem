@@ -1,0 +1,17 @@
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["closure", "call:map", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:sum", "call:product", "call:sort_by", "call:sort_by_key", "call:sort_unstable_by", "call:retain", "call:unwrap_or_else", "call:and_modify", "call:or_insert_with", "type:BTreeMap", "type:BTreeSet", "type:VecDeque", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "try", "call:leak", "call:forget", "macro:include", "attr:path"], message = "Use only what Chapters 1–8 teach: Vec, String and HashMap/HashSet with loops, match and the methods the lessons show — no closures or the adapters that take them (map, filter, collect, sort_by, retain, unwrap_or_else, and_modify), no BTreeMap or VecDeque, no traits or trait implementations, no explicit lifetimes, no unsafe code and no `?` operator." },
+  { check = "uses", what = ["call:get"], within = "read", message = "Read the element with `v.get(index)`, which returns `None` instead of panicking." },
+  { check = "forbids", what = ["index"], within = "read", message = "Don't index with `v[index]` in `read`: it panics when the index is out of range." },
+]
+
+[[wrong]]
+name = "indexes-after-check"
+fails = ["t12"]
+
+[[wrong]]
+name = "zero-is-missing"
+fails = ["t06"]
+

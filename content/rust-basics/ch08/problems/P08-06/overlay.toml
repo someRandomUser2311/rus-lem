@@ -1,0 +1,8 @@
+[[wrong]]
+name = "trailing-separator"
+fails = ["t01", "t03", "t05", "t06", "t08", "t09", "t11"]
+
+[[wrong]]
+name = "empty-as-text"
+fails = ["t01", "t03", "t05", "t08", "t11"]
+

@@ -1,0 +1,4 @@
+[[wrong]]
+name = "wraps-on-overflow"
+fails = ["t02", "t06"]
+

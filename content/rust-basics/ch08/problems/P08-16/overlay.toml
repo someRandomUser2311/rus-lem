@@ -1,0 +1,4 @@
+[[wrong]]
+name = "splits-on-space-only"
+fails = ["t02", "t03", "t06", "t09"]
+
