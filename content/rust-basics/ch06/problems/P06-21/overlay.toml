@@ -1,0 +1,23 @@
+[[tests]]
+key = "t13"
+run = { kind = "suite", script = "t13" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t14"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["type:Vec", "type:VecDeque", "type:HashMap", "type:HashSet", "type:BTreeMap", "type:BTreeSet", "macro:vec", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "try", "call:leak", "call:forget", "call:map", "call:and_then", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:zip", "call:sum", "call:product", "call:any", "call:all", "call:position", "call:windows", "call:chunks"], message = "Use only what Chapters 1–6 teach: enums, Option, match, if let and let...else are fine, but no Vec or other collections, no traits or trait implementations, no explicit lifetimes, no unsafe code, no `?` operator, and no adapters that take closures, such as map, and_then, filter or collect." },
+  { check = "uses", what = ["let_else"], within = "decorate", message = "Take the `String` out of the `Option` with `let Some(mut text) = label else { return None; };`." },
+  { check = "uses", what = ["ident:None"], within = "decorate", inside = "let_else", message = "The `let...else` block should `return None;`." },
+  { check = "forbids", what = ["call:clone", "call:to_owned", "call:to_string"], within = "decorate", message = "`decorate` owns `label`: move its `String` out and push onto it, without copying the text." },
+]
+
+[[wrong]]
+name = "suffix-first"
+fails = ["t01", "t05", "t06", "t07", "t08", "t09", "t11", "t13"]
+
+[[wrong]]
+name = "copies-text"
+fails = ["t14"]
+

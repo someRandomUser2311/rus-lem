@@ -1,0 +1,17 @@
+[[tests]]
+key = "t09"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["type:Vec", "type:VecDeque", "type:HashMap", "type:HashSet", "type:BTreeMap", "type:BTreeSet", "macro:vec", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "try", "call:leak", "call:forget", "call:map", "call:and_then", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:zip", "call:sum", "call:product", "call:any", "call:all", "call:position", "call:windows", "call:chunks"], message = "Use only what Chapters 1–6 teach: enums, Option, match, if let and let...else are fine, but no Vec or other collections, no traits or trait implementations, no explicit lifetimes, no unsafe code, no `?` operator, and no adapters that take closures, such as map, and_then, filter or collect." },
+  { check = "uses", what = ["let_else", "let_else"], within = "sum_pair", message = "`sum_pair` needs two `let Some(…) = … else { return None; };` bindings, one per value." },
+  { check = "uses", what = ["ident:None", "ident:None"], within = "sum_pair", inside = "let_else", message = "Each `let...else` block should `return None;`." },
+]
+
+[[wrong]]
+name = "i32-sum"
+fails = ["t07", "t08"]
+
+[[wrong]]
+name = "match-for-b"
+fails = ["t09"]
+

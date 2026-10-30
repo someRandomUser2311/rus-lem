@@ -1,0 +1,56 @@
+mode = "cargo"
+
+[[tests]]
+key = "t01"
+run = { kind = "process", stdin = "" }
+asserts = [
+  { check = "stdout_matches", pattern = "^You rolled a [1-6]!\\n$" },
+]
+
+[[tests]]
+key = "t02"
+run = { kind = "process", stdin = "ignored\n" }
+asserts = [
+  { check = "stdout_matches", pattern = "^You rolled a [1-6]!\\n$" },
+]
+
+[[tests]]
+key = "t03"
+run = { kind = "process", stdin = "", times = 100 }
+asserts = [
+  { check = "stdout_matches", pattern = "^You rolled a [1-6]!\\n$" },
+]
+
+[[tests]]
+key = "t04"
+run = { kind = "process", stdin = "東京 😀\n" }
+asserts = [
+  { check = "stdout_matches", pattern = "^You rolled a [1-6]!\\n$" },
+]
+
+[[tests]]
+key = "t05"
+run = { kind = "process", stdin = "" }
+asserts = [
+  { check = "stderr_empty" },
+  { check = "exit_code", code = 0 },
+]
+
+[[tests]]
+key = "t06"
+run = { kind = "source" }
+asserts = [
+  { check = "let_init", name = "roll", ty = "u32", exprs = ["rand::rng().random_range(1..=6)"] },
+]
+
+[[wrong]]
+name = "constant"
+fails = ["t06"]
+
+[[wrong]]
+name = "exclusive-range"
+fails = ["t06"]
+
+[[wrong]]
+name = "out-of-range"
+fails = ["t01", "t02", "t03", "t04", "t06"]

@@ -1,0 +1,41 @@
+[[tests]]
+key = "t10"
+run = { kind = "fixture", main = '''
+fn check(text: &str, start: usize, end: usize) {
+    let r = window(text, start, end);
+    let base = text.as_ptr() as usize;
+    let p = r.as_ptr() as usize;
+    assert!(p >= base && p + r.len() <= base + text.len(), "the slice isn't inside the input");
+    assert_eq!(p - base, start, "the slice starts at the wrong byte");
+    assert_eq!(r.len(), end - start, "the slice has the wrong length");
+}
+fn main() {
+    let cases = [("hello", 1, 4), ("abc", 0, 3), ("", 0, 0), ("a", 0, 0), ("a", 1, 1), ("é東京", 0, 2), ("é東京", 2, 8), ("😀x", 0, 4), ("abab", 2, 4), ("x x x", 4, 5)];
+    for (t, s, e) in cases {
+        let owned = String::from(t);
+        check(&owned, s, e);
+    }
+    let big = "x".repeat(100000);
+    check(&big, 0, 100000);
+}''' }
+asserts = [{ check = "stdout_eq", text = "" }]
+
+[[tests]]
+key = "t11"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["type:Vec", "type:VecDeque", "type:HashMap", "type:HashSet", "type:BTreeMap", "type:BTreeSet", "macro:vec", "type:Option", "call:Some", "ident:None", "item:struct", "item:enum", "item:trait", "item:impl", "item:type", "item:static", "lifetime", "unsafe", "call:leak", "call:forget", "call:map", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:zip", "call:skip", "call:take", "call:sum", "call:product", "call:any", "call:all", "call:position", "call:windows", "call:chunks"], message = "Use only what Chapters 1–4 teach: no Vec or other collections, no Option, no struct/enum/trait/impl definitions, no explicit lifetimes, no unsafe code, and no iterator adapters such as map, filter or collect. Plain for loops over chars, bytes, char_indices or split_whitespace, and standard String methods, are fine." },
+]
+
+[[wrong]]
+name = "first-occurrence"
+fails = ["t10"]
+
+[[wrong]]
+name = "literal-empty"
+fails = ["t10"]
+
+[[wrong]]
+name = "drops-last-char"
+fails = ["t01", "t02", "t06", "t07", "t08", "t09", "t10"]
+

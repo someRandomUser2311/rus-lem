@@ -1,0 +1,34 @@
+[[tests]]
+key = "t12"
+run = { kind = "suite", script = "t12" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t13"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["op:%", "op:/", "op:*"], within = "reverse_integer", inside = "while", message = "Use a `while` loop in `reverse_integer` that takes each digit off with `% 10` and `/ 10` and appends it with `result * 10 + digit`." },
+]
+
+[[tests]]
+key = "t14"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["cast:u64"], within = "reverse_integer", message = "Widen the digits (or the input) with an explicit `as u64` cast before building the reversed number." },
+]
+
+[[wrong]]
+name = "u32-result"
+fails = ["t06", "t07", "t12", "t13"]
+
+[[wrong]]
+name = "digits-summed"
+fails = ["t01", "t02", "t03", "t06", "t07", "t09", "t10", "t12", "t13"]
+
+[[wrong]]
+name = "for-digits"
+fails = ["t13"]
+
+[[wrong]]
+name = "no-cast"
+fails = ["t14"]

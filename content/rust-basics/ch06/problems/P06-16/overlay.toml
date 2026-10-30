@@ -1,0 +1,26 @@
+[[tests]]
+key = "t13"
+run = { kind = "suite", script = "t13" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t14"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["type:Vec", "type:VecDeque", "type:HashMap", "type:HashSet", "type:BTreeMap", "type:BTreeSet", "macro:vec", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "try", "call:leak", "call:forget", "call:map", "call:and_then", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:zip", "call:sum", "call:product", "call:any", "call:all", "call:position", "call:windows", "call:chunks"], message = "Use only what Chapters 1–6 teach: enums, Option, match, if let and let...else are fine, but no Vec or other collections, no traits or trait implementations, no explicit lifetimes, no unsafe code, no `?` operator, and no adapters that take closures, such as map, and_then, filter or collect." },
+  { check = "uses", what = ["match", "pat:Add", "pat:Sub", "pat:Mul", "pat:Div"], within = "calculate", message = "`calculate` needs a `match` on `op` with an explicit arm for each of `Op::Add`, `Op::Sub`, `Op::Mul` and `Op::Div`." },
+  { check = "forbids", what = ["pat_wild", "pat_bind"], within = "calculate", message = "Name all four `Op` variants; a catch-all arm would hide a missing one." },
+]
+
+[[wrong]]
+name = "divides-by-zero"
+fails = ["t05"]
+
+[[wrong]]
+name = "saturating-sub"
+fails = ["t06", "t13"]
+
+[[wrong]]
+name = "catch-all-div"
+fails = ["t14"]
+

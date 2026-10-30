@@ -1,0 +1,58 @@
+isolated_target = true
+
+[[tests]]
+key = "t02"
+asserts = [
+  { check = "manifest_eq", key = "package.name", value = "ferris_greeter" },
+]
+
+[[tests]]
+key = "t03"
+asserts = [
+  { check = "manifest_eq", key = "package.version", value = "0.2.0" },
+]
+
+[[tests]]
+key = "t04"
+asserts = [
+  { check = "manifest_eq", key = "package.edition", value = "2024" },
+  { check = "manifest_table_empty", table = "dependencies" },
+]
+
+[[tests]]
+key = "t05"
+asserts = [
+  { check = "build_ok" },
+  { check = "file_exists", path = "target/debug/ferris_greeter{exe}" },
+]
+
+[[tests]]
+key = "t06"
+asserts = [
+  { check = "build_ok" },
+]
+
+[[tests]]
+key = "t07"
+asserts = [
+  { check = "files_allowlist", files = ["Cargo.toml", "src/main.rs"] },
+]
+
+[[tests]]
+key = "t08"
+run = { kind = "manifest" }
+asserts = [
+  { check = "manifest_forbid_keys", keys = ["bin", "lib", "example", "test", "bench", "workspace", "build", "package.build", "package.default-run", "package.autobins"] },
+]
+
+[[wrong]]
+name = "old-name"
+fails = ["t02", "t05"]
+
+[[wrong]]
+name = "custom-bin"
+fails = ["t05", "t08"]
+
+[[wrong]]
+name = "old-version"
+fails = ["t03"]

@@ -1,0 +1,19 @@
+[[tests]]
+key = "t08"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["shorthand:x", "shorthand:y", "shorthand:brightness"], within = "make_pixel", inside = "struct_lit:Pixel", message = "Build the pixel with the field init shorthand: `Pixel { x, y, brightness }`." },
+]
+
+[[wrong]]
+name = "explicit-fields"
+fails = ["t08"]
+
+[[wrong]]
+name = "swapped-xy"
+fails = ["t01", "t02", "t08"]
+
+[[wrong]]
+name = "threshold"
+fails = ["t06"]
+

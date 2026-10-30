@@ -1,0 +1,8 @@
+[[wrong]]
+name = "zero-is-empty"
+fails = ["t03"]
+
+[[wrong]]
+name = "empty-text-is-empty"
+fails = ["t06"]
+

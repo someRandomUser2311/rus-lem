@@ -1,0 +1,12 @@
+[package]
+name = "rb-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+rb-content.workspace = true
+rb-grader.workspace = true
+rb-runner.workspace = true
+anyhow.workspace = true
+clap.workspace = true

@@ -1,0 +1,62 @@
+
+[[tests]]
+key = "t03"
+asserts = [
+  { check = "line_eq", line = 1, text = "=========================" },
+  { check = "line_eq", line = 3, text = "=========================" },
+  { check = "line_eq", line = 9, text = "=========================" },
+]
+
+[[tests]]
+key = "t04"
+asserts = [
+  { check = "line_eq", line = 2, text = "  Today's special" },
+]
+
+[[tests]]
+key = "t09"
+asserts = [
+  { check = "line_count", count = 9 },
+  { check = "ends_with", text = "\n" },
+  { check = "no_trailing_whitespace" },
+]
+
+[[tests]]
+key = "t11"
+asserts = [
+  { check = "fmt_literal_forbid", macros = ["print", "println"], digits = true },
+]
+
+[[tests]]
+key = "t12"
+asserts = [
+  { check = "fmt_literal_forbid", macros = ["print", "println"], substrings = ["Pancakes"] },
+]
+
+[[tests]]
+key = "t13"
+asserts = [
+  { check = "macro_sequence", first = { name = "print", fmt = "Rating: " }, then = { name = "println", fmt = "{stars} stars" }, exactly_once = true },
+]
+
+[[tests]]
+key = "t14"
+asserts = [
+  { check = "lets_unchanged", lets = ["let dish = \"Pancakes\";", "let price = 450;", "let stars = 4;"] },
+]
+
+[[wrong]]
+name = "typed-price"
+fails = ["t11"]
+
+[[wrong]]
+name = "one-call-rating"
+fails = ["t13"]
+
+[[wrong]]
+name = "unescaped-dish"
+fails = ["t01", "t08"]
+
+[[wrong]]
+name = "long-border"
+fails = ["t01", "t03"]

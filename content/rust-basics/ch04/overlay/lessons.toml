@@ -1,0 +1,880 @@
+# Chapter 4 lesson visuals, authored from the "Visual state" columns of lessons.md.
+# Merged onto chapter.gen.json: lessons by `id`, screens by `key`, steps by `n`.
+# Each spec "Owner panel" is a scene of bindings (stack frames / owners); each "data panel"
+# is a scene of the text those bindings own or borrow (heap buffers, static text, bytes).
+# Ownership is drawn as a row-layout edge where one owner points at one buffer; elsewhere
+# it is a note ("owns → A"). Borrows are notes ("⇢ title" shared, "⇒ title" exclusive)
+# with "&" / "&mut" badges. Moved or dropped values are ghosted with a badge.
+# The diagrams are explanatory models: they show ptr / len / cap ≥ only where the spec
+# does, and make no promise about physical placement or exact capacity.
+# State panels show conceptual values, not extra program output.
+
+# ---------------------------------------------------------------- L4.1
+[[lessons]]
+id = "L4.1"
+read_more = ["ch04-00-understanding-ownership.md", "ch04-01-what-is-ownership.md"]
+
+# Screen 1 · Instructions, literals and runtime data
+# One step, on line 3; the println! on line 4 runs after it, so there is no output panel.
+[[lessons.screens]]
+key = "s1"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "owners"
+layout = "grid"
+nodes = [
+  { id = "literal", label = "literal", state = { value = "&str", note = "reads the program text" } },
+  { id = "owned", label = "owned", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "data"
+layout = "grid"
+nodes = [
+  { id = "stat", label = "static text", state = { value = "hi" } },
+  { id = "buf", label = "owned buffer", state = { ghost = true } },
+]
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "owners", op = "node", id = "owned", ghost = false, lit = true, value = "String", note = "owns separate, mutable text" },
+  { panel = "data", op = "node", id = "buf", ghost = false, lit = true, value = "hi", note = "a copy of the literal's text" },
+]
+
+# Screen 3 · Calls add frames; returns remove them
+# Call stack: frames listed newest first, so add_one sits on top of `main`.
+[[lessons.screens]]
+key = "s3"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "stack"
+layout = "tree"
+nodes = [
+  { id = "add_one", label = "add_one", state = { hidden = true } },
+  { id = "n", label = "n", parent = "add_one", state = { hidden = true } },
+  { id = "next", label = "next", parent = "add_one", state = { hidden = true } },
+  { id = "main", label = "main" },
+  { id = "start", label = "start", parent = "main", state = { ghost = true } },
+  { id = "result", label = "result", parent = "main", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "heap"
+layout = "grid"
+nodes = [{ id = "none", label = "heap", state = { value = "—", note = "no owned heap buffer in this example" } }]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [{ panel = "stack", op = "node", id = "start", ghost = false, lit = true, value = "7" }]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "stack", op = "node", id = "start", lit = false },
+  { panel = "stack", op = "node", id = "main", note = "waiting" },
+  { panel = "stack", op = "node", id = "add_one", hidden = false, badge = "new frame" },
+  { panel = "stack", op = "node", id = "n", hidden = false, value = "7" },
+  { panel = "stack", op = "node", id = "next", hidden = false, lit = true, value = "8" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "stack", op = "node", id = "next", lit = false },
+  { panel = "stack", op = "node", id = "add_one", lit = true, badge = "returns 8", note = "frame ends" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "stack", op = "node", id = "add_one", hidden = true, lit = false, badge = "", note = "" },
+  { panel = "stack", op = "node", id = "n", hidden = true },
+  { panel = "stack", op = "node", id = "next", hidden = true },
+  { panel = "stack", op = "node", id = "main", note = "resumed" },
+  { panel = "stack", op = "node", id = "result", ghost = false, lit = true, value = "8" },
+  { panel = "out", op = "print", text = "7 8\n" },
+]
+
+# Screen 4 · Scope determines cleanup
+[[lessons.screens]]
+key = "s4"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "scope"
+layout = "tree"
+nodes = [
+  { id = "main", label = "scope: main" },
+  { id = "outer", label = "outer", parent = "main", state = { ghost = true } },
+  { id = "inner_b", label = "scope: inner block", parent = "main", state = { ghost = true } },
+  { id = "inner", label = "inner", parent = "inner_b", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "heap"
+layout = "grid"
+nodes = [
+  { id = "a", label = "A", state = { ghost = true } },
+  { id = "b", label = "B", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "scope", op = "node", id = "outer", ghost = false, lit = true, value = "String", note = "owns → A" },
+  { panel = "heap", op = "node", id = "a", ghost = false, lit = true, value = "outside" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "scope", op = "node", id = "outer", lit = false },
+  { panel = "heap", op = "node", id = "a", lit = false },
+  { panel = "scope", op = "node", id = "inner_b", ghost = false, style = "blue" },
+  { panel = "scope", op = "node", id = "inner", ghost = false, lit = true, value = "String", note = "owns → B" },
+  { panel = "heap", op = "node", id = "b", ghost = false, lit = true, value = "inside" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "scope", op = "node", id = "inner_b", ghost = true, badge = "ended" },
+  { panel = "scope", op = "node", id = "inner", ghost = true, lit = false, badge = "dropped", note = "" },
+  { panel = "heap", op = "node", id = "b", ghost = true, lit = false, badge = "dropped" },
+  { panel = "out", op = "print", text = "inside\n" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "scope", op = "node", id = "inner_b", hidden = true, badge = "" },
+  { panel = "scope", op = "node", id = "inner", hidden = true, badge = "" },
+  { panel = "heap", op = "node", id = "b", hidden = true, badge = "" },
+  { panel = "scope", op = "node", id = "outer", lit = true },
+  { panel = "out", op = "print", text = "outside\n" },
+]
+
+# Screen 5 · A memory model, not a placement promise
+# Row layout: the owner on the stack, an arrow, the buffer it owns.
+[[lessons.screens]]
+key = "s5"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "mem"
+layout = "row"
+nodes = [
+  { id = "text", label = "text", sub = "String", state = { ghost = true } },
+  { id = "buf", label = "heap buffer", state = { ghost = true } },
+]
+edges = [{ id = "own", from = "text", to = "buf", label = "ptr ●", hidden = true }]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "mem", op = "node", id = "text", ghost = false, lit = true, value = "ptr ●\nlen 5\ncap ≥ 5" },
+  { panel = "mem", op = "edge", id = "own", hidden = false },
+  { panel = "mem", op = "node", id = "buf", ghost = false, value = "h e l l o" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "mem", op = "node", id = "text", lit = false, badge = "owner" },
+  { panel = "mem", op = "node", id = "buf", lit = true, badge = "5 bytes used" },
+  { panel = "out", op = "print", text = "5\n" },
+]
+
+# Screen 6 · Growing and releasing a heap buffer
+[[lessons.screens]]
+key = "s6"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "mem"
+layout = "row"
+nodes = [
+  { id = "text", label = "text", sub = "String", state = { ghost = true } },
+  { id = "buf", label = "heap buffer", state = { ghost = true } },
+]
+edges = [{ id = "own", from = "text", to = "buf", label = "ptr ●", hidden = true }]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "mem", op = "node", id = "text", ghost = false, lit = true, value = "ptr ●\nlen 2\ncap ≥ 2", badge = "mut" },
+  { panel = "mem", op = "edge", id = "own", hidden = false },
+  { panel = "mem", op = "node", id = "buf", ghost = false, value = "hi" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "mem", op = "node", id = "text", value = "ptr (current)\nlen 8\ncap ≥ 8" },
+  { panel = "mem", op = "node", id = "buf", lit = true, value = "hi there", badge = "reused or grown" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "mem", op = "node", id = "text", lit = false, badge = "owner" },
+  { panel = "mem", op = "node", id = "buf", lit = false, badge = "8 UTF-8 bytes used" },
+  { panel = "out", op = "print", text = "hi there 8\n" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "mem", op = "node", id = "text", ghost = true, badge = "dropped" },
+  { panel = "mem", op = "edge", id = "own", hidden = true },
+  { panel = "mem", op = "node", id = "buf", ghost = true, badge = "released" },
+]
+
+# ---------------------------------------------------------------- L4.2
+[[lessons]]
+id = "L4.2"
+read_more = ["ch04-01-what-is-ownership.md"]
+
+# Screen 1 · Follow the ownership arrow
+# Two bindings, one heap buffer; the owner arrow moves from s1 to s2.
+# Row edges only join neighbours, so `s2_wait` is the unbound s2 placeholder shown
+# before s1; on the move it is swapped for `s2`, which sits between s1 and the buffer.
+[[lessons.screens]]
+key = "s1"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "own"
+layout = "row"
+nodes = [
+  { id = "s2_wait", label = "s2", state = { ghost = true, value = "unbound" } },
+  { id = "s1", label = "s1", sub = "String", state = { ghost = true } },
+  { id = "s2", label = "s2", sub = "String", state = { hidden = true } },
+  { id = "buf", label = "heap buffer", state = { value = "h e l l o" } },
+]
+edges = [
+  { id = "s1_buf", from = "s1", to = "buf", label = "owns", hidden = true },
+  { id = "move", from = "s1", to = "s2", label = "move", hidden = true },
+  { id = "s2_buf", from = "s2", to = "buf", label = "owns", hidden = true },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "own", op = "node", id = "s1", ghost = false, lit = true, value = "ptr ●\nlen 5\ncap ≥ 5" },
+  { panel = "own", op = "edge", id = "s1_buf", hidden = false },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "own", op = "node", id = "s2_wait", hidden = true },
+  { panel = "own", op = "edge", id = "s1_buf", hidden = true },
+  { panel = "own", op = "node", id = "s1", lit = false, ghost = true, value = "", badge = "moved" },
+  { panel = "own", op = "edge", id = "move", hidden = false },
+  { panel = "own", op = "node", id = "s2", hidden = false, lit = true, value = "ptr ●\nlen 5\ncap ≥ 5" },
+  { panel = "own", op = "edge", id = "s2_buf", hidden = false },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "own", op = "node", id = "s2", badge = "only owner" },
+  { panel = "out", op = "print", text = "hello\n" },
+]
+
+# Screen 5 · Replacement drops the old destination
+[[lessons.screens]]
+key = "s5"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "owners"
+layout = "grid"
+nodes = [
+  { id = "s1", label = "s1", state = { value = "String", badge = "mut", note = "owns → A" } },
+  { id = "s2", label = "s2", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "heap"
+layout = "grid"
+nodes = [
+  { id = "a", label = "A", state = { value = "old" } },
+  { id = "b", label = "B", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "owners", op = "node", id = "s2", ghost = false, lit = true, value = "String", note = "owns → B" },
+  { panel = "heap", op = "node", id = "b", ghost = false, lit = true, value = "new" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "owners", op = "node", id = "s2", ghost = true, lit = false, badge = "moved", note = "unusable" },
+  { panel = "heap", op = "node", id = "b", lit = false },
+  { panel = "owners", op = "node", id = "s1", lit = true, badge = "", note = "owns → B" },
+  { panel = "heap", op = "node", id = "a", ghost = true, badge = "dropped" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "owners", op = "node", id = "s1", lit = false },
+  { panel = "heap", op = "node", id = "a", hidden = true, badge = "" },
+  { panel = "out", op = "print", text = "new\n" },
+]
+
+# ---------------------------------------------------------------- L4.3
+[[lessons]]
+id = "L4.3"
+read_more = ["ch04-01-what-is-ownership.md"]
+
+# Screen 1 · Clone creates independent text
+[[lessons.screens]]
+key = "s1"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "owners"
+layout = "grid"
+nodes = [
+  { id = "a", label = "a", state = { ghost = true } },
+  { id = "b", label = "b", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "heap"
+layout = "grid"
+nodes = [
+  { id = "ba", label = "A", state = { ghost = true } },
+  { id = "bb", label = "B", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "owners", op = "node", id = "a", ghost = false, lit = true, value = "String", note = "owns → A" },
+  { panel = "heap", op = "node", id = "ba", ghost = false, value = "cat" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "owners", op = "node", id = "a", lit = false },
+  { panel = "owners", op = "node", id = "b", ghost = false, lit = true, value = "String", badge = "clone", note = "owns → B" },
+  { panel = "heap", op = "node", id = "bb", ghost = false, lit = true, value = "cat", note = "separate copy" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "owners", op = "node", id = "b", lit = false, badge = "mut" },
+  { panel = "heap", op = "node", id = "bb", value = "cat!", note = "changed" },
+  { panel = "heap", op = "node", id = "ba", note = "unchanged" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "heap", op = "node", id = "bb", lit = false, note = "" },
+  { panel = "heap", op = "node", id = "ba", note = "" },
+  { panel = "out", op = "print", text = "cat cat!\n" },
+]
+
+# Screen 2 · Integer assignment copies the value
+# Line 3 prints before the first step (on line 4), so step 1 shows that output.
+[[lessons.screens]]
+key = "s2"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "stack"
+layout = "grid"
+nodes = [
+  { id = "s1", label = "s1: i32", state = { value = "1", badge = "mut" } },
+  { id = "s2", label = "s2: i32", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "heap"
+layout = "grid"
+nodes = [{ id = "none", label = "heap", state = { value = "—", note = "no owned heap buffer" } }]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "stack", op = "node", id = "s2", ghost = false, lit = true, value = "7" },
+  { panel = "out", op = "print", text = "1\n" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "stack", op = "node", id = "s2", lit = false, note = "still usable" },
+  { panel = "stack", op = "node", id = "s1", lit = true, value = "7", note = "copied from s2" },
+  { panel = "heap", op = "node", id = "none", note = "no shared mutable storage" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "stack", op = "node", id = "s1", value = "8", note = "s2 unchanged" },
+  { panel = "stack", op = "node", id = "s2", note = "" },
+  { panel = "heap", op = "node", id = "none", note = "no owned heap buffer" },
+  { panel = "out", op = "print", text = "8 7\n" },
+]
+
+# Screen 3 · Floats copy too
+# The println! on line 5 runs after the last step, so there is no output panel.
+[[lessons.screens]]
+key = "s3"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "stack"
+layout = "grid"
+nodes = [
+  { id = "s1", label = "s1: f64", state = { ghost = true } },
+  { id = "s2", label = "s2: f64", state = { value = "2.5" } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "data"
+layout = "grid"
+nodes = [{ id = "indep", label = "data", state = { value = "—", note = "independent float values; nothing shared" } }]
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "stack", op = "node", id = "s1", ghost = false, lit = true, value = "2.5", badge = "mut", note = "copied from s2" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "stack", op = "node", id = "s1", value = "3.5", note = "s2 unchanged" },
+]
+
+# Screen 7 · A copied string reference shares text
+[[lessons.screens]]
+key = "s7"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "refs"
+layout = "grid"
+nodes = [
+  { id = "s1", label = "s1: &str", state = { ghost = true } },
+  { id = "s2", label = "s2: &str", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "data"
+layout = "grid"
+nodes = [{ id = "lit", label = "static literal", state = { value = "hello", note = "no owned String buffer" } }]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "refs", op = "node", id = "s2", ghost = false, lit = true, value = "len 5", badge = "&", note = "→ static text" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "refs", op = "node", id = "s2", lit = false, note = "→ same static text" },
+  { panel = "refs", op = "node", id = "s1", ghost = false, lit = true, value = "len 5", badge = "&", note = "→ static text (copied reference)" },
+  { panel = "data", op = "node", id = "lit", note = "one static hello, two shared references" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "refs", op = "node", id = "s1", lit = false, note = "usable" },
+  { panel = "refs", op = "node", id = "s2", note = "usable" },
+  { panel = "data", op = "node", id = "lit", note = "one static hello" },
+  { panel = "out", op = "print", text = "hello hello\n" },
+]
+
+# Screen 8 · String moves; Copy is not about allocation
+# Same arrow-moving row as L4.2 s1, with the roles swapped: s2 owns first, then s1.
+[[lessons.screens]]
+key = "s8"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "own"
+layout = "row"
+nodes = [
+  { id = "s1_wait", label = "s1", state = { ghost = true, value = "not initialized" } },
+  { id = "s2", label = "s2", sub = "String", state = { ghost = true } },
+  { id = "s1", label = "s1", sub = "String", state = { hidden = true } },
+  { id = "buf", label = "A", sub = "one owned buffer", state = { value = "hello" } },
+]
+edges = [
+  { id = "s2_buf", from = "s2", to = "buf", label = "owns", hidden = true },
+  { id = "move", from = "s2", to = "s1", label = "move", hidden = true },
+  { id = "s1_buf", from = "s1", to = "buf", label = "owns", hidden = true },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "own", op = "node", id = "s2", ghost = false, lit = true, value = "ptr ●\nlen 5\ncap ≥ 5" },
+  { panel = "own", op = "edge", id = "s2_buf", hidden = false },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "own", op = "node", id = "s1_wait", hidden = true },
+  { panel = "own", op = "edge", id = "s2_buf", hidden = true },
+  { panel = "own", op = "node", id = "s2", lit = false, ghost = true, value = "", badge = "moved" },
+  { panel = "own", op = "edge", id = "move", hidden = false },
+  { panel = "own", op = "node", id = "s1", hidden = false, lit = true, value = "ptr ●\nlen 5\ncap ≥ 5" },
+  { panel = "own", op = "edge", id = "s1_buf", hidden = false },
+  { panel = "own", op = "node", id = "buf", badge = "same buffer" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "own", op = "node", id = "s2", badge = "unusable" },
+  { panel = "own", op = "node", id = "s1", badge = "valid" },
+  { panel = "own", op = "node", id = "buf", badge = "" },
+  { panel = "out", op = "print", text = "hello\n" },
+]
+
+# ---------------------------------------------------------------- L4.4
+[[lessons]]
+id = "L4.4"
+read_more = ["ch04-01-what-is-ownership.md"]
+
+# Screen 1 · An owned argument moves into the call
+# Call stack: frames listed newest first, so `consume` sits on top of `main`.
+[[lessons.screens]]
+key = "s1"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "stack"
+layout = "tree"
+nodes = [
+  { id = "consume", label = "consume", state = { hidden = true } },
+  { id = "text", label = "text", parent = "consume", state = { hidden = true } },
+  { id = "main", label = "main" },
+  { id = "title", label = "title", parent = "main", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "heap"
+layout = "grid"
+nodes = [{ id = "a", label = "A", state = { ghost = true } }]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "stack", op = "node", id = "title", ghost = false, lit = true, value = "String", note = "owns → A" },
+  { panel = "heap", op = "node", id = "a", ghost = false, value = "Rust" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "stack", op = "node", id = "title", lit = false, ghost = true, badge = "moved", note = "" },
+  { panel = "stack", op = "node", id = "main", note = "waiting" },
+  { panel = "stack", op = "node", id = "consume", hidden = false, badge = "new frame" },
+  { panel = "stack", op = "node", id = "text", hidden = false, lit = true, value = "String", note = "owns → A" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "stack", op = "node", id = "consume", ghost = true, badge = "ends" },
+  { panel = "stack", op = "node", id = "text", lit = false, ghost = true, badge = "dropped", note = "no owner" },
+  { panel = "heap", op = "node", id = "a", ghost = true, badge = "dropped" },
+  { panel = "out", op = "print", text = "Rust\n" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "stack", op = "node", id = "consume", hidden = true, badge = "" },
+  { panel = "stack", op = "node", id = "text", hidden = true, badge = "" },
+  { panel = "stack", op = "node", id = "main", lit = true, note = "resumed" },
+  { panel = "heap", op = "node", id = "a", badge = "released" },
+]
+
+# Screen 3 · Return ownership to the caller
+# `ret` is the shadowing `text` that receives the returned String.
+# The buffer is labelled "buffer", not A: growth inside add_mark may relocate it.
+[[lessons.screens]]
+key = "s3"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "stack"
+layout = "tree"
+nodes = [
+  { id = "add_mark", label = "add_mark", state = { hidden = true } },
+  { id = "param", label = "text", parent = "add_mark", state = { hidden = true } },
+  { id = "main", label = "main" },
+  { id = "text", label = "text", parent = "main", state = { ghost = true } },
+  { id = "ret", label = "text", parent = "main", state = { hidden = true } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "heap"
+layout = "grid"
+nodes = [{ id = "buf", label = "buffer", state = { ghost = true } }]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "stack", op = "node", id = "text", ghost = false, lit = true, value = "String", note = "owns → buffer" },
+  { panel = "heap", op = "node", id = "buf", ghost = false, value = "hi" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "stack", op = "node", id = "text", lit = false, ghost = true, badge = "moved", note = "" },
+  { panel = "stack", op = "node", id = "main", note = "waiting" },
+  { panel = "stack", op = "node", id = "add_mark", hidden = false, badge = "new frame" },
+  { panel = "stack", op = "node", id = "param", hidden = false, lit = true, value = "String", badge = "mut", note = "owns current buffer" },
+  { panel = "heap", op = "node", id = "buf", lit = true, value = "hi!", note = "current buffer (may have moved)" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "stack", op = "node", id = "param", lit = false },
+  { panel = "stack", op = "node", id = "add_mark", lit = true, badge = "returns String", note = "ownership goes to the caller" },
+  { panel = "heap", op = "node", id = "buf", lit = false, note = "still live" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "stack", op = "node", id = "add_mark", hidden = true, lit = false, badge = "", note = "" },
+  { panel = "stack", op = "node", id = "param", hidden = true, badge = "" },
+  { panel = "stack", op = "node", id = "text", hidden = true, badge = "" },
+  { panel = "stack", op = "node", id = "main", note = "resumed" },
+  { panel = "stack", op = "node", id = "ret", hidden = false, lit = true, value = "String", note = "owns current buffer" },
+  { panel = "heap", op = "node", id = "buf", note = "live" },
+  { panel = "out", op = "print", text = "hi!\n" },
+]
+
+# ---------------------------------------------------------------- L4.5
+[[lessons]]
+id = "L4.5"
+read_more = ["ch04-02-references-and-borrowing.md"]
+
+# Screen 1 · Borrow instead of taking ownership
+[[lessons.screens]]
+key = "s1"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "stack"
+layout = "tree"
+nodes = [
+  { id = "bytes", label = "bytes", state = { hidden = true } },
+  { id = "text", label = "text", parent = "bytes", state = { hidden = true } },
+  { id = "main", label = "main" },
+  { id = "title", label = "title", parent = "main", state = { ghost = true } },
+  { id = "n", label = "n", parent = "main", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "heap"
+layout = "grid"
+nodes = [{ id = "a", label = "A", state = { ghost = true } }]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "stack", op = "node", id = "title", ghost = false, lit = true, value = "String", note = "owns → A" },
+  { panel = "heap", op = "node", id = "a", ghost = false, value = "Rust" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "stack", op = "node", id = "title", lit = false, note = "owns → A (still responsible for cleanup)" },
+  { panel = "stack", op = "node", id = "bytes", hidden = false, badge = "new frame" },
+  { panel = "stack", op = "node", id = "text", hidden = false, lit = true, value = "&String", badge = "&", note = "⇢ title (shared)" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "stack", op = "node", id = "bytes", hidden = true, badge = "" },
+  { panel = "stack", op = "node", id = "text", hidden = true, lit = false, badge = "" },
+  { panel = "stack", op = "node", id = "title", lit = true, note = "owns → A · call borrow finished" },
+  { panel = "stack", op = "node", id = "n", ghost = false, value = "4" },
+  { panel = "out", op = "print", text = "Rust 4\n" },
+]
+
+# ---------------------------------------------------------------- L4.6
+[[lessons]]
+id = "L4.6"
+read_more = ["ch04-02-references-and-borrowing.md"]
+
+# Screen 1 · Grant mutable access explicitly
+[[lessons.screens]]
+key = "s1"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "stack"
+layout = "tree"
+nodes = [
+  { id = "mark", label = "mark", state = { hidden = true } },
+  { id = "text", label = "text", parent = "mark", state = { hidden = true } },
+  { id = "main", label = "main" },
+  { id = "title", label = "title", parent = "main", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "heap"
+layout = "grid"
+nodes = [{ id = "a", label = "A", state = { ghost = true } }]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "stack", op = "node", id = "title", ghost = false, lit = true, value = "String", badge = "mut", note = "owns → A" },
+  { panel = "heap", op = "node", id = "a", ghost = false, value = "Rust" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "stack", op = "node", id = "title", lit = false },
+  { panel = "stack", op = "node", id = "mark", hidden = false, badge = "new frame" },
+  { panel = "stack", op = "node", id = "text", hidden = false, lit = true, value = "&mut String", badge = "&mut", note = "⇒ title (exclusive)" },
+  { panel = "heap", op = "node", id = "a", lit = true, value = "Rust!" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "stack", op = "node", id = "mark", hidden = true, badge = "" },
+  { panel = "stack", op = "node", id = "text", hidden = true, lit = false, badge = "" },
+  { panel = "stack", op = "node", id = "title", lit = true, note = "owns → A · call borrow finished" },
+  { panel = "heap", op = "node", id = "a", lit = false },
+  { panel = "out", op = "print", text = "Rust!\n" },
+]
+
+# Screen 5 · Last use can end a borrow before the brace
+[[lessons.screens]]
+key = "s5"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "owners"
+layout = "grid"
+nodes = [
+  { id = "text", label = "text", state = { value = "String", badge = "mut", note = "owner" } },
+  { id = "read", label = "read", state = { ghost = true } },
+  { id = "write", label = "write", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "heap"
+layout = "grid"
+nodes = [{ id = "buf", label = "buffer", state = { value = "hi" } }]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "owners", op = "node", id = "read", ghost = false, lit = true, value = "&String", badge = "&", note = "⇢ text" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "owners", op = "node", id = "read", note = "last used" },
+  { panel = "out", op = "print", text = "hi\n" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "owners", op = "node", id = "read", lit = false, ghost = true, note = "borrow ended" },
+  { panel = "owners", op = "node", id = "write", ghost = false, lit = true, value = "&mut String", badge = "&mut", note = "⇒ text" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "owners", op = "node", id = "read", hidden = true },
+  { panel = "owners", op = "node", id = "write", lit = false, ghost = true, note = "last used" },
+  { panel = "owners", op = "node", id = "text", lit = true, note = "owner reads" },
+  { panel = "heap", op = "node", id = "buf", value = "hi!" },
+  { panel = "out", op = "print", text = "hi!\n" },
+]
+
+# ---------------------------------------------------------------- L4.7
+[[lessons]]
+id = "L4.7"
+read_more = ["ch04-03-slices.md"]
+
+# Screen 1 · A slice borrows a window
+# `bytes`: one cell per byte of the buffer `text` owns, labelled by index (␣ is the space).
+[[lessons.screens]]
+key = "s1"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "owners"
+layout = "grid"
+nodes = [
+  { id = "text", label = "text", state = { ghost = true } },
+  { id = "word", label = "word", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "bytes"
+layout = "grid"
+nodes = [
+  { id = "b0", label = "0", state = { value = "h" } },
+  { id = "b1", label = "1", state = { value = "e" } },
+  { id = "b2", label = "2", state = { value = "l" } },
+  { id = "b3", label = "3", state = { value = "l" } },
+  { id = "b4", label = "4", state = { value = "o" } },
+  { id = "b5", label = "5", state = { value = "␣" } },
+  { id = "b6", label = "6", state = { value = "w" } },
+  { id = "b7", label = "7", state = { value = "o" } },
+  { id = "b8", label = "8", state = { value = "r" } },
+  { id = "b9", label = "9", state = { value = "l" } },
+  { id = "b10", label = "10", state = { value = "d" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "owners", op = "node", id = "text", ghost = false, lit = true, value = "String", note = "owns → buffer (11 bytes)" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "owners", op = "node", id = "text", lit = false },
+  { panel = "owners", op = "node", id = "word", ghost = false, lit = true, value = "&str", badge = "&", note = "⇢ buffer + 6 · len 5" },
+  { panel = "bytes", op = "node", id = "b6", lit = true, style = "rust" },
+  { panel = "bytes", op = "node", id = "b7", lit = true, style = "rust" },
+  { panel = "bytes", op = "node", id = "b8", lit = true, style = "rust" },
+  { panel = "bytes", op = "node", id = "b9", lit = true, style = "rust" },
+  { panel = "bytes", op = "node", id = "b10", lit = true, style = "rust", note = "11 − 6 = 5 bytes" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "owners", op = "node", id = "text", note = "owns" },
+  { panel = "owners", op = "node", id = "word", lit = false, note = "borrows bytes 6..11" },
+  { panel = "bytes", op = "node", id = "b6", lit = false },
+  { panel = "bytes", op = "node", id = "b7", lit = false },
+  { panel = "bytes", op = "node", id = "b8", lit = false },
+  { panel = "bytes", op = "node", id = "b9", lit = false },
+  { panel = "bytes", op = "node", id = "b10", lit = false, note = "" },
+  { panel = "out", op = "print", text = "hello world hello world\n" },
+]

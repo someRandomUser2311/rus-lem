@@ -1,0 +1,28 @@
+[[tests]]
+key = "t08"
+run = { kind = "process", stdin = "", stdin_pieces = [{ text = " " }, { text = "x", times = 991 }, { text = " \nBo\nCy\n" }] }
+asserts = [
+  { check = "stdout_pieces", pieces = [{ text = "Type three guest names, one per line:\nGuest list:\n " }, { text = "x", times = 991 }, { text = " \nBo\nCy\n" }] },
+]
+
+[[tests]]
+key = "t10"
+run = { kind = "source" }
+asserts = [
+  { check = "call_count", name = "String::new", eq = 1 },
+]
+
+[[tests]]
+key = "t11"
+run = { kind = "source" }
+asserts = [
+  { check = "call_count", name = "read_line", eq = 3 },
+]
+
+[[wrong]]
+name = "three-strings"
+fails = ["t10"]
+
+[[wrong]]
+name = "two-reads"
+fails = ["t01", "t03", "t05", "t06", "t07", "t08", "t09", "t11"]

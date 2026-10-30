@@ -1,0 +1,24 @@
+[[tests]]
+key = "t14"
+run = { kind = "suite", script = "t14" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t15"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["derive:Debug"], inside = "struct:Rect", message = "Add `Debug` to `Rect`'s derives: `#[derive(Debug, Clone, Copy, PartialEq)]`." },
+]
+
+[[wrong]]
+name = "last-maximum"
+fails = ["t06", "t07"]
+
+[[wrong]]
+name = "no-rotation"
+fails = ["t11", "t14"]
+
+[[wrong]]
+name = "u32-area"
+fails = ["t03"]
+

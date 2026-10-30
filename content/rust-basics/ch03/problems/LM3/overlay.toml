@@ -1,0 +1,113 @@
+checkpoints = true
+
+[[tests]]
+key = "t35"
+part = 1
+run = { kind = "suite", script = "t35" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t36"
+part = 2
+run = { kind = "suite", script = "t36" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t37"
+part = 3
+run = { kind = "suite", script = "t37" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t38"
+part = 4
+run = { kind = "suite", script = "t38" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t28"
+part = 4
+
+[[tests]]
+key = "t29"
+part = 4
+
+[[tests]]
+key = "t30"
+part = 4
+
+[[tests]]
+key = "t31"
+part = 4
+
+[[tests]]
+key = "t32"
+part = 4
+
+[[tests]]
+key = "t33"
+part = 4
+
+[[tests]]
+key = "t34"
+part = 4
+
+[[tests]]
+key = "t39"
+part = 4
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["ident:LOAN_DAYS", "ident:PREMIUM_LOAN_DAYS"], within = "due_day", message = "Choose the loan duration in `due_day` from the constants `LOAN_DAYS` and `PREMIUM_LOAN_DAYS`." },
+  { check = "uses", what = ["ident:FEE_CAP_CENTS"], within = "late_fee_cents", message = "Cap the fee in `late_fee_cents` with the constant `FEE_CAP_CENTS`." },
+  { check = "forbids", what = ["float"], message = "Keep money in whole cents with integer arithmetic; don't use `f64` or decimal literals." },
+]
+
+[[tests]]
+key = "t40"
+part = 4
+run = { kind = "suite", script = "t40" }
+asserts = [{ check = "same_as_reference" }]
+
+[[tests]]
+key = "t41"
+part = 1
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["if_expr"], within = "due_day", message = "Choose the duration in `due_day` with an `if … else` expression that produces it, such as `let duration = if premium { … } else { … };`." },
+]
+
+[[wrong]]
+name = "statement-if"
+part = 1
+fails = ["t41"]
+
+[[wrong]]
+name = "swapped-durations"
+part = 1
+fails = ["t01", "t02", "t03", "t04", "t05", "t06", "t35"]
+
+[[wrong]]
+name = "subtract-first"
+part = 2
+fails = ["t11", "t12", "t36"]
+
+[[wrong]]
+name = "cap-after-multiply"
+part = 3
+fails = ["t20", "t37"]
+
+[[wrong]]
+name = "literal-cap"
+part = 4
+fails = ["t39"]
+
+[[wrong]]
+name = "float-money"
+part = 4
+fails = ["t39"]
+
+[[wrong]]
+name = "unpadded-cents"
+part = 4
+fails = ["t22", "t23", "t25", "t26", "t38"]
+

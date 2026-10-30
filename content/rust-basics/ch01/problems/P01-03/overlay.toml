@@ -1,0 +1,49 @@
+
+[[tests]]
+key = "t03"
+asserts = [
+  { check = "line_eq", line = 1, text = "*******************" },
+]
+
+[[tests]]
+key = "t07"
+asserts = [
+  { check = "line_eq", line = 6, text = "*******************" },
+  { check = "line_count", count = 6 },
+]
+
+[[tests]]
+key = "t08"
+asserts = [
+  { check = "no_trailing_whitespace" },
+]
+
+[[tests]]
+key = "t09"
+asserts = [
+  { check = "fmt_literal_forbid", macros = ["print", "println"], substrings = ["Ferris", "crab", "10"] },
+]
+
+[[tests]]
+key = "t10"
+asserts = [
+  { check = "fmt_inline_placeholders", macros = ["print", "println"], names = ["name", "species", "legs"] },
+]
+
+[[tests]]
+key = "t11"
+asserts = [
+  { check = "lets_unchanged", lets = ["let name = \"Ferris\";", "let species = \"crab\";", "let legs = 10;"] },
+]
+
+[[wrong]]
+name = "typed-values"
+fails = ["t09"]
+
+[[wrong]]
+name = "positional"
+fails = ["t10"]
+
+[[wrong]]
+name = "short-border"
+fails = ["t01", "t03", "t07"]

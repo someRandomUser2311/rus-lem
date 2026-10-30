@@ -1,0 +1,12 @@
+[[wrong]]
+name = "no-padding"
+fails = ["t01", "t02", "t03", "t04"]
+
+[[wrong]]
+name = "total-minutes"
+fails = ["t03", "t04", "t05"]
+
+[[wrong]]
+name = "tick-overflows"
+fails = ["t07", "t08", "t11"]
+

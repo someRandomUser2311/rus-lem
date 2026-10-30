@@ -1,0 +1,54 @@
+
+[[tests]]
+key = "t04"
+asserts = [
+  { check = "line_chars", line = 1, len = 30, all = "=" },
+]
+
+[[tests]]
+key = "t05"
+asserts = [
+  { check = "line_eq", line = 3, text = "==============================" },
+]
+
+[[tests]]
+key = "t07"
+asserts = [
+  { check = "line_count", count = 4 },
+]
+
+[[tests]]
+key = "t08"
+asserts = [
+  { check = "ends_with", text = "17:00\n" },
+]
+
+[[tests]]
+key = "t09"
+asserts = [
+  { check = "no_trailing_whitespace" },
+]
+
+[[tests]]
+key = "t10"
+asserts = [
+  { check = "not_starts_with", line = 2, any = ["   ", "\t"] },
+]
+
+[[tests]]
+key = "t13"
+asserts = [
+  { check = "macro_count", name = "println", ge = 1 },
+]
+
+[[wrong]]
+name = "short-border"
+fails = ["t01", "t03", "t04", "t12"]
+
+[[wrong]]
+name = "tab-indent"
+fails = ["t01", "t02", "t10", "t12"]
+
+[[wrong]]
+name = "trailing-space"
+fails = ["t01", "t06", "t08", "t09", "t12"]

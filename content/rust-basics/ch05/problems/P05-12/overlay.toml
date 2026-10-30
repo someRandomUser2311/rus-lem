@@ -1,0 +1,8 @@
+[[wrong]]
+name = "ignores-count"
+fails = ["t01"]
+
+[[wrong]]
+name = "case-sensitive"
+fails = ["t06"]
+

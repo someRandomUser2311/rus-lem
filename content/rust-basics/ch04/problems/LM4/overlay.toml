@@ -1,0 +1,276 @@
+checkpoints = true
+
+[[tests]]
+key = "t01"
+part = 1
+
+[[tests]]
+key = "t02"
+part = 1
+
+[[tests]]
+key = "t03"
+part = 1
+
+[[tests]]
+key = "t04"
+part = 1
+
+[[tests]]
+key = "t05"
+part = 1
+
+[[tests]]
+key = "t06"
+part = 1
+
+[[tests]]
+key = "t07"
+part = 1
+
+[[tests]]
+key = "t58"
+part = 1
+
+[[tests]]
+key = "t08"
+part = 2
+
+[[tests]]
+key = "t09"
+part = 2
+
+[[tests]]
+key = "t10"
+part = 2
+
+[[tests]]
+key = "t11"
+part = 2
+
+[[tests]]
+key = "t12"
+part = 2
+
+[[tests]]
+key = "t13"
+part = 2
+
+[[tests]]
+key = "t14"
+part = 2
+
+[[tests]]
+key = "t15"
+part = 2
+
+[[tests]]
+key = "t16"
+part = 2
+
+[[tests]]
+key = "t17"
+part = 2
+
+[[tests]]
+key = "t18"
+part = 2
+
+[[tests]]
+key = "t19"
+part = 2
+
+[[tests]]
+key = "t20"
+part = 3
+
+[[tests]]
+key = "t21"
+part = 3
+
+[[tests]]
+key = "t22"
+part = 3
+
+[[tests]]
+key = "t23"
+part = 3
+
+[[tests]]
+key = "t24"
+part = 3
+
+[[tests]]
+key = "t25"
+part = 3
+
+[[tests]]
+key = "t26"
+part = 3
+
+[[tests]]
+key = "t27"
+part = 3
+
+[[tests]]
+key = "t28"
+part = 3
+
+[[tests]]
+key = "t29"
+part = 3
+
+[[tests]]
+key = "t30"
+part = 3
+
+[[tests]]
+key = "t34"
+part = 4
+
+[[tests]]
+key = "t35"
+part = 4
+
+[[tests]]
+key = "t36"
+part = 4
+
+[[tests]]
+key = "t37"
+part = 4
+
+[[tests]]
+key = "t38"
+part = 4
+
+[[tests]]
+key = "t39"
+part = 4
+
+[[tests]]
+key = "t40"
+part = 4
+
+[[tests]]
+key = "t41"
+part = 4
+
+[[tests]]
+key = "t42"
+part = 4
+
+[[tests]]
+key = "t43"
+part = 4
+
+[[tests]]
+key = "t44"
+part = 4
+
+[[tests]]
+key = "t45"
+part = 4
+
+[[tests]]
+key = "t46"
+part = 4
+
+[[tests]]
+key = "t47"
+part = 4
+
+[[tests]]
+key = "t48"
+part = 4
+
+[[tests]]
+key = "t49"
+part = 4
+
+[[tests]]
+key = "t50"
+part = 4
+
+[[tests]]
+key = "t51"
+part = 4
+
+[[tests]]
+key = "t52"
+part = 4
+
+[[tests]]
+key = "t53"
+part = 4
+
+[[tests]]
+key = "t54"
+part = 4
+
+[[tests]]
+key = "t31"
+part = 1
+run = { kind = "suite", script = "t31" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t32"
+part = 2
+run = { kind = "suite", script = "t32" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t33"
+part = 3
+run = { kind = "suite", script = "t33" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t55"
+part = 4
+run = { kind = "fixture", main = "fn reference_sort_key(title: &str) -> &str {\n    if title.starts_with(\"The \") {\n        &title[4..]\n    } else if title.starts_with(\"A \") {\n        &title[2..]\n    } else if title.starts_with(\"An \") {\n        &title[3..]\n    } else {\n        title\n    }\n}\nfn main() {\n    let inputs = [\n        String::from(\"The Hobbit\"),\n        String::from(\"A Tale\"),\n        String::from(\"An Essay\"),\n        String::from(\"\"),\n        String::from(\"The \"),\n        String::from(\" The Hobbit\"),\n        String::from(\"the Hobbit\"),\n        String::from(\"The The Book\"),\n        String::from(\"The\\tBook\"),\n        String::from(\"The 東京\"),\n        String::from(\"A 😀\"),\n        String::from(\"An é\"),\n    ];\n    for owned in inputs {\n        let got = sort_key(&owned);\n        let want = reference_sort_key(&owned);\n        let base = owned.as_ptr() as usize;\n        let at = got.as_ptr() as usize;\n        assert!(at >= base && at + got.len() <= base + owned.len(), \"sort_key: the returned slice isn't inside the input {owned:?}\");\n        assert_eq!((at - base, got.len()), (want.as_ptr() as usize - base, want.len()), \"sort_key: wrong part of {owned:?}\");\n    }\n}" }
+asserts = [{ check = "stdout_eq", text = "" }]
+
+[[tests]]
+key = "t56"
+part = 4
+run = { kind = "source" }
+asserts = [
+{ check = "forbids", what = ["type:Vec", "type:VecDeque", "type:HashMap", "type:HashSet", "type:BTreeMap", "type:BTreeSet", "macro:vec", "type:Option", "call:Some", "ident:None", "item:struct", "item:enum", "item:trait", "item:impl", "item:type", "item:static", "lifetime", "unsafe", "call:leak", "call:forget", "call:map", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:zip", "call:skip", "call:take", "call:sum", "call:product", "call:any", "call:all", "call:position", "call:windows", "call:chunks"], message = "Use only what Chapters 1–4 teach: no Vec or other collections, no Option, no struct/enum/trait/impl definitions, no explicit lifetimes, no unsafe code, and no iterator adapters such as map, filter or collect. Plain for loops over chars, bytes, char_indices or split_whitespace, and standard String methods, are fine." },
+  { check = "forbids", what = ["recursion"], message = "Process the words with loops; functions here must not call themselves." },
+]
+
+[[tests]]
+key = "t57"
+part = 4
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["const:LOAN_DAYS", "const:PREMIUM_LOAN_DAYS", "const:FEE_CAP_CENTS", "fn:due_day", "fn:days_late", "fn:late_fee_cents", "fn:format_cents", "fn:main"], message = "Keep everything from LM3: its three public constants, `due_day`, `days_late`, `late_fee_cents`, `format_cents` and the menu in `main`." },
+]
+
+[[wrong]]
+name = "ascii-split"
+part = 1
+fails = ["t04", "t05", "t06", "t31"]
+
+[[wrong]]
+name = "any-case-article"
+part = 2
+fails = ["t14", "t32"]
+
+[[wrong]]
+name = "query-not-lowered"
+part = 3
+fails = ["t20", "t33"]
+
+[[wrong]]
+name = "menu-changed"
+part = 4
+fails = ["t48", "t49", "t50", "t51", "t52", "t53", "t54"]
+
+[[wrong]]
+name = "constant-dropped"
+part = 4
+fails = ["t57"]
+

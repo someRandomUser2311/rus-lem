@@ -1,0 +1,334 @@
+checkpoints = true
+
+[[tests]]
+key = "t01"
+part = 1
+
+[[tests]]
+key = "t02"
+part = 1
+
+[[tests]]
+key = "t03"
+part = 1
+
+[[tests]]
+key = "t04"
+part = 1
+
+[[tests]]
+key = "t05"
+part = 1
+
+[[tests]]
+key = "t06"
+part = 1
+
+[[tests]]
+key = "t07"
+part = 1
+
+[[tests]]
+key = "t27"
+part = 1
+
+[[tests]]
+key = "t28"
+part = 1
+
+[[tests]]
+key = "t29"
+part = 1
+
+[[tests]]
+key = "t30"
+part = 1
+
+[[tests]]
+key = "t31"
+part = 1
+
+[[tests]]
+key = "t32"
+part = 1
+
+[[tests]]
+key = "t08"
+part = 2
+
+[[tests]]
+key = "t09"
+part = 2
+
+[[tests]]
+key = "t10"
+part = 2
+
+[[tests]]
+key = "t11"
+part = 2
+
+[[tests]]
+key = "t12"
+part = 2
+
+[[tests]]
+key = "t13"
+part = 2
+
+[[tests]]
+key = "t14"
+part = 2
+
+[[tests]]
+key = "t15"
+part = 2
+
+[[tests]]
+key = "t16"
+part = 2
+
+[[tests]]
+key = "t17"
+part = 2
+
+[[tests]]
+key = "t18"
+part = 2
+
+[[tests]]
+key = "t19"
+part = 2
+
+[[tests]]
+key = "t20"
+part = 2
+
+[[tests]]
+key = "t21"
+part = 2
+
+[[tests]]
+key = "t22"
+part = 3
+
+[[tests]]
+key = "t23"
+part = 3
+
+[[tests]]
+key = "t24"
+part = 3
+
+[[tests]]
+key = "t25"
+part = 3
+
+[[tests]]
+key = "t26"
+part = 3
+
+[[tests]]
+key = "t33"
+part = 4
+
+[[tests]]
+key = "t34"
+part = 4
+
+[[tests]]
+key = "t01"
+visible = true
+
+[[tests]]
+key = "t02"
+visible = false
+
+[[tests]]
+key = "t03"
+visible = false
+
+[[tests]]
+key = "t04"
+visible = false
+
+[[tests]]
+key = "t05"
+visible = false
+
+[[tests]]
+key = "t06"
+visible = false
+
+[[tests]]
+key = "t07"
+visible = false
+
+[[tests]]
+key = "t08"
+visible = true
+
+[[tests]]
+key = "t09"
+visible = false
+
+[[tests]]
+key = "t10"
+visible = false
+
+[[tests]]
+key = "t11"
+visible = true
+
+[[tests]]
+key = "t12"
+visible = false
+
+[[tests]]
+key = "t13"
+visible = false
+
+[[tests]]
+key = "t14"
+visible = false
+
+[[tests]]
+key = "t15"
+visible = false
+
+[[tests]]
+key = "t16"
+visible = false
+
+[[tests]]
+key = "t17"
+visible = false
+
+[[tests]]
+key = "t18"
+visible = false
+
+[[tests]]
+key = "t19"
+visible = false
+
+[[tests]]
+key = "t20"
+visible = false
+
+[[tests]]
+key = "t21"
+visible = false
+
+[[tests]]
+key = "t22"
+visible = true
+
+[[tests]]
+key = "t23"
+visible = false
+
+[[tests]]
+key = "t24"
+visible = false
+
+[[tests]]
+key = "t25"
+visible = false
+
+[[tests]]
+key = "t26"
+visible = false
+
+[[tests]]
+key = "t27"
+visible = true
+
+[[tests]]
+key = "t28"
+visible = false
+
+[[tests]]
+key = "t29"
+visible = false
+
+[[tests]]
+key = "t30"
+visible = false
+
+[[tests]]
+key = "t31"
+visible = false
+
+[[tests]]
+key = "t32"
+visible = false
+
+[[tests]]
+key = "t33"
+visible = true
+
+[[tests]]
+key = "t34"
+visible = false
+
+[[tests]]
+key = "t35"
+visible = false
+
+[[tests]]
+key = "t36"
+visible = false
+
+[[tests]]
+key = "t35"
+part = 4
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["field:owner:String", "field:balance_cents:u64"], inside = "struct:BankAccount", message = "Keep `BankAccount`'s fields exactly: `pub owner: String` and `pub balance_cents: u64`." },
+  { check = "uses", what = ["recv:none"], within = "new", message = "`new` is an associated function: no `self` parameter." },
+  { check = "uses", what = ["recv:mut"], within = "deposit", message = "`deposit` must take `&mut self`." },
+  { check = "uses", what = ["recv:mut"], within = "withdraw", message = "`withdraw` must take `&mut self`." },
+  { check = "uses", what = ["recv:mut"], within = "transfer_to", message = "`transfer_to` must take `&mut self`." },
+  { check = "uses", what = ["recv:ref"], within = "summary", message = "`summary` must take `&self`: it only reads the account." },
+  { check = "uses", what = ["recv:own"], within = "close", message = "`close` must take `self`: closing consumes the account." },
+  { check = "forbids", what = ["derive:Copy"], message = "`BankAccount` owns a `String`, so it can't derive `Copy`; keep `Debug, Clone, PartialEq`." },
+  { check = "forbids", what = ["call:checked_add", "call:checked_sub", "call:checked_mul"], message = "Check `cents > u64::MAX - balance` (or `cents > balance`) before changing anything; `checked_*` returns an `Option`, which Chapter 6 teaches." },
+]
+
+[[tests]]
+key = "t36"
+part = 4
+run = { kind = "suite", script = "t36" }
+asserts = [{ check = "returns" }]
+
+[[wrong]]
+name = "untrimmed-owner"
+part = 1
+fails = ["t01", "t03", "t04"]
+
+[[wrong]]
+name = "unpadded-cents"
+part = 1
+fails = ["t27", "t28", "t30"]
+
+[[wrong]]
+name = "deposit-saturates"
+part = 2
+fails = ["t16"]
+
+[[wrong]]
+name = "withdraw-all-or-nothing"
+part = 2
+fails = ["t09"]
+
+[[wrong]]
+name = "transfer-ignores-overflow"
+part = 3
+fails = ["t24"]
+
+[[wrong]]
+name = "close-borrows"
+part = 4
+fails = ["t34", "t35"]
+

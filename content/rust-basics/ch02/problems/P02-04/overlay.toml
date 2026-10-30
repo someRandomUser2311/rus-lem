@@ -1,0 +1,85 @@
+mode = "cargo"
+fixtures = ["table", "seat"]
+
+[[tests]]
+key = "t01"
+run = { kind = "process", stdin = "" }
+asserts = [
+  { check = "stdout_matches", pattern = "^Your table: ([1-9]|1[0-9]|20)\\nYour seat: [1-4]\\n$" },
+]
+
+[[tests]]
+key = "t02"
+run = { kind = "process", stdin = "ignored\n" }
+asserts = [
+  { check = "stdout_matches", pattern = "^Your table: ([1-9]|1[0-9]|20)\\nYour seat: [1-4]\\n$" },
+]
+
+[[tests]]
+key = "t03"
+run = { kind = "process", stdin = "", times = 100 }
+asserts = [
+  { check = "stdout_matches", pattern = "^Your table: ([1-9]|1[0-9]|20)\\nYour seat: [1-4]\\n$" },
+]
+
+[[tests]]
+key = "t04"
+run = { kind = "process", stdin = "東京 😀\n" }
+asserts = [
+  { check = "stdout_matches", pattern = "^Your table: ([1-9]|1[0-9]|20)\\nYour seat: [1-4]\\n$" },
+]
+
+[[tests]]
+key = "t05"
+run = { kind = "process", stdin = "" }
+asserts = [
+  { check = "stderr_empty" },
+  { check = "exit_code", code = 0 },
+]
+
+[[tests]]
+key = "t06"
+run = { kind = "source" }
+asserts = [
+  { check = "let_init", name = "table", ty = "u32", exprs = ["rand::rng().random_range(1..=20)"] },
+]
+
+[[tests]]
+key = "t07"
+run = { kind = "source" }
+asserts = [
+  { check = "let_init", name = "seat", ty = "u32", exprs = ["rand::rng().random_range(1..5)"], after = "table" },
+]
+
+[[tests]]
+key = "t08"
+run = { kind = "process", stdin = "1\n2\n3\n" }
+asserts = [
+  { check = "stdout_matches", pattern = "^Your table: ([1-9]|1[0-9]|20)\\nYour seat: [1-4]\\n$" },
+]
+
+[[tests]]
+key = "t09"
+run = { kind = "suite", cases = [{ stdin = "", fixture = { table = "1", seat = "1" }, stdout = "Your table: 1\nYour seat: 1\n" }, { stdin = "", fixture = { table = "1", seat = "4" }, stdout = "Your table: 1\nYour seat: 4\n" }, { stdin = "", fixture = { table = "20", seat = "1" }, stdout = "Your table: 20\nYour seat: 1\n" }, { stdin = "", fixture = { table = "20", seat = "4" }, stdout = "Your table: 20\nYour seat: 4\n" }] }
+asserts = [
+  { check = "same_as_reference" },
+]
+
+[[tests]]
+key = "t10"
+run = { kind = "process", stdin = "   \n" }
+asserts = [
+  { check = "stdout_matches", pattern = "^Your table: ([1-9]|1[0-9]|20)\\nYour seat: [1-4]\\n$" },
+]
+
+[[wrong]]
+name = "inclusive-seat"
+fails = ["t07"]
+
+[[wrong]]
+name = "seat-first"
+fails = ["t07"]
+
+[[wrong]]
+name = "typed-table"
+fails = ["t09"]

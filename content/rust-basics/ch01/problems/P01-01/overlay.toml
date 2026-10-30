@@ -1,0 +1,21 @@
+
+[[tests]]
+key = "t04"
+asserts = [
+  { check = "line_count", count = 2 },
+  { check = "ends_with", text = "\n" },
+]
+
+[[tests]]
+key = "t06"
+asserts = [
+  { check = "macro_count", name = "println", ge = 1 },
+]
+
+[[wrong]]
+name = "print-only"
+fails = ["t01", "t04", "t06"]
+
+[[wrong]]
+name = "blank-line"
+fails = ["t01", "t04"]

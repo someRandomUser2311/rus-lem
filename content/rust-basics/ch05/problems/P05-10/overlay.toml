@@ -1,0 +1,8 @@
+[[wrong]]
+name = "can-hold-equal"
+fails = ["t05", "t06", "t08"]
+
+[[wrong]]
+name = "can-hold-either"
+fails = ["t05", "t06", "t08"]
+

@@ -1,0 +1,14 @@
+[[tests]]
+key = "t09"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["shadow:value"], within = "main", message = "Shadow the text: write `let value = number;` in the `Ok` arm and print that `value`." },
+]
+
+[[wrong]]
+name = "no-shadow"
+fails = ["t09"]
+
+[[wrong]]
+name = "prints-text"
+fails = ["t07", "t10"]

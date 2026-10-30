@@ -1,0 +1,19 @@
+[[tests]]
+key = "t09"
+run = { kind = "source" }
+asserts = [
+  { check = "let_init", name = "doubled", exprs = ["units * 2"] },
+  { check = "uses", what = ["tail:doubled"], within = "energy", message = "End `energy` with the expression `doubled` and no semicolon, so the block's value is returned." },
+]
+
+[[wrong]]
+name = "new-expression"
+fails = ["t09"]
+
+[[wrong]]
+name = "triples"
+fails = ["t01", "t02", "t04", "t05", "t06", "t07", "t08", "t09"]
+
+[[wrong]]
+name = "early-return"
+fails = ["t09"]

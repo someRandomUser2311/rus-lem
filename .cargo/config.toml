@@ -1,0 +1,4 @@
+[env]
+TS_RS_EXPORT_DIR = { value = "app/src/lib/bindings", relative = true }
+# 64-bit integers arrive as JSON numbers; type them as `number` in TypeScript.
+TS_RS_LARGE_INT = "number"

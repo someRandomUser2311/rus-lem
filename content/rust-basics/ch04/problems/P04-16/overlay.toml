@@ -1,0 +1,25 @@
+[[tests]]
+key = "t15"
+run = { kind = "suite", script = "t15" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t16"
+run = { kind = "fixture", main = "fn reference_first_word(text: &str) -> &str {\n    for word in text.split_whitespace() {\n        return word;\n    }\n    &text[..0]\n}\n\nfn main() {\n    let inputs = [\n        String::from(\"one two\"),\n        String::from(\"hello world\"),\n        String::from(\"\"),\n        String::from(\"   \"),\n        String::from(\"\\t\\n\"),\n        String::from(\"é 東京\"),\n        String::from(\"😀 x\"),\n        String::from(\"é é\"),\n        String::from(\"  first\\tlast  \"),\n        String::from(\"x\".repeat(100000)),\n        String::from(\"a　b\"),\n        String::from(\"\\0 middle\"),\n        String::from(\"a\"),\n        String::from(\"x\".repeat(99999)),\n        String::from(\"a\\u{1c}b c\"),\n    ];\n    for owned in inputs {\n        let got = first_word(&owned);\n        let want = reference_first_word(&owned);\n        let base = owned.as_ptr() as usize;\n        let at = got.as_ptr() as usize;\n        assert!(at >= base && at + got.len() <= base + owned.len(), \"the returned slice isn't inside the input {owned:?}\");\n        assert_eq!((at - base, got.len()), (want.as_ptr() as usize - base, want.len()), \"wrong part of {owned:?}\");\n    }\n}" }
+asserts = [{ check = "stdout_eq", text = "" }]
+
+[[tests]]
+key = "t18"
+run = { kind = "source" }
+asserts = [
+{ check = "forbids", what = ["type:Vec", "type:VecDeque", "type:HashMap", "type:HashSet", "type:BTreeMap", "type:BTreeSet", "macro:vec", "type:Option", "call:Some", "ident:None", "item:struct", "item:enum", "item:trait", "item:impl", "item:type", "item:static", "lifetime", "unsafe", "call:leak", "call:forget", "call:map", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:zip", "call:skip", "call:take", "call:sum", "call:product", "call:any", "call:all", "call:position", "call:windows", "call:chunks"], message = "Use only what Chapters 1–4 teach: no Vec or other collections, no Option, no struct/enum/trait/impl definitions, no explicit lifetimes, no unsafe code, and no iterator adapters such as map, filter or collect. Plain for loops over chars, bytes, char_indices or split_whitespace, and standard String methods, are fine." },
+]
+
+[[wrong]]
+name = "space-split"
+fails = ["t05", "t09", "t11", "t15", "t16"]
+
+[[wrong]]
+name = "uses-vec"
+fails = ["t18"]
+

@@ -1,0 +1,18 @@
+[[tests]]
+key = "t09"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["if_expr", "else_if"], within = "classify", message = "Produce the result with one `if … else if … else` expression whose branches are the values, not with `return` statements." },
+]
+
+[[wrong]]
+name = "early-returns"
+fails = ["t09"]
+
+[[wrong]]
+name = "returns-n"
+fails = ["t02", "t07", "t08"]
+
+[[wrong]]
+name = "zero-positive"
+fails = ["t03"]

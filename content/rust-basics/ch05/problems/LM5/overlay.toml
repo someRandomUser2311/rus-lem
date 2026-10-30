@@ -1,0 +1,518 @@
+checkpoints = true
+
+[[tests]]
+key = "t01"
+part = 1
+
+[[tests]]
+key = "t02"
+part = 1
+
+[[tests]]
+key = "t03"
+part = 1
+
+[[tests]]
+key = "t04"
+part = 1
+
+[[tests]]
+key = "t05"
+part = 1
+
+[[tests]]
+key = "t06"
+part = 1
+
+[[tests]]
+key = "t07"
+part = 1
+
+[[tests]]
+key = "t08"
+part = 1
+
+[[tests]]
+key = "t09"
+part = 1
+
+[[tests]]
+key = "t10"
+part = 1
+
+[[tests]]
+key = "t11"
+part = 2
+
+[[tests]]
+key = "t12"
+part = 2
+
+[[tests]]
+key = "t13"
+part = 2
+
+[[tests]]
+key = "t14"
+part = 2
+
+[[tests]]
+key = "t15"
+part = 2
+
+[[tests]]
+key = "t16"
+part = 2
+
+[[tests]]
+key = "t17"
+part = 2
+
+[[tests]]
+key = "t18"
+part = 2
+
+[[tests]]
+key = "t19"
+part = 2
+
+[[tests]]
+key = "t20"
+part = 2
+
+[[tests]]
+key = "t21"
+part = 2
+
+[[tests]]
+key = "t22"
+part = 2
+
+[[tests]]
+key = "t23"
+part = 2
+
+[[tests]]
+key = "t24"
+part = 2
+
+[[tests]]
+key = "t25"
+part = 2
+
+[[tests]]
+key = "t26"
+part = 2
+
+[[tests]]
+key = "t27"
+part = 2
+
+[[tests]]
+key = "t30"
+part = 2
+
+[[tests]]
+key = "t42"
+part = 2
+
+[[tests]]
+key = "t28"
+part = 3
+
+[[tests]]
+key = "t29"
+part = 3
+
+[[tests]]
+key = "t40"
+part = 3
+
+[[tests]]
+key = "t31"
+part = 4
+
+[[tests]]
+key = "t32"
+part = 4
+
+[[tests]]
+key = "t33"
+part = 4
+
+[[tests]]
+key = "t34"
+part = 4
+
+[[tests]]
+key = "t35"
+part = 4
+
+[[tests]]
+key = "t36"
+part = 4
+
+[[tests]]
+key = "t37"
+part = 4
+
+[[tests]]
+key = "t38"
+part = 4
+
+[[tests]]
+key = "t39"
+part = 4
+
+[[tests]]
+key = "t01"
+visible = true
+
+[[tests]]
+key = "t02"
+visible = true
+
+[[tests]]
+key = "t03"
+visible = false
+
+[[tests]]
+key = "t04"
+visible = false
+
+[[tests]]
+key = "t05"
+visible = false
+
+[[tests]]
+key = "t06"
+visible = false
+
+[[tests]]
+key = "t07"
+visible = false
+
+[[tests]]
+key = "t08"
+visible = false
+
+[[tests]]
+key = "t09"
+visible = false
+
+[[tests]]
+key = "t10"
+visible = false
+
+[[tests]]
+key = "t11"
+visible = true
+
+[[tests]]
+key = "t12"
+visible = false
+
+[[tests]]
+key = "t13"
+visible = false
+
+[[tests]]
+key = "t14"
+visible = false
+
+[[tests]]
+key = "t15"
+visible = false
+
+[[tests]]
+key = "t16"
+visible = false
+
+[[tests]]
+key = "t17"
+visible = true
+
+[[tests]]
+key = "t18"
+visible = false
+
+[[tests]]
+key = "t19"
+visible = false
+
+[[tests]]
+key = "t20"
+visible = false
+
+[[tests]]
+key = "t21"
+visible = false
+
+[[tests]]
+key = "t22"
+visible = false
+
+[[tests]]
+key = "t23"
+visible = true
+
+[[tests]]
+key = "t24"
+visible = false
+
+[[tests]]
+key = "t25"
+visible = false
+
+[[tests]]
+key = "t26"
+visible = false
+
+[[tests]]
+key = "t27"
+visible = false
+
+[[tests]]
+key = "t28"
+visible = true
+
+[[tests]]
+key = "t29"
+visible = false
+
+[[tests]]
+key = "t30"
+visible = false
+
+[[tests]]
+key = "t31"
+visible = false
+
+[[tests]]
+key = "t32"
+visible = false
+
+[[tests]]
+key = "t33"
+visible = false
+
+[[tests]]
+key = "t34"
+visible = false
+
+[[tests]]
+key = "t35"
+visible = false
+
+[[tests]]
+key = "t36"
+visible = false
+
+[[tests]]
+key = "t37"
+visible = false
+
+[[tests]]
+key = "t38"
+visible = false
+
+[[tests]]
+key = "t39"
+visible = false
+
+[[tests]]
+key = "t40"
+visible = false
+
+[[tests]]
+key = "t41"
+visible = false
+
+[[tests]]
+key = "t42"
+visible = false
+
+[[tests]]
+key = "t41"
+part = 4
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["field:id:u32", "field:title:String", "field:author:String", "field:year:u16", "derive:Debug", "derive:Clone", "derive:PartialEq"], inside = "struct:Book", message = "Keep `Book` exactly as supplied: `#[derive(Debug, Clone, PartialEq)]` and the fields `id: u32`, `title: String`, `author: String`, `year: u16`." },
+  { check = "uses", what = ["field:id:u32", "field:name:String", "field:premium:bool", "field:borrowed:u8", "derive:Debug", "derive:Clone", "derive:PartialEq"], inside = "struct:Member", message = "Keep `Member` exactly as supplied: `#[derive(Debug, Clone, PartialEq)]` and the fields `id: u32`, `name: String`, `premium: bool`, `borrowed: u8`." },
+  { check = "forbids", what = ["derive:Copy"], message = "`Book` and `Member` own `String`s, so neither can derive `Copy`." },
+  { check = "uses", what = ["recv:none"], within = "new", inside = "impl:Book", message = "`Book::new` is an associated function: no `self` parameter." },
+  { check = "uses", what = ["call:normalize_title"], within = "new", inside = "impl:Book", message = "`Book::new` must clean the title with LM4's `normalize_title` rather than a new rule of its own." },
+  { check = "uses", what = ["recv:ref"], within = "summary", message = "`summary` must take `&self`." },
+  { check = "uses", what = ["recv:ref"], within = "limit", message = "`limit` must take `&self`." },
+  { check = "uses", what = ["recv:ref"], within = "can_borrow", message = "`can_borrow` must take `&self`." },
+  { check = "uses", what = ["recv:mut"], within = "record_borrow", message = "`record_borrow` must take `&mut self`." },
+  { check = "uses", what = ["recv:mut"], within = "record_return", message = "`record_return` must take `&mut self`." },
+  { check = "uses", what = ["fn:normalize_title", "fn:sort_key", "fn:title_matches", "fn:due_day", "fn:days_late", "fn:late_fee_cents", "fn:format_cents", "fn:main"], message = "Keep everything from LM4: the title helpers, LM3's fee functions and the menu in `main`." },
+]
+
+[[tests]]
+key = "t43"
+n = 43
+visible = false
+category = "edge"
+input_md = "`\"\"`"
+expected_md = "`\"==============================\\n  Riverside Community Library\\n==============================\\nOpen daily, 9:00 to 17:00\\n1) List books\\n2) Borrow a book\\n3) Return a book\\n4) Quit\\nChoose an option:\\nGoodbye!\\n\"`"
+checks_md = "`struct.instance`: Inherited menu prints the banner once and quits cleanly on immediate EOF."
+concept = "struct.instance"
+part = 4
+run = { kind = "process", stdin = "" }
+asserts = [{ check = "stdout_eq", text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" }]
+
+[[tests]]
+key = "t44"
+n = 44
+visible = false
+category = "edge"
+input_md = "`\"4\\n\"`"
+expected_md = "`\"==============================\\n  Riverside Community Library\\n==============================\\nOpen daily, 9:00 to 17:00\\n1) List books\\n2) Borrow a book\\n3) Return a book\\n4) Quit\\nChoose an option:\\nGoodbye!\\n\"`"
+checks_md = "`struct.instance`: Inherited menu accepts explicit Quit and prints Goodbye exactly once."
+concept = "struct.instance"
+part = 4
+run = { kind = "process", stdin = "4\n" }
+asserts = [{ check = "stdout_eq", text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" }]
+
+[[tests]]
+key = "t45"
+n = 45
+visible = false
+category = "edge"
+input_md = "`\"1\\n4\\n\"`"
+expected_md = "`\"==============================\\n  Riverside Community Library\\n==============================\\nOpen daily, 9:00 to 17:00\\n1) List books\\n2) Borrow a book\\n3) Return a book\\n4) Quit\\nChoose an option:\\nYou chose: List books\\n1) List books\\n2) Borrow a book\\n3) Return a book\\n4) Quit\\nChoose an option:\\nGoodbye!\\n\"`"
+checks_md = "`struct.instance`: Inherited menu acknowledges List books, repeats, then accepts Quit."
+concept = "struct.instance"
+part = 4
+run = { kind = "process", stdin = "1\n4\n" }
+asserts = [{ check = "stdout_eq", text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nYou chose: List books\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" }]
+
+[[tests]]
+key = "t46"
+n = 46
+visible = false
+category = "edge"
+input_md = "`\"2\\n3\\n4\"`"
+expected_md = "`\"==============================\\n  Riverside Community Library\\n==============================\\nOpen daily, 9:00 to 17:00\\n1) List books\\n2) Borrow a book\\n3) Return a book\\n4) Quit\\nChoose an option:\\nYou chose: Borrow a book\\n1) List books\\n2) Borrow a book\\n3) Return a book\\n4) Quit\\nChoose an option:\\nYou chose: Return a book\\n1) List books\\n2) Borrow a book\\n3) Return a book\\n4) Quit\\nChoose an option:\\nGoodbye!\\n\"`"
+checks_md = "`struct.instance`: Inherited menu acknowledges Borrow and Return, then accepts Quit without a final input newline."
+concept = "struct.instance"
+part = 4
+run = { kind = "process", stdin = "2\n3\n4" }
+asserts = [{ check = "stdout_eq", text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nYou chose: Borrow a book\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nYou chose: Return a book\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" }]
+
+[[tests]]
+key = "t47"
+n = 47
+visible = false
+category = "edge"
+input_md = "`\"x\\n4\\n\"`"
+expected_md = "`\"==============================\\n  Riverside Community Library\\n==============================\\nOpen daily, 9:00 to 17:00\\n1) List books\\n2) Borrow a book\\n3) Return a book\\n4) Quit\\nChoose an option:\\nPlease type a number from 1 to 4.\\n1) List books\\n2) Borrow a book\\n3) Return a book\\n4) Quit\\nChoose an option:\\nGoodbye!\\n\"`"
+checks_md = "`struct.instance`: Inherited menu rejects invalid input, repeats, and accepts a later Quit."
+concept = "struct.instance"
+part = 4
+run = { kind = "process", stdin = "x\n4\n" }
+asserts = [{ check = "stdout_eq", text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nPlease type a number from 1 to 4.\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" }]
+
+[[tests]]
+key = "t48"
+n = 48
+visible = false
+category = "edge"
+input_md = "`\" \\t4 \\n\"`"
+expected_md = "`\"==============================\\n  Riverside Community Library\\n==============================\\nOpen daily, 9:00 to 17:00\\n1) List books\\n2) Borrow a book\\n3) Return a book\\n4) Quit\\nChoose an option:\\nGoodbye!\\n\"`"
+checks_md = "`struct.instance`: Inherited menu trims surrounding whitespace before recognizing Quit."
+concept = "struct.instance"
+part = 4
+run = { kind = "process", stdin = " \t4 \n" }
+asserts = [{ check = "stdout_eq", text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" }]
+
+[[tests]]
+key = "t49"
+n = 49
+visible = false
+category = "random"
+input_md = "Inherited regression suite: LM2's 20 stdin fixtures, its 300-case seeded suite and its 10,000-line session"
+expected_md = "Same results as the combined LM5 reference"
+checks_md = "`struct.instance`: Earlier milestones keep working after the Chapter 5 types are added."
+concept = "struct.instance"
+part = 4
+run = { kind = "suite", script = "t49" }
+asserts = [{ check = "same_as_reference" }]
+
+[[tests]]
+key = "t50"
+n = 50
+visible = false
+category = "random"
+input_md = "Inherited regression suite: LM4's 300-case `normalize_title` suite (seed `0x0004B001`)"
+expected_md = "Same results as the combined LM5 reference"
+checks_md = "`struct.self_kinds`: Earlier milestones keep working after the Chapter 5 types are added."
+concept = "struct.self_kinds"
+part = 4
+run = { kind = "suite", script = "t50" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t51"
+n = 51
+visible = false
+category = "random"
+input_md = "Inherited regression suite: LM4's 300-case `sort_key` suite (seed `0x0004B002`)"
+expected_md = "Same results as the combined LM5 reference"
+checks_md = "`struct.self_kinds`: Earlier milestones keep working after the Chapter 5 types are added."
+concept = "struct.self_kinds"
+part = 4
+run = { kind = "suite", script = "t51" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t52"
+n = 52
+visible = false
+category = "random"
+input_md = "Inherited regression suite: LM4's 300-case `title_matches` suite (seed `0x0004B003`)"
+expected_md = "Same results as the combined LM5 reference"
+checks_md = "`struct.self_kinds`: Earlier milestones keep working after the Chapter 5 types are added."
+concept = "struct.self_kinds"
+part = 4
+run = { kind = "suite", script = "t52" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t42"
+part = 2
+run = { kind = "suite", script = "t42" }
+asserts = [{ check = "returns" }]
+
+[[wrong]]
+name = "own-title-rule"
+part = 1
+fails = ["t01", "t02", "t05", "t06", "t07", "t08", "t09", "t10"]
+
+[[wrong]]
+name = "limits-swapped"
+part = 2
+fails = ["t11", "t12", "t13", "t14", "t15", "t16", "t17", "t18", "t19", "t20", "t21", "t22", "t30", "t42"]
+
+[[wrong]]
+name = "borrow-unchecked"
+part = 2
+fails = ["t13", "t14", "t15", "t16", "t21", "t22", "t30", "t42"]
+
+[[wrong]]
+name = "member-trims"
+part = 2
+fails = ["t23"]
+
+[[wrong]]
+name = "menu-changed"
+part = 4
+fails = ["t43", "t44", "t45", "t46", "t47", "t48", "t49"]
+
+[[wrong]]
+name = "match-case-sensitive"
+part = 4
+fails = ["t52"]
+

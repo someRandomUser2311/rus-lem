@@ -1,0 +1,26 @@
+[[tests]]
+key = "t11"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["recv:own"], within = "summary", message = "`summary` must take `self`: it consumes the playlist." },
+  { check = "uses", what = ["recv:mut"], within = "clear", message = "`clear` must take `&mut self`: it changes the playlist." },
+  { check = "uses", what = ["fn:new", "fn:add", "fn:clear", "fn:count", "fn:rename", "fn:summary", "fn:demo"], message = "Keep all six methods (`new`, `add`, `clear`, `count`, `rename`, `summary`) and `demo`; fix them rather than removing any." },
+]
+
+[[tests]]
+key = "t13"
+run = { kind = "suite", script = "t13" }
+asserts = [{ check = "returns" }]
+
+[[wrong]]
+name = "rename-returns-new"
+fails = ["t09", "t13"]
+
+[[wrong]]
+name = "summary-borrows"
+fails = ["t11"]
+
+[[wrong]]
+name = "capacity-off-by-one"
+fails = ["t08", "t13"]
+

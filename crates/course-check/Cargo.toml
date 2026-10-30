@@ -1,0 +1,16 @@
+[package]
+name = "course-check"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+rb-content.workspace = true
+rb-specparse.workspace = true
+rb-grader.workspace = true
+rb-runner.workspace = true
+anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+toml.workspace = true
+clap.workspace = true

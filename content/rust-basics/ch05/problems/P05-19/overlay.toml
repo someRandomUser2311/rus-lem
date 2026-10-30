@@ -1,0 +1,27 @@
+[[tests]]
+key = "t13"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["shorthand:title", "shorthand:body", "shorthand:revision"], within = "record", message = "Build the `Record` in `record` with field init shorthand: `Record { title, body, revision }`." },
+  { check = "uses", what = ["update", "call:clone"], within = "revise", message = "In `revise`, use struct update syntax with an explicit clone of the borrowed base (`..base.clone()`)." },
+  { check = "uses", what = ["update"], within = "retitle", message = "In `retitle`, use struct update syntax to move the remaining fields out of `base` (`..base`)." },
+  { check = "forbids", what = ["call:clone"], within = "retitle", message = "`retitle` owns `base`, so it can move its fields without cloning anything." },
+]
+
+[[tests]]
+key = "t14"
+run = { kind = "suite", script = "t14" }
+asserts = [{ check = "returns" }]
+
+[[wrong]]
+name = "plain-increment"
+fails = ["t05"]
+
+[[wrong]]
+name = "retitle-clones"
+fails = ["t13"]
+
+[[wrong]]
+name = "no-shorthand"
+fails = ["t13"]
+

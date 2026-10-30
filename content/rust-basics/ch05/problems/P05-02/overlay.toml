@@ -1,0 +1,19 @@
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["shorthand:username", "shorthand:email"], within = "build_profile", inside = "struct_lit:Profile", message = "Make cleaned locals named `username` and `email`, then build the profile with the shorthand `Profile { username, email, … }`." },
+]
+
+[[wrong]]
+name = "not-lowercased"
+fails = ["t01", "t02", "t05", "t06", "t07", "t08"]
+
+[[wrong]]
+name = "plain-add"
+fails = ["t11"]
+
+[[wrong]]
+name = "explicit-fields"
+fails = ["t12"]
+

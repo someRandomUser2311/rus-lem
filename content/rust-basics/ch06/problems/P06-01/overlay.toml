@@ -1,0 +1,8 @@
+[[wrong]]
+name = "max-is-red"
+fails = ["t04"]
+
+[[wrong]]
+name = "describe-lowercase"
+fails = ["t05"]
+

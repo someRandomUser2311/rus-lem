@@ -1,0 +1,14 @@
+[[tests]]
+key = "t06"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["tuple:3", "let_tuple"], within = "main", message = "Build `size` as `(width, height, 'R')` and take it apart with `let (w, h, initial) = size;`, then print those names." },
+]
+
+[[wrong]]
+name = "field-access"
+fails = ["t06"]
+
+[[wrong]]
+name = "swapped"
+fails = ["t01", "t02", "t04", "t10", "t11"]

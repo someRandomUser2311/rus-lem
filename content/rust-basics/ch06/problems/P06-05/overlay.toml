@@ -1,0 +1,8 @@
+[[wrong]]
+name = "first-twice"
+fails = ["t07"]
+
+[[wrong]]
+name = "index-off-by-one"
+fails = ["t01", "t02", "t05", "t06"]
+

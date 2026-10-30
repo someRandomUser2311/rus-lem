@@ -1,0 +1,16 @@
+[[tests]]
+key = "t06"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["const:SECONDS_PER_HOUR", "const_ty:u32"], message = "Keep `const SECONDS_PER_HOUR: u32 = 60 * 60;` outside `main`." },
+  { check = "uses", what = ["op:*"], inside = "const:SECONDS_PER_HOUR", message = "Write the constant as `60 * 60`, minutes per hour times seconds per minute." },
+  { check = "uses", what = ["ident:SECONDS_PER_HOUR"], within = "main", message = "Multiply by the constant `SECONDS_PER_HOUR` instead of writing the number of seconds yourself." },
+]
+
+[[wrong]]
+name = "magic-number"
+fails = ["t06"]
+
+[[wrong]]
+name = "minutes"
+fails = ["t01", "t02", "t04", "t06", "t09", "t10"]

@@ -1,0 +1,33 @@
+[[tests]]
+key = "t06"
+run = { kind = "process", stdin = "999\n" }
+asserts = [{ check = "stdout_pieces", pieces = [{ text = "{n:03}\n", from = 999, to = 1 }, { text = "Go!\n" }] }]
+
+[[tests]]
+key = "t07"
+run = { kind = "process", stdin = "1000\n" }
+asserts = [{ check = "stdout_pieces", pieces = [{ text = "{n:03}\n", from = 1000, to = 1 }, { text = "Go!\n" }] }]
+
+[[tests]]
+key = "t12"
+run = { kind = "suite", script = "t12" }
+asserts = [{ check = "same_as_reference" }]
+
+[[tests]]
+key = "t13"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["for_rev"], within = "countdown", message = "Count down with a `for` loop over a reversed range, `(1..=n).rev()`, in `countdown`." },
+]
+
+[[wrong]]
+name = "no-padding"
+fails = ["t01", "t02", "t03", "t05", "t06", "t07", "t08", "t11", "t12", "t15", "t16"]
+
+[[wrong]]
+name = "while-countdown"
+fails = ["t13"]
+
+[[wrong]]
+name = "stops-at-two"
+fails = ["t01", "t02", "t03", "t05", "t06", "t07", "t08", "t11", "t12", "t15", "t16"]

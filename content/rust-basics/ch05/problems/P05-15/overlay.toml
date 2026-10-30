@@ -1,0 +1,17 @@
+[[tests]]
+key = "t16"
+run = { kind = "suite", script = "t16" }
+asserts = [{ check = "returns" }]
+
+[[wrong]]
+name = "negative-remainder"
+fails = ["t03", "t04", "t06", "t16"]
+
+[[wrong]]
+name = "unpadded-hours"
+fails = ["t01", "t02", "t05", "t07", "t08", "t10", "t12", "t14", "t16"]
+
+[[wrong]]
+name = "distance"
+fails = ["t15"]
+

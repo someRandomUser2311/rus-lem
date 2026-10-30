@@ -1,0 +1,34 @@
+
+[[tests]]
+key = "t05"
+asserts = [
+  { check = "not_contains", text = "{{", line = 3 },
+  { check = "not_contains", text = "}}", line = 3 },
+]
+
+[[tests]]
+key = "t06"
+asserts = [
+  { check = "line_count", count = 3 },
+  { check = "ends_with", text = "\n" },
+]
+
+[[tests]]
+key = "t08"
+asserts = [
+  { check = "fmt_literal_forbid", macros = ["print", "println"], substrings = ["Ferris", "Hello"] },
+]
+
+[[tests]]
+key = "t09"
+asserts = [
+  { check = "lets_unchanged", lets = ["let name = \"Ferris\";", "let word = \"Hello\";"] },
+]
+
+[[wrong]]
+name = "unescaped-name"
+fails = ["t01", "t02"]
+
+[[wrong]]
+name = "typed-text"
+fails = ["t08"]

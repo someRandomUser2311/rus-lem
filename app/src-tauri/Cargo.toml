@@ -1,0 +1,31 @@
+[package]
+name = "rusticoder"
+description = "Rusticoder: learn Rust by writing it"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+default-run = "rusticoder"
+
+[lib]
+name = "rusticoder_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.7.4", features = [] }
+
+[dependencies]
+tauri = { version = "2.12.5", features = [] }
+tauri-plugin-log = "2"
+log = "0.4"
+serde.workspace = true
+serde_json.workspace = true
+anyhow.workspace = true
+rb-content.workspace = true
+rb-grader.workspace = true
+rb-runner.workspace = true
+rb-quiz.workspace = true
+rb-progress.workspace = true
+rb-lsp.workspace = true
+ts-rs.workspace = true
+tiny_http = "0.12"

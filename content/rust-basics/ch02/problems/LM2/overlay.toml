@@ -1,0 +1,196 @@
+[[tests]]
+key = "t01"
+run = { kind = "process", stdin = "4\n" }
+asserts = [
+  { check = "stdout_eq", text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" },
+]
+
+[[tests]]
+key = "t02"
+run = { kind = "process", stdin = "1\n4\n" }
+asserts = [
+  { check = "stdout_eq", text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nYou chose: List books\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" },
+]
+
+[[tests]]
+key = "t03"
+run = { kind = "process", stdin = "2\n4\n" }
+asserts = [
+  { check = "stdout_eq", text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nYou chose: Borrow a book\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" },
+]
+
+[[tests]]
+key = "t04"
+run = { kind = "process", stdin = "3\n4\n" }
+asserts = [
+  { check = "stdout_eq", text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nYou chose: Return a book\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" },
+]
+
+[[tests]]
+key = "t05"
+run = { kind = "process", stdin = "1\n2\n3\n4\n" }
+asserts = [
+  { check = "stdout_eq", text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nYou chose: List books\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nYou chose: Borrow a book\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nYou chose: Return a book\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" },
+]
+
+[[tests]]
+key = "t06"
+run = { kind = "process", stdin = "" }
+asserts = [
+  { check = "stdout_eq", text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" },
+]
+
+[[tests]]
+key = "t07"
+run = { kind = "process", stdin = "\n4\n" }
+asserts = [
+  { check = "stdout_eq", text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nPlease type a number from 1 to 4.\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" },
+]
+
+[[tests]]
+key = "t08"
+run = { kind = "process", stdin = "0\n5\n4\n" }
+asserts = [
+  { check = "stdout_eq", text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nPlease type a number from 1 to 4.\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nPlease type a number from 1 to 4.\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" },
+]
+
+[[tests]]
+key = "t09"
+run = { kind = "process", stdin = "", stdin_pieces = [{ text = "x", times = 999 }, { text = "\n4\n" }] }
+asserts = [
+  { check = "stdout_eq", text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nPlease type a number from 1 to 4.\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" },
+]
+
+[[tests]]
+key = "t10"
+run = { kind = "process", stdin = " 2 \r\n4\n" }
+asserts = [
+  { check = "stdout_eq", text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nYou chose: Borrow a book\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" },
+]
+
+[[tests]]
+key = "t11"
+run = { kind = "process", stdin = "4" }
+asserts = [
+  { check = "stdout_eq", text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" },
+]
+
+[[tests]]
+key = "t12"
+run = { kind = "process", stdin = "4\n1\n" }
+asserts = [
+  { check = "stdout_eq", text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" },
+]
+
+[[tests]]
+key = "t13"
+run = { kind = "process", stdin = "4294967296\n4\n" }
+asserts = [
+  { check = "stdout_eq", text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nPlease type a number from 1 to 4.\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" },
+]
+
+[[tests]]
+key = "t14"
+run = { kind = "process", stdin = "-1\n4\n" }
+asserts = [
+  { check = "stdout_eq", text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nPlease type a number from 1 to 4.\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" },
+]
+
+[[tests]]
+key = "t15"
+run = { kind = "process", stdin = "４\n4\n" }
+asserts = [
+  { check = "stdout_eq", text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nPlease type a number from 1 to 4.\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" },
+]
+
+[[tests]]
+key = "t16"
+run = { kind = "process", stdin = "　4　\n" }
+asserts = [
+  { check = "stdout_eq", text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" },
+]
+
+[[tests]]
+key = "t17"
+run = { kind = "process", stdin = "+4\n" }
+asserts = [
+  { check = "stdout_eq", text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" },
+]
+
+[[tests]]
+key = "t18"
+run = { kind = "process", stdin = "01\n4\n" }
+asserts = [
+  { check = "stdout_eq", text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nYou chose: List books\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" },
+]
+
+[[tests]]
+key = "t19"
+run = { kind = "process", stdin = "2" }
+asserts = [
+  { check = "stdout_eq", text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nYou chose: Borrow a book\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" },
+]
+
+[[tests]]
+key = "t20"
+run = { kind = "process", stdin = "   " }
+asserts = [
+  { check = "stdout_eq", text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nPlease type a number from 1 to 4.\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" },
+]
+
+[[tests]]
+key = "t21"
+run = { kind = "source" }
+asserts = [
+  { check = "required_keyword", word = "loop" },
+  { check = "required_keyword", word = "match" },
+  { check = "call_in_loop", name = "String::new" },
+  { check = "call_chain", calls = ["read_line", "expect"], arg = "Failed to read line" },
+]
+
+[[tests]]
+key = "t22"
+run = { kind = "suite", generator = { seed = 688, cases = 300, lines = 13, items = ["1", "2", "3", "4", "0", "5", "crab", "", " 2 ", "-1", "４", "+4"], reference = true } }
+asserts = [
+  { check = "same_as_reference" },
+]
+
+[[tests]]
+key = "t23"
+run = { kind = "process", stdin = "", stdin_pieces = [{ text = "1\n", times = 9999 }, { text = "4\n" }] }
+asserts = [
+  { check = "stdout_pieces", pieces = [{ text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n" }, { text = "1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nYou chose: List books\n", times = 9999 }, { text = "1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" }] },
+]
+
+[[tests]]
+key = "t24"
+run = { kind = "source" }
+asserts = [
+  { check = "banned_keyword", word = "if" },
+]
+
+[[tests]]
+key = "t25"
+run = { kind = "source" }
+asserts = [
+  { check = "banned_keyword", word = "while" },
+]
+
+[[tests]]
+key = "t26"
+run = { kind = "source" }
+asserts = [
+  { check = "banned_keyword", word = "for" },
+]
+
+[[wrong]]
+name = "banner-in-loop"
+fails = ["t02", "t03", "t04", "t05", "t07", "t08", "t09", "t10", "t13", "t14", "t15", "t18", "t19", "t20", "t22", "t23"]
+
+[[wrong]]
+name = "buffer-outside-loop"
+fails = ["t02", "t03", "t04", "t05", "t08", "t09", "t10", "t13", "t14", "t15", "t18", "t21", "t22", "t23"]
+
+[[wrong]]
+name = "blank-is-quit"
+fails = ["t07", "t20", "t22"]

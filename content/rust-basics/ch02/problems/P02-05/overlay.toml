@@ -1,0 +1,74 @@
+[[tests]]
+key = "t03"
+asserts = [
+  { check = "stdout_eq", text = "Type a whole number:\n" },
+  { check = "stderr_contains", text = "Please type a number!" },
+  { check = "exit_code", code = 101 },
+]
+
+[[tests]]
+key = "t09"
+asserts = [
+  { check = "stdout_eq", text = "Type a whole number:\n" },
+  { check = "stderr_contains", text = "Please type a number!" },
+  { check = "exit_code", code = 101 },
+]
+
+[[tests]]
+key = "t10"
+asserts = [
+  { check = "stdout_eq", text = "Type a whole number:\n" },
+  { check = "stderr_contains", text = "Please type a number!" },
+  { check = "exit_code", code = 101 },
+]
+
+[[tests]]
+key = "t11"
+asserts = [
+  { check = "stdout_eq", text = "Type a whole number:\n" },
+  { check = "stderr_contains", text = "Please type a number!" },
+  { check = "exit_code", code = 101 },
+]
+
+[[tests]]
+key = "t15"
+asserts = [
+  { check = "stdout_eq", text = "Type a whole number:\n" },
+  { check = "stderr_contains", text = "Please type a number!" },
+  { check = "exit_code", code = 101 },
+]
+
+[[tests]]
+key = "t16"
+asserts = [
+  { check = "stdout_eq", text = "Type a whole number:\n" },
+  { check = "stderr_contains", text = "Please type a number!" },
+  { check = "exit_code", code = 101 },
+]
+
+[[tests]]
+key = "t17"
+run = { kind = "source" }
+asserts = [
+  { check = "let_init", name = "number", ty = "u32", exprs = ["number.trim().parse().expect(\"Please type a number!\")"], shadows = true },
+  { check = "match_on", method = "cmp" },
+]
+
+[[tests]]
+key = "t18"
+run = { kind = "source" }
+asserts = [
+  { check = "banned_keyword", word = "if" },
+]
+
+[[wrong]]
+name = "unwrap"
+fails = ["t03", "t09", "t10", "t11", "t15", "t16", "t17"]
+
+[[wrong]]
+name = "if-else"
+fails = ["t17", "t18"]
+
+[[wrong]]
+name = "prints-text"
+fails = ["t13", "t14"]

@@ -1,0 +1,29 @@
+[[tests]]
+key = "t18"
+run = { kind = "suite", script = "t18" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t19"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["block_expr"], within = "statistics", message = "Compute the sum with a block expression that holds a local accumulator and loops over the array: `let sum = { let mut total = 0; for … ; total };`." },
+  { check = "uses", what = ["for"], within = "statistics", inside = "block_expr", message = "Loop over the array inside the sum's block expression." },
+]
+
+[[wrong]]
+name = "min-starts-zero"
+fails = ["t01", "t02", "t04", "t06", "t07", "t08", "t09", "t11", "t18"]
+
+[[wrong]]
+name = "zero-positive"
+fails = ["t03", "t05", "t12", "t13", "t16", "t17"]
+
+[[wrong]]
+name = "integer-mean"
+fails = ["t01", "t02", "t11", "t12", "t13", "t16", "t17", "t18"]
+
+[[wrong]]
+name = "no-block"
+fails = ["t19"]
+

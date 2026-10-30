@@ -1,0 +1,307 @@
+# Chapter 2 lesson visuals, authored from the "Visual state" columns of lessons.md.
+# Merged onto chapter.gen.json: lessons by `id`, screens by `key`, steps by `n`.
+# State panels show conceptual values (bindings, input, results), not extra program output.
+
+# ---------------------------------------------------------------- L2.1
+[[lessons]]
+id = "L2.1"
+read_more = ["ch02-00-guessing-game-tutorial.md", "ch03-01-variables-and-mutability.md"]
+
+# Screen 2 · Let a value change
+[[lessons.screens]]
+key = "s2"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "vars"
+layout = "grid"
+nodes = [{ id = "guess", label = "guess", state = { ghost = true } }]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [{ panel = "vars", op = "node", id = "guess", ghost = false, lit = true, value = "5", badge = "mut" }]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "out", op = "print", text = "Before: 5\n" },
+  { panel = "vars", op = "node", id = "guess", value = "8", badge = "assigned" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "vars", op = "node", id = "guess", lit = false, badge = "" },
+  { panel = "out", op = "print", text = "After: 8\n" },
+]
+
+# Screen 4 · Read into the String
+[[lessons.screens]]
+key = "s4"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "state"
+layout = "grid"
+nodes = [
+  { id = "stdin", label = "stdin", state = { value = '"42\n"', badge = "waiting" } },
+  { id = "guess", label = "guess", state = { value = '""' } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [{ panel = "state", op = "node", id = "guess", lit = true }]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "state", op = "node", id = "stdin", value = '""', badge = "consumed", ghost = true },
+  { panel = "state", op = "node", id = "guess", value = '"42\n"', badge = "appended" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "state", op = "node", id = "guess", lit = false, badge = "" },
+  { panel = "out", op = "print", text = "You guessed: 42\n" },
+]
+
+# Screen 7 · Reading again appends
+[[lessons.screens]]
+key = "s7"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "state"
+layout = "grid"
+nodes = [{ id = "guests", label = "guests", state = { ghost = true } }]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [{ panel = "state", op = "node", id = "guests", ghost = false, lit = true, value = '""', badge = "empty" }]
+[[lessons.screens.steps]]
+n = 2
+ops = [{ panel = "state", op = "node", id = "guests", value = '"Ana\n"', badge = "+ Ana\\n" }]
+[[lessons.screens.steps]]
+n = 3
+ops = [{ panel = "state", op = "node", id = "guests", value = '"Ana\nBo\n"', badge = "+ Bo\\n" }]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "state", op = "node", id = "guests", lit = false, badge = "" },
+  { panel = "out", op = "print", text = "Ana\nBo\n" },
+]
+
+# ---------------------------------------------------------------- L2.2
+[[lessons]]
+id = "L2.2"
+read_more = ["ch02-00-guessing-game-tutorial.md", "ch01-03-hello-cargo.md"]
+
+# Screen 2 · Cargo resolves and builds dependencies
+[[lessons.screens]]
+key = "s2"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "flow"
+layout = "row"
+nodes = [
+  { id = "manifest", label = "Cargo.toml", sub = "rand = \"0.10.1\"", state = { ghost = true } },
+  { id = "sources", label = "crate sources", sub = "resolved versions", state = { ghost = true } },
+  { id = "deps", label = "dependencies", sub = "compiled first", state = { ghost = true } },
+  { id = "app", label = "your program", sub = "compiled last", state = { ghost = true } },
+]
+edges = [
+  { id = "e1", from = "manifest", to = "sources", label = "resolve" },
+  { id = "e2", from = "sources", to = "deps", label = "compile" },
+  { id = "e3", from = "deps", to = "app", label = "link" },
+]
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "flow", op = "node", id = "manifest", ghost = false, lit = true, style = "rust" },
+  { panel = "flow", op = "node", id = "sources", ghost = false, lit = true, style = "blue", badge = "cached or downloaded" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "flow", op = "node", id = "manifest", lit = false },
+  { panel = "flow", op = "node", id = "sources", lit = false, badge = "" },
+  { panel = "flow", op = "node", id = "deps", ghost = false, lit = true, style = "blue" },
+  { panel = "flow", op = "node", id = "app", ghost = false, lit = true, style = "green" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "flow", op = "node", id = "deps", lit = false },
+  { panel = "flow", op = "node", id = "app", lit = false },
+  { panel = "flow", op = "node", id = "sources", lit = true, badge = "bundled + Cargo.lock", note = "offline: no download" },
+]
+
+# Screen 5 · Include or exclude the endpoint
+[[lessons.screens]]
+key = "s5"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "ranges"
+layout = "grid"
+nodes = [
+  { id = "die", label = "die: 1..=6", state = { ghost = true } },
+  { id = "seat", label = "seat: 1..5", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output (one possible run)"
+[[lessons.screens.steps]]
+n = 1
+ops = [{ panel = "ranges", op = "node", id = "die", ghost = false, lit = true, style = "green", value = "1 2 3 4 5 6", badge = "6 included" }]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "ranges", op = "node", id = "die", lit = false, badge = "" },
+  { panel = "ranges", op = "node", id = "seat", ghost = false, lit = true, style = "blue", value = "1 2 3 4", badge = "5 excluded" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "ranges", op = "node", id = "seat", lit = false, badge = "" },
+  { panel = "out", op = "print", text = "Die: 6; seat: 4\n" },
+  { panel = "out", op = "badge", text = "Example only: another run may differ" },
+]
+
+# ---------------------------------------------------------------- L2.3
+[[lessons]]
+id = "L2.3"
+read_more = ["ch02-00-guessing-game-tutorial.md", "ch06-02-match.md"]
+
+# Screen 1 · Conversion: turn input into a number
+[[lessons.screens]]
+key = "s1"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "conv"
+layout = "row"
+nodes = [
+  { id = "text", label = "guess (text)", state = { ghost = true } },
+  { id = "trimmed", label = "trim()", state = { ghost = true } },
+  { id = "parsed", label = "parse()", state = { ghost = true } },
+  { id = "number", label = "guess: u32", state = { ghost = true } },
+]
+edges = [
+  { id = "e1", from = "text", to = "trimmed" },
+  { id = "e2", from = "trimmed", to = "parsed" },
+  { id = "e3", from = "parsed", to = "number", label = "expect" },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [{ panel = "conv", op = "node", id = "text", ghost = false, lit = true, value = '" 42\r\n"', badge = "text" }]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "conv", op = "node", id = "text", lit = false, badge = "" },
+  { panel = "conv", op = "node", id = "trimmed", ghost = false, value = '"42"' },
+  { panel = "conv", op = "node", id = "parsed", ghost = false, value = "Ok(42)" },
+  { panel = "conv", op = "node", id = "number", ghost = false, lit = true, style = "green", value = "42", badge = "new binding" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "conv", op = "node", id = "number", lit = false, badge = "" },
+  { panel = "out", op = "print", text = "Number: 42\n" },
+]
+
+# Screen 3 · Comparison: three possible outcomes
+[[lessons.screens]]
+key = "s3"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "arms"
+layout = "grid"
+nodes = [
+  { id = "cmp", label = "guess.cmp(&secret_number)", state = { ghost = true } },
+  { id = "less", label = "Ordering::Less", sub = "Too small!" },
+  { id = "greater", label = "Ordering::Greater", sub = "Too big!" },
+  { id = "equal", label = "Ordering::Equal", sub = "You win!" },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [{ panel = "arms", op = "node", id = "cmp", ghost = false, lit = true, style = "blue", value = "20 vs 42 → Less" }]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "arms", op = "node", id = "cmp", lit = false },
+  { panel = "arms", op = "node", id = "less", lit = true, style = "green", badge = "runs" },
+  { panel = "arms", op = "node", id = "greater", ghost = true },
+  { panel = "arms", op = "node", id = "equal", ghost = true },
+  { panel = "out", op = "print", text = "Too small!\n" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "arms", op = "node", id = "less", lit = false, badge = "" },
+  { panel = "out", op = "badge", text = "match finished" },
+]
+
+# Screen 6 · Repetition: continue skips the rest
+[[lessons.screens]]
+key = "s6"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "iter"
+layout = "grid"
+nodes = [
+  { id = "line", label = "line", state = { ghost = true } },
+  { id = "bytes", label = "bytes", state = { ghost = true } },
+  { id = "parse", label = "parse", state = { ghost = true } },
+  { id = "next", label = "next", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "iter", op = "node", id = "line", ghost = false, lit = true, value = '"crab\n"', badge = "new buffer" },
+  { panel = "iter", op = "node", id = "bytes", ghost = false, value = "5" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "iter", op = "node", id = "line", lit = false, badge = "" },
+  { panel = "iter", op = "node", id = "parse", ghost = false, lit = true, style = "red", value = "Err" },
+  { panel = "iter", op = "node", id = "next", ghost = false, value = "continue → loop start" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "iter", op = "node", id = "parse", lit = false, style = "plain", value = "" },
+  { panel = "iter", op = "node", id = "next", value = "" },
+  { panel = "iter", op = "node", id = "line", lit = true, value = '"8\n"', badge = "new buffer" },
+  { panel = "iter", op = "node", id = "bytes", value = "2" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "iter", op = "node", id = "line", lit = false, badge = "" },
+  { panel = "iter", op = "node", id = "parse", lit = true, style = "green", value = "Ok(8)" },
+  { panel = "out", op = "print", text = "Number: 8\n" },
+]
+[[lessons.screens.steps]]
+n = 5
+ops = [
+  { panel = "iter", op = "node", id = "parse", lit = false, value = "" },
+  { panel = "iter", op = "node", id = "line", value = '""' },
+  { panel = "iter", op = "node", id = "bytes", lit = true, style = "blue", value = "0", badge = "end of input" },
+  { panel = "iter", op = "node", id = "next", value = "break → loop exits" },
+]

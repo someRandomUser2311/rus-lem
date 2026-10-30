@@ -1,0 +1,22 @@
+[[tests]]
+key = "t15"
+run = { kind = "suite", script = "t15" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t16"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["type:Vec", "type:VecDeque", "type:HashMap", "type:HashSet", "type:BTreeMap", "type:BTreeSet", "macro:vec", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "try", "call:leak", "call:forget", "call:map", "call:and_then", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:zip", "call:sum", "call:product", "call:any", "call:all", "call:position", "call:windows", "call:chunks"], message = "Use only what Chapters 1–6 teach: enums, Option, match, if let and let...else are fine, but no Vec or other collections, no traits or trait implementations, no explicit lifetimes, no unsafe code, no `?` operator, and no adapters that take closures, such as map, and_then, filter or collect." },
+  { check = "uses", what = ["if_let", "pat:Some"], within = "maximum", message = "Process each present reading with `if let Some(n) = value`." },
+  { check = "forbids", what = ["ident:MIN", "ident:MAX"], within = "maximum", message = "Keep the running maximum as an `Option<i32>` that starts as `None`, not a numeric sentinel such as `i32::MIN`." },
+]
+
+[[wrong]]
+name = "minimum"
+fails = ["t01", "t06", "t07", "t10", "t15"]
+
+[[wrong]]
+name = "sentinel"
+fails = ["t16"]
+

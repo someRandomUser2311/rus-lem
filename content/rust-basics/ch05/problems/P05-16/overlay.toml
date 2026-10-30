@@ -1,0 +1,13 @@
+[[tests]]
+key = "t17"
+run = { kind = "suite", script = "t17" }
+asserts = [{ check = "returns" }]
+
+[[wrong]]
+name = "sign-on-den"
+fails = ["t02", "t04", "t05", "t07", "t09"]
+
+[[wrong]]
+name = "unreduced-sum"
+fails = ["t14", "t16", "t17", "t18"]
+

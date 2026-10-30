@@ -1,0 +1,24 @@
+[[tests]]
+key = "t12"
+run = { kind = "suite", script = "t12" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t13"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["op:%"], within = "is_prime", inside = "while", message = "Search for a divisor with a `while` loop in `is_prime`, testing `n % d == 0`." },
+]
+
+[[wrong]]
+name = "one-is-prime"
+fails = ["t05"]
+
+[[wrong]]
+name = "stops-before-root"
+fails = ["t08", "t10"]
+
+[[wrong]]
+name = "for-range"
+fails = ["t13"]
+

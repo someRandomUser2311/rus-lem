@@ -1,0 +1,21 @@
+[[tests]]
+key = "t11"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["update"], within = "night_mode", inside = "struct_lit:Settings", message = "Build the night-mode settings with struct update syntax: list what changes, then `..base`." },
+  { check = "uses", what = ["update"], within = "with_volume", inside = "struct_lit:Settings", message = "Build the new settings in `with_volume` with struct update syntax (`..*base`)." },
+  { check = "uses", what = ["call:clone"], within = "with_volume", message = "`with_volume` borrows its base, so clone the theme explicitly (`base.theme.clone()`)." },
+]
+
+[[wrong]]
+name = "brightness-forced"
+fails = ["t03", "t05"]
+
+[[wrong]]
+name = "volume-uncapped"
+fails = ["t02", "t04", "t06", "t08", "t10"]
+
+[[wrong]]
+name = "no-update"
+fails = ["t11"]
+

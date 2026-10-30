@@ -1,0 +1,39 @@
+[[tests]]
+key = "t15"
+run = { kind = "suite", script = "t15" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t16"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["reborrow"], within = "decorate", message = "Measure the text through a shared reborrow first, such as `let view = &*text;`, before changing it." },
+]
+
+[[tests]]
+key = "t17"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:marker_text", "call:push_str"], within = "decorate", message = "Get the marker from `marker_text()` and append the returned String with `push_str`." },
+  { check = "uses", what = ["call:from"], within = "marker_text", message = "`marker_text` should build and return its own String, such as `String::from(\"!\")`." },
+]
+
+[[tests]]
+key = "t18"
+run = { kind = "source" }
+asserts = [
+{ check = "forbids", what = ["type:Vec", "type:VecDeque", "type:HashMap", "type:HashSet", "type:BTreeMap", "type:BTreeSet", "macro:vec", "type:Option", "call:Some", "ident:None", "item:struct", "item:enum", "item:trait", "item:impl", "item:type", "item:static", "lifetime", "unsafe", "call:leak", "call:forget", "call:map", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:zip", "call:skip", "call:take", "call:sum", "call:product", "call:any", "call:all", "call:position", "call:windows", "call:chunks"], message = "Use only what Chapters 1–4 teach: no Vec or other collections, no Option, no struct/enum/trait/impl definitions, no explicit lifetimes, no unsafe code, and no iterator adapters such as map, filter or collect. Plain for loops over chars, bytes, char_indices or split_whitespace, and standard String methods, are fine." },
+]
+
+[[wrong]]
+name = "new-length"
+fails = ["t01", "t02", "t03", "t04", "t05", "t06", "t07", "t08", "t09", "t10", "t11", "t12", "t13", "t14", "t15"]
+
+[[wrong]]
+name = "no-reborrow"
+fails = ["t16"]
+
+[[wrong]]
+name = "inline-marker"
+fails = ["t17"]
+

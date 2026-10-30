@@ -1,0 +1,35 @@
+[workspace]
+resolver = "3"
+members = ["crates/*", "app/src-tauri"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.90"
+license = "MIT OR Apache-2.0"
+
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.9"
+anyhow = "1"
+thiserror = "2"
+syn = { version = "2", features = ["full", "visit", "extra-traits"] }
+proc-macro2 = { version = "1", features = ["span-locations"] }
+quote = "1"
+rusqlite = { version = "0.37", features = ["bundled"] }
+tempfile = "3"
+pulldown-cmark = "0.13"
+regex = "1"
+clap = { version = "4", features = ["derive"] }
+libc = "0.2"
+ts-rs = { version = "12", features = ["serde-compat", "no-serde-warnings", "serde-json-impl"] }
+sha2 = "0.10"
+rb-content = { path = "crates/rb-content" }
+rb-specparse = { path = "crates/rb-specparse" }
+rb-srccheck = { path = "crates/rb-srccheck" }
+rb-runner = { path = "crates/rb-runner" }
+rb-grader = { path = "crates/rb-grader" }
+rb-quiz = { path = "crates/rb-quiz" }
+rb-progress = { path = "crates/rb-progress" }
+rb-lsp = { path = "crates/rb-lsp" }

@@ -1,0 +1,35 @@
+[[tests]]
+key = "t18"
+run = { kind = "suite", script = "t18" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t19"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["block_expr"], within = "calendar", message = "Compute the leap flag with a block expression: `let leap = { let …; condition };`." },
+]
+
+[[tests]]
+key = "t20"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["if_expr"], within = "calendar", message = "Choose the month length with an `if … else` expression that produces the value, such as `let days = if month == 2 { … } else { … };`." },
+]
+
+[[wrong]]
+name = "every-fourth"
+fails = ["t04", "t10", "t18"]
+
+[[wrong]]
+name = "invalid-months-31"
+fails = ["t05", "t06", "t07", "t18"]
+
+[[wrong]]
+name = "no-block"
+fails = ["t19"]
+
+[[wrong]]
+name = "assigned-days"
+fails = ["t20"]
+

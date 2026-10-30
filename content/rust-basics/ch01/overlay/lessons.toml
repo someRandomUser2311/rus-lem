@@ -1,0 +1,162 @@
+# Chapter 1 lesson visuals, authored from the "Visual state" columns of lessons.md.
+# Merged onto chapter.gen.json: lessons by `id`, screens by `key`, steps by `n`.
+
+# ---------------------------------------------------------------- L1.1
+[[lessons]]
+id = "L1.1"
+read_more = ["ch01-01-installation.md", "ch01-02-hello-world.md"]
+
+[[lessons.screens]]
+key = "s2"
+panels = [{ kind = "terminal", id = "out", title = "Output" }]
+steps = [
+  { n = 1, ops = [{ panel = "out", op = "print", text = "Crack two eggs.\n" }] },
+  { n = 2, ops = [{ panel = "out", op = "print", text = "Whisk them.\n" }] },
+  { n = 3, ops = [{ panel = "out", op = "print", text = "Heat the pan.\n" }] },
+  { n = 4, ops = [{ panel = "out", op = "badge", text = "Program finished" }] },
+]
+
+[[lessons.screens]]
+key = "s3"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "flow"
+layout = "row"
+nodes = [
+  { id = "src", label = "main.rs", sub = "source code · text you write", state = { style = "rust" } },
+  { id = "rustc", label = "rustc", sub = "the compiler", state = { style = "blue" } },
+  { id = "exe", label = "main", sub = "executable · machine code the processor runs", state = { style = "green" } },
+]
+edges = [
+  { id = "e1", from = "src", to = "rustc", label = "translate" },
+  { id = "e2", from = "rustc", to = "exe" },
+]
+
+[[lessons.screens]]
+key = "s4"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "flow"
+layout = "row"
+nodes = [
+  { id = "src", label = "main.rs", sub = "source code" },
+  { id = "rustc", label = "rustc", sub = "the compiler", state = { ghost = true } },
+  { id = "exe", label = "main", sub = "executable", state = { ghost = true } },
+]
+edges = [
+  { id = "e1", from = "src", to = "rustc", label = "translate" },
+  { id = "e2", from = "rustc", to = "exe" },
+]
+[[lessons.screens.steps]]
+n = 1
+ops = [{ panel = "flow", op = "node", id = "src", lit = true, style = "rust" }]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "flow", op = "node", id = "src", lit = false },
+  { panel = "flow", op = "node", id = "rustc", ghost = false, lit = true, style = "blue", badge = "checking…" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "flow", op = "node", id = "rustc", lit = false, badge = "" },
+  { panel = "flow", op = "node", id = "exe", ghost = false, lit = true, style = "green", badge = "new file" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "flow", op = "node", id = "exe", badge = "running" },
+]
+
+# ---------------------------------------------------------------- L1.2
+[[lessons]]
+id = "L1.2"
+read_more = ["ch01-02-hello-world.md"]
+
+[[lessons.screens]]
+key = "s1"
+panels = [{ kind = "terminal", id = "out", title = "Output" }]
+steps = [
+  { n = 1, notes = [{ line = 1, text = "start here" }] },
+  { n = 2, ops = [{ panel = "out", op = "print", text = "Hello, world!\n" }] },
+  { n = 3, ops = [{ panel = "out", op = "badge", text = "Program finished" }] },
+]
+
+[[lessons.screens]]
+key = "s7"
+panels = [{ kind = "terminal", id = "out", title = "Output", cursor = true }]
+steps = [
+  { n = 1, ops = [{ panel = "out", op = "print", text = "Hello, " }] },
+  { n = 2, ops = [{ panel = "out", op = "print", text = "world" }] },
+  { n = 3, ops = [{ panel = "out", op = "print", text = "!\n" }] },
+  { n = 4, ops = [{ panel = "out", op = "print", text = "2 + 3 = 5\n" }], links = [
+    { from = "5:15-16", to = "5:30-30" },
+    { from = "5:20-21", to = "5:33-33" },
+    { from = "5:25-26", to = "5:36-36" },
+  ] },
+  { n = 5, ops = [{ panel = "out", op = "print", text = "Braces: {}\n" }] },
+]
+
+# ---------------------------------------------------------------- L1.3
+[[lessons]]
+id = "L1.3"
+read_more = ["ch01-03-hello-cargo.md"]
+
+[[lessons.screens]]
+key = "s2"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "tree"
+layout = "tree"
+nodes = [
+  { id = "root", label = "hello_cargo/", kind = "folder" },
+  { id = "toml", label = "Cargo.toml", kind = "file", parent = "root" },
+  { id = "gitignore", label = ".gitignore", kind = "file", parent = "root" },
+  { id = "src", label = "src/", kind = "folder", parent = "root" },
+  { id = "main", label = "main.rs", kind = "file", parent = "src" },
+  { id = "code", label = "fn main() {\n    println!(\"Hello, world!\");\n}", kind = "code", state = { hidden = true } },
+]
+[[lessons.screens.steps]]
+n = 1
+[[lessons.screens.steps]]
+n = 2
+ops = [{ panel = "tree", op = "node", id = "toml", lit = true, style = "rust", badge = "settings" }]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "tree", op = "node", id = "toml", lit = false, badge = "" },
+  { panel = "tree", op = "node", id = "main", lit = true, style = "rust", badge = "your code" },
+  { panel = "tree", op = "node", id = "code", hidden = false },
+]
+
+[[lessons.screens]]
+key = "s4"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "tree"
+layout = "tree"
+nodes = [
+  { id = "root", label = "hello_cargo/", kind = "folder" },
+  { id = "toml", label = "Cargo.toml", kind = "file", parent = "root" },
+  { id = "lock", label = "Cargo.lock", kind = "file", parent = "root", state = { hidden = true } },
+  { id = "gitignore", label = ".gitignore", kind = "file", parent = "root" },
+  { id = "src", label = "src/", kind = "folder", parent = "root" },
+  { id = "main", label = "main.rs", kind = "file", parent = "src" },
+  { id = "target", label = "target/", kind = "folder", parent = "root", state = { hidden = true } },
+  { id = "debug", label = "debug/", kind = "folder", parent = "target", state = { hidden = true } },
+  { id = "exe", label = "hello_cargo", kind = "file", parent = "debug", state = { hidden = true } },
+]
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "tree", op = "node", id = "lock", hidden = false, badge = "new" },
+  { panel = "tree", op = "node", id = "target", hidden = false, badge = "new" },
+  { panel = "tree", op = "node", id = "debug", hidden = false, badge = "new" },
+  { panel = "tree", op = "node", id = "exe", hidden = false, badge = "new", style = "green", lit = true },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [{ panel = "tree", op = "node", id = "exe", badge = "running" }]
+[[lessons.screens.steps]]
+n = 3
+notes = [{ line = 7, text = "not rebuilt: nothing changed" }]

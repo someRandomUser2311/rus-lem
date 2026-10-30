@@ -1,0 +1,17 @@
+[[tests]]
+key = "t06"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["type:Vec", "type:VecDeque", "type:HashMap", "type:HashSet", "type:BTreeMap", "type:BTreeSet", "macro:vec", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "try", "call:leak", "call:forget", "call:map", "call:and_then", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:zip", "call:sum", "call:product", "call:any", "call:all", "call:position", "call:windows", "call:chunks"], message = "Use only what Chapters 1–6 teach: enums, Option, match, if let and let...else are fine, but no Vec or other collections, no traits or trait implementations, no explicit lifetimes, no unsafe code, no `?` operator, and no adapters that take closures, such as map, and_then, filter or collect." },
+  { check = "uses", what = ["match", "pat:Penny", "pat:Nickel", "pat:Dime", "pat:Quarter"], within = "cents", message = "`cents` needs a `match` with an explicit arm for each of `Coin::Penny`, `Coin::Nickel`, `Coin::Dime` and `Coin::Quarter`." },
+  { check = "forbids", what = ["pat_wild", "pat_bind"], within = "cents", message = "Name every `Coin` variant in its own arm; a catch-all (`_` or a bare name) would hide a missing one." },
+]
+
+[[wrong]]
+name = "dime-is-five"
+fails = ["t03"]
+
+[[wrong]]
+name = "catch-all-quarter"
+fails = ["t06"]
+

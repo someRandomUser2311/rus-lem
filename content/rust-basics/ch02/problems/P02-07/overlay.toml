@@ -1,0 +1,53 @@
+[[tests]]
+key = "t17"
+run = { kind = "process", stdin = "", stdin_pieces = [{ text = "{n}\n", from = 1, to = 100000 }] }
+asserts = [
+  { check = "stdout_pieces", pieces = [{ text = "Type numbers, one per line. Type done to finish.\n" }, { text = "New largest: {n}\n", from = 1, to = 100000 }, { text = "Largest: 100000\n" }] },
+]
+
+[[tests]]
+key = "t18"
+run = { kind = "suite", generator = { seed = 519, cases = 300, lines = 13, items = [{ number = 1001 }, { number = 1001 }, { number = 1001 }, { number = 1001 }, { number = 1001 }, { number = 1001 }, "4294967295", { one_of = ["ten", "-5", "4294967296", "٧"] }, "", "done"], reference = true } }
+asserts = [
+  { check = "same_as_reference" },
+]
+
+[[tests]]
+key = "t19"
+run = { kind = "source" }
+asserts = [
+  { check = "banned_keyword", word = "if" },
+]
+
+[[tests]]
+key = "t20"
+run = { kind = "source" }
+asserts = [
+  { check = "banned_keyword", word = "while" },
+]
+
+[[tests]]
+key = "t21"
+run = { kind = "source" }
+asserts = [
+  { check = "banned_keyword", word = "for" },
+]
+
+[[tests]]
+key = "t22"
+run = { kind = "source" }
+asserts = [
+  { check = "banned_method", name = "max" },
+]
+
+[[wrong]]
+name = "greater-or-equal"
+fails = ["t05", "t08"]
+
+[[wrong]]
+name = "uses-max"
+fails = ["t22"]
+
+[[wrong]]
+name = "stops-on-blank"
+fails = ["t09", "t18"]

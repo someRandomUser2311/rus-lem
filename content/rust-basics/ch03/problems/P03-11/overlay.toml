@@ -1,0 +1,39 @@
+[[tests]]
+key = "t05"
+asserts = [
+  { check = "exit_code", code = 101 },
+  { check = "stderr_contains", text = "index out of bounds: the len is 5 but the index is 5" },
+]
+
+[[tests]]
+key = "t06"
+asserts = [
+  { check = "exit_code", code = 101 },
+  { check = "stderr_contains", text = "index out of bounds: the len is 5 but the index is 1000000" },
+]
+
+[[tests]]
+key = "t09"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["index"], within = "main", message = "Read the element with array indexing, `days[i]`." },
+]
+
+[[tests]]
+key = "t13"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["let_ty:usize"], within = "main", message = "Give the index an explicit type before using it: `let i: usize = index;`." },
+]
+
+[[wrong]]
+name = "no-annotation"
+fails = ["t13"]
+
+[[wrong]]
+name = "recovers"
+fails = ["t05", "t06"]
+
+[[wrong]]
+name = "loop-not-index"
+fails = ["t09"]

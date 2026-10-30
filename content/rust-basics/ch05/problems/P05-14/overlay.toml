@@ -1,0 +1,12 @@
+[[wrong]]
+name = "minutes-of-total"
+fails = ["t09"]
+
+[[wrong]]
+name = "plain-multiply"
+fails = ["t06"]
+
+[[wrong]]
+name = "plain-add"
+fails = ["t08"]
+

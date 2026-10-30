@@ -1,0 +1,4 @@
+[[wrong]]
+name = "last-match"
+fails = ["t01", "t07"]
+

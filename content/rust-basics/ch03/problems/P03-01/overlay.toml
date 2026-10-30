@@ -1,0 +1,19 @@
+[[tests]]
+key = "t06"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["let_mut:score", "assign:score"], within = "main", message = "Keep one `let mut score = 0;` and give it the new value with `score = new_score;` (no second `let`)." },
+  { check = "forbids", what = ["shadow:score"], within = "main", message = "Don't declare `score` a second time with `let`; assign to the mutable binding instead." },
+]
+
+[[wrong]]
+name = "shadow"
+fails = ["t06"]
+
+[[wrong]]
+name = "assign-after-print"
+fails = ["t01", "t03", "t05", "t09"]
+
+[[wrong]]
+name = "no-trim"
+fails = ["t05", "t09"]

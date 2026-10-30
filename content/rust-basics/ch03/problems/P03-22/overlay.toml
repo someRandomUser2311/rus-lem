@@ -1,0 +1,31 @@
+[[tests]]
+key = "t12"
+run = { kind = "suite", script = "t12" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t13"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["recursion"], message = "Compute the Fibonacci number with a loop; functions here must not call themselves (directly or through another function)." },
+]
+
+[[tests]]
+key = "t14"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["op:+"], within = "fibonacci", inside = "for_range", message = "Advance the pair inside a `for` loop over a range (`for _ in 0..n`) in `fibonacci`." },
+]
+
+[[wrong]]
+name = "recursive"
+fails = ["t13"]
+
+[[wrong]]
+name = "off-by-one"
+fails = ["t02", "t03", "t05", "t06", "t07", "t08", "t09", "t10", "t11", "t12"]
+
+[[wrong]]
+name = "while-loop"
+fails = ["t14"]
+

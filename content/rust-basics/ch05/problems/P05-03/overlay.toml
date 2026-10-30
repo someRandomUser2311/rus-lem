@@ -1,0 +1,12 @@
+[[wrong]]
+name = "i32-difference"
+fails = ["t06", "t07"]
+
+[[wrong]]
+name = "touching-counts"
+fails = ["t02"]
+
+[[wrong]]
+name = "diagonal-adjacent"
+fails = ["t05", "t06", "t07"]
+

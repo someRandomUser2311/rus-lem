@@ -1,0 +1,4 @@
+[[wrong]]
+name = "zero-default"
+fails = ["t04"]
+

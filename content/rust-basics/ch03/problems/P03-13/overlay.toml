@@ -1,0 +1,7 @@
+[[wrong]]
+name = "abs-number"
+fails = ["t02"]
+
+[[wrong]]
+name = "uppercase-marker"
+fails = ["t02"]

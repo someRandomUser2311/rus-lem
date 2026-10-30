@@ -1,0 +1,286 @@
+mode = "cargo"
+checkpoints = true
+fixtures = ["secret_number"]
+parts = ["Read and parse", "Compare", "Repeat", "Random secret"]
+
+[[tests]]
+key = "t01"
+part = 1
+run = { kind = "process", stdin = "42\n" }
+asserts = [
+  { check = "stdout_eq", text = "Guess the number!\nPlease input your guess.\nYou guessed: 42\nGoodbye!\n" },
+]
+
+[[tests]]
+key = "t02"
+part = 1
+run = { kind = "process", stdin = "crab\n" }
+asserts = [
+  { check = "stdout_eq", text = "Guess the number!\nPlease input your guess.\nPlease type a number!\nGoodbye!\n" },
+]
+
+[[tests]]
+key = "t03"
+part = 2
+run = { kind = "process", stdin = "20\n" }
+asserts = [
+  { check = "stdout_eq", text = "Guess the number!\nPlease input your guess.\nYou guessed: 20\nToo small!\nGoodbye!\n" },
+]
+
+[[tests]]
+key = "t04"
+part = 2
+run = { kind = "process", stdin = "90\n" }
+asserts = [
+  { check = "stdout_eq", text = "Guess the number!\nPlease input your guess.\nYou guessed: 90\nToo big!\nGoodbye!\n" },
+]
+
+[[tests]]
+key = "t05"
+part = 2
+run = { kind = "process", stdin = "42\n" }
+asserts = [
+  { check = "stdout_eq", text = "Guess the number!\nPlease input your guess.\nYou guessed: 42\nYou win!\n" },
+]
+
+[[tests]]
+key = "t06"
+part = 3
+run = { kind = "process", stdin = "20\n90\n42\n" }
+asserts = [
+  { check = "stdout_eq", text = "Guess the number!\nPlease input your guess.\nYou guessed: 20\nToo small!\nPlease input your guess.\nYou guessed: 90\nToo big!\nPlease input your guess.\nYou guessed: 42\nYou win!\n" },
+]
+
+[[tests]]
+key = "t07"
+part = 4
+run = { kind = "process", stdin = "42\n", fixture = { secret_number = "42" } }
+asserts = [
+  { check = "stdout_eq", text = "Guess the number!\nPlease input your guess.\nYou guessed: 42\nYou win!\n" },
+]
+
+[[tests]]
+key = "t08"
+part = 4
+run = { kind = "process", stdin = "", fixture = { secret_number = "42" } }
+asserts = [
+  { check = "stdout_eq", text = "Guess the number!\nPlease input your guess.\nGoodbye!\n" },
+]
+
+[[tests]]
+key = "t09"
+part = 4
+run = { kind = "process", stdin = "", stdin_pieces = [{ text = "x", times = 999 }, { text = "\n42\n" }], fixture = { secret_number = "42" } }
+asserts = [
+  { check = "stdout_eq", text = "Guess the number!\nPlease input your guess.\nPlease type a number!\nPlease input your guess.\nYou guessed: 42\nYou win!\n" },
+]
+
+[[tests]]
+key = "t10"
+part = 4
+run = { kind = "process", stdin = "\n42\n", fixture = { secret_number = "42" } }
+asserts = [
+  { check = "stdout_eq", text = "Guess the number!\nPlease input your guess.\nPlease type a number!\nPlease input your guess.\nYou guessed: 42\nYou win!\n" },
+]
+
+[[tests]]
+key = "t11"
+part = 4
+run = { kind = "process", stdin = "42", fixture = { secret_number = "42" } }
+asserts = [
+  { check = "stdout_eq", text = "Guess the number!\nPlease input your guess.\nYou guessed: 42\nYou win!\n" },
+]
+
+[[tests]]
+key = "t12"
+part = 4
+run = { kind = "process", stdin = " 42 \r\n", fixture = { secret_number = "42" } }
+asserts = [
+  { check = "stdout_eq", text = "Guess the number!\nPlease input your guess.\nYou guessed: 42\nYou win!\n" },
+]
+
+[[tests]]
+key = "t13"
+part = 4
+run = { kind = "process", stdin = "0\n42\n", fixture = { secret_number = "42" } }
+asserts = [
+  { check = "stdout_eq", text = "Guess the number!\nPlease input your guess.\nYou guessed: 0\nToo small!\nPlease input your guess.\nYou guessed: 42\nYou win!\n" },
+]
+
+[[tests]]
+key = "t14"
+part = 4
+run = { kind = "process", stdin = "4294967295\n42\n", fixture = { secret_number = "42" } }
+asserts = [
+  { check = "stdout_eq", text = "Guess the number!\nPlease input your guess.\nYou guessed: 4294967295\nToo big!\nPlease input your guess.\nYou guessed: 42\nYou win!\n" },
+]
+
+[[tests]]
+key = "t15"
+part = 4
+run = { kind = "process", stdin = "4294967296\n42\n", fixture = { secret_number = "42" } }
+asserts = [
+  { check = "stdout_eq", text = "Guess the number!\nPlease input your guess.\nPlease type a number!\nPlease input your guess.\nYou guessed: 42\nYou win!\n" },
+]
+
+[[tests]]
+key = "t16"
+part = 4
+run = { kind = "process", stdin = "-1\n42\n", fixture = { secret_number = "42" } }
+asserts = [
+  { check = "stdout_eq", text = "Guess the number!\nPlease input your guess.\nPlease type a number!\nPlease input your guess.\nYou guessed: 42\nYou win!\n" },
+]
+
+[[tests]]
+key = "t17"
+part = 4
+run = { kind = "process", stdin = "5.0\n42\n", fixture = { secret_number = "42" } }
+asserts = [
+  { check = "stdout_eq", text = "Guess the number!\nPlease input your guess.\nPlease type a number!\nPlease input your guess.\nYou guessed: 42\nYou win!\n" },
+]
+
+[[tests]]
+key = "t18"
+part = 4
+run = { kind = "process", stdin = "４２\n42\n", fixture = { secret_number = "42" } }
+asserts = [
+  { check = "stdout_eq", text = "Guess the number!\nPlease input your guess.\nPlease type a number!\nPlease input your guess.\nYou guessed: 42\nYou win!\n" },
+]
+
+[[tests]]
+key = "t19"
+part = 4
+run = { kind = "process", stdin = "　42　\n", fixture = { secret_number = "42" } }
+asserts = [
+  { check = "stdout_eq", text = "Guess the number!\nPlease input your guess.\nYou guessed: 42\nYou win!\n" },
+]
+
+[[tests]]
+key = "t20"
+part = 4
+run = { kind = "process", stdin = "1\n", fixture = { secret_number = "1" } }
+asserts = [
+  { check = "stdout_eq", text = "Guess the number!\nPlease input your guess.\nYou guessed: 1\nYou win!\n" },
+]
+
+[[tests]]
+key = "t21"
+part = 4
+run = { kind = "process", stdin = "100\n", fixture = { secret_number = "100" } }
+asserts = [
+  { check = "stdout_eq", text = "Guess the number!\nPlease input your guess.\nYou guessed: 100\nYou win!\n" },
+]
+
+[[tests]]
+key = "t22"
+part = 4
+run = { kind = "process", stdin = "42\n99\n", fixture = { secret_number = "42" } }
+asserts = [
+  { check = "stdout_eq", text = "Guess the number!\nPlease input your guess.\nYou guessed: 42\nYou win!\n" },
+]
+
+[[tests]]
+key = "t23"
+part = 4
+run = { kind = "process", stdin = "+42\n", fixture = { secret_number = "42" } }
+asserts = [
+  { check = "stdout_eq", text = "Guess the number!\nPlease input your guess.\nYou guessed: 42\nYou win!\n" },
+]
+
+[[tests]]
+key = "t24"
+part = 4
+run = { kind = "process", stdin = "0042\n", fixture = { secret_number = "42" } }
+asserts = [
+  { check = "stdout_eq", text = "Guess the number!\nPlease input your guess.\nYou guessed: 42\nYou win!\n" },
+]
+
+[[tests]]
+key = "t25"
+part = 4
+run = { kind = "process", stdin = "crab", fixture = { secret_number = "42" } }
+asserts = [
+  { check = "stdout_eq", text = "Guess the number!\nPlease input your guess.\nPlease type a number!\nPlease input your guess.\nGoodbye!\n" },
+]
+
+[[tests]]
+key = "t26"
+part = 4
+run = { kind = "process", stdin = "20\n", fixture = { secret_number = "42" } }
+asserts = [
+  { check = "stdout_eq", text = "Guess the number!\nPlease input your guess.\nYou guessed: 20\nToo small!\nPlease input your guess.\nGoodbye!\n" },
+]
+
+[[tests]]
+key = "t27"
+part = 4
+run = { kind = "source" }
+asserts = [
+  { check = "let_init", name = "secret_number", ty = "u32", exprs = ["rand::rng().random_range(1..=100)"], in_loop = false },
+  { check = "match_on", method = "cmp" },
+]
+
+[[tests]]
+key = "t28"
+part = 4
+run = { kind = "suite", generator = { seed = 672, cases = 300, lines = 13, fixture = { binding = "secret_number", pick = 100, add = 1 }, items = ["0", "101", { fixture = true }, "crab", "", "4294967296", " 42 ", "４２"], reference = true } }
+asserts = [
+  { check = "same_as_reference" },
+]
+
+[[tests]]
+key = "t29"
+part = 4
+run = { kind = "process", stdin = "", stdin_pieces = [{ text = "crab\n", times = 9999 }, { text = "42\n" }], fixture = { secret_number = "42" } }
+asserts = [
+  { check = "stdout_pieces", pieces = [{ text = "Guess the number!\nPlease input your guess.\n" }, { text = "Please type a number!\nPlease input your guess.\n", times = 9999 }, { text = "You guessed: 42\nYou win!\n" }] },
+]
+
+[[tests]]
+key = "t30"
+part = 4
+run = { kind = "source" }
+asserts = [
+  { check = "macro_mention_forbid", macros = ["print", "println", "eprint", "eprintln", "dbg", "format"], name = "secret_number" },
+]
+
+[[tests]]
+key = "t31"
+run = { kind = "source" }
+asserts = [
+  { check = "banned_keyword", word = "if" },
+]
+part = 4
+
+[[tests]]
+key = "t32"
+run = { kind = "source" }
+asserts = [
+  { check = "banned_keyword", word = "while" },
+]
+part = 4
+
+[[tests]]
+key = "t33"
+run = { kind = "source" }
+asserts = [
+  { check = "banned_keyword", word = "for" },
+]
+part = 4
+
+[[wrong]]
+name = "shows-secret"
+fails = ["t07", "t08", "t09", "t10", "t11", "t12", "t13", "t14", "t15", "t16", "t17", "t18", "t19", "t20", "t21", "t22", "t23", "t24", "t25", "t26", "t28", "t29", "t30"]
+
+[[wrong]]
+name = "secret-in-loop"
+fails = ["t27"]
+
+[[wrong]]
+name = "eof-loops"
+fails = ["t08", "t25", "t26", "t28"]
+
+[[wrong]]
+name = "part1-no-goodbye"
+part = 1
+fails = ["t01", "t02"]

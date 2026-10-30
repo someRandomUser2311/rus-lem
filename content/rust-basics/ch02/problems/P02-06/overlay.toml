@@ -1,0 +1,53 @@
+[[tests]]
+key = "t15"
+run = { kind = "process", stdin = "", stdin_pieces = [{ text = "x", times = 1000 }, { text = "\nrustacean\n" }] }
+asserts = [
+  { check = "stdout_eq", text = "Password:\nWrong password, try again.\nPassword:\nWelcome!\n" },
+]
+
+[[tests]]
+key = "t16"
+run = { kind = "process", stdin = "", stdin_pieces = [{ text = "crab\n", times = 199999 }, { text = "rustacean\n" }] }
+asserts = [
+  { check = "stdout_pieces", pieces = [{ text = "Password:\nWrong password, try again.\n", times = 199999 }, { text = "Password:\nWelcome!\n" }] },
+]
+
+[[tests]]
+key = "t17"
+run = { kind = "suite", generator = { seed = 518, cases = 300, lines = 9, items = ["rustacean", "Rustacean", "hint", "", "  rustacean  ", "crab", "rust acean", "\t", "rustacéan"], reference = true } }
+asserts = [
+  { check = "same_as_reference" },
+]
+
+[[tests]]
+key = "t18"
+run = { kind = "source" }
+asserts = [
+  { check = "banned_keyword", word = "if" },
+]
+
+[[tests]]
+key = "t19"
+run = { kind = "source" }
+asserts = [
+  { check = "banned_keyword", word = "while" },
+]
+
+[[tests]]
+key = "t20"
+run = { kind = "source" }
+asserts = [
+  { check = "banned_keyword", word = "for" },
+]
+
+[[wrong]]
+name = "buffer-outside-loop"
+fails = ["t01", "t02", "t15", "t16", "t17"]
+
+[[wrong]]
+name = "if-chain"
+fails = ["t18"]
+
+[[wrong]]
+name = "no-trim"
+fails = ["t01", "t02", "t04", "t05", "t07", "t10", "t12", "t14", "t15", "t16", "t17"]

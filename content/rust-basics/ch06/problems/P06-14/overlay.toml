@@ -1,0 +1,13 @@
+[[tests]]
+key = "t13"
+run = { kind = "suite", script = "t13" }
+asserts = [{ check = "returns" }]
+
+[[wrong]]
+name = "spaces-only"
+fails = ["t03", "t04", "t07", "t08", "t09", "t13", "t14"]
+
+[[wrong]]
+name = "ascii-whitespace"
+fails = ["t07", "t13"]
+

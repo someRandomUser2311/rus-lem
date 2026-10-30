@@ -1,0 +1,25 @@
+[[tests]]
+key = "t22"
+run = { kind = "suite", script = "t22" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t23"
+run = { kind = "fixture", main = "fn reference_longest_word(text: &str) -> &str {\n    let mut best = &text[..0];\n    let mut length = 0;\n    for word in text.split_whitespace() {\n        let n = word.chars().count();\n        if n > length {\n            best = word;\n            length = n;\n        }\n    }\n    best\n}\n\nfn main() {\n    let inputs = [\n        String::from(\"one two\"),\n        String::from(\"hello world\"),\n        String::from(\"\"),\n        String::from(\"   \"),\n        String::from(\"\\t\\n\"),\n        String::from(\"é 東京\"),\n        String::from(\"😀 x\"),\n        String::from(\"é é\"),\n        String::from(\"  first\\tlast  \"),\n        String::from(\"x\".repeat(100000)),\n        String::from(\"a　b\"),\n        String::from(\"\\0 middle\"),\n        String::from(\"aa bb c\"),\n        String::from(\"éé abc\"),\n        String::from(\"東京 ab\"),\n        String::from(\"a\\nbbb\\tc\"),\n        String::from(\"  😀😀 é  \"),\n        String::from(\"a \".repeat(50000)),\n        String::from(\"a\"),\n        String::from(\"x\".repeat(99999)),\n        String::from(\"same same\"),\n        String::from(\"a\\u{1c}b cc\"),\n    ];\n    for owned in inputs {\n        let got = longest_word(&owned);\n        let want = reference_longest_word(&owned);\n        let base = owned.as_ptr() as usize;\n        let at = got.as_ptr() as usize;\n        assert!(at >= base && at + got.len() <= base + owned.len(), \"the returned slice isn't inside the input {owned:?}\");\n        assert_eq!((at - base, got.len()), (want.as_ptr() as usize - base, want.len()), \"wrong part of {owned:?}\");\n    }\n}" }
+asserts = [{ check = "stdout_eq", text = "" }]
+
+[[tests]]
+key = "t25"
+run = { kind = "source" }
+asserts = [
+{ check = "forbids", what = ["type:Vec", "type:VecDeque", "type:HashMap", "type:HashSet", "type:BTreeMap", "type:BTreeSet", "macro:vec", "type:Option", "call:Some", "ident:None", "item:struct", "item:enum", "item:trait", "item:impl", "item:type", "item:static", "lifetime", "unsafe", "call:leak", "call:forget", "call:map", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:zip", "call:skip", "call:take", "call:sum", "call:product", "call:any", "call:all", "call:position", "call:windows", "call:chunks"], message = "Use only what Chapters 1–4 teach: no Vec or other collections, no Option, no struct/enum/trait/impl definitions, no explicit lifetimes, no unsafe code, and no iterator adapters such as map, filter or collect. Plain for loops over chars, bytes, char_indices or split_whitespace, and standard String methods, are fine." },
+]
+
+[[wrong]]
+name = "last-tie"
+fails = ["t01", "t02", "t07", "t11", "t13", "t15", "t17", "t22", "t23"]
+
+[[wrong]]
+name = "byte-length"
+fails = ["t14", "t22", "t23"]
+

@@ -1,0 +1,1 @@
+Adapted from *The Rust Programming Language* by Steve Klabnik, Carol Nichols and Chris Krycho, with contributions from the Rust Community. Dual-licensed under MIT and Apache-2.0; see LICENSE-MIT and LICENSE-APACHE.

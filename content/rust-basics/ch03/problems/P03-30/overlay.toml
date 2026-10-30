@@ -1,0 +1,37 @@
+[[tests]]
+key = "t18"
+run = { kind = "suite", script = "t18" }
+asserts = [{ check = "same_as_reference" }]
+
+[[tests]]
+key = "t19"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:digit_sum", "call:reverse_integer", "call:is_prime"], within = "main", message = "Print the result lines from your `digit_sum`, `reverse_integer` and `is_prime` helpers, calling them from `main`." },
+]
+
+[[tests]]
+key = "t22"
+run = { kind = "process", stdin_pieces = [{ text = "x", times = 99 }, { text = "\nquit\n" }] }
+asserts = [{ check = "stdout_eq", text = "Number utilities\nEnter a number or quit:\nInput error\nEnter a number or quit:\nGoodbye!\n" }]
+
+[[wrong]]
+name = "sum-unpadded"
+fails = ["t01", "t02", "t03", "t04", "t08", "t12", "t13", "t14", "t17", "t18", "t21"]
+
+[[wrong]]
+name = "one-prime"
+fails = ["t17"]
+
+[[wrong]]
+name = "inline-sum"
+fails = ["t19"]
+
+[[wrong]]
+name = "quit-untrimmed"
+fails = ["t20"]
+
+[[tests]]
+key = "t17"
+run = { kind = "process", stdin_pieces = [{ text = "1\n", times = 9999 }, { text = "quit\n" }] }
+asserts = [{ check = "stdout_pieces", pieces = [{ text = "Number utilities\n" }, { text = "Enter a number or quit:\nNumber: 1\nDigit sum: 01\nPrime: false\nReversed: 1\n", times = 9999 }, { text = "Enter a number or quit:\nGoodbye!\n" }] }]

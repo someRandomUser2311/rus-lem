@@ -1,0 +1,18 @@
+[[tests]]
+key = "t07"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["derive:Debug"], inside = "struct:Rect", message = "Add `#[derive(Debug)]` to `Rect`." },
+  { check = "uses", what = ["macro:format"], within = "debug_line", message = "`debug_line` formats the rectangle with `format!` and `{:?}`." },
+  { check = "uses", what = ["macro:format"], within = "debug_pretty", message = "`debug_pretty` formats the rectangle with `format!` and `{:#?}`." },
+  { check = "fmt_literal_forbid", macros = ["format"], substrings = ["Rect", "width", "height"] },
+]
+
+[[wrong]]
+name = "pretty-compact"
+fails = ["t02", "t04", "t06"]
+
+[[wrong]]
+name = "hand-written"
+fails = ["t07"]
+

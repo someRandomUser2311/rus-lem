@@ -1,0 +1,8 @@
+[[wrong]]
+name = "add-first"
+fails = ["t01", "t02", "t03", "t04", "t05", "t06"]
+
+[[wrong]]
+name = "precedence"
+fails = ["t07", "t08", "t09", "t11", "t12"]
+

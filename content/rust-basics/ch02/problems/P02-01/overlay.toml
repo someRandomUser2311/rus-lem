@@ -1,0 +1,32 @@
+[[tests]]
+key = "t07"
+run = { kind = "process", stdin = "", stdin_pieces = [{ text = " " }, { text = "x", times = 997 }, { text = " \n" }] }
+asserts = [
+  { check = "stdout_pieces", pieces = [{ text = "Say something:\nYou said:  " }, { text = "x", times = 997 }, { text = " \n" }] },
+]
+
+[[tests]]
+key = "t09"
+run = { kind = "source" }
+asserts = [
+  { check = "call_count", name = "read_line", ge = 1 },
+]
+
+[[tests]]
+key = "t10"
+run = { kind = "source" }
+asserts = [
+  { check = "call_chain", calls = ["read_line", "expect"], arg = "Failed to read line" },
+]
+
+[[wrong]]
+name = "println-echo"
+fails = ["t01", "t02", "t03", "t04", "t05", "t06", "t07", "t08"]
+
+[[wrong]]
+name = "unwrap"
+fails = ["t10"]
+
+[[wrong]]
+name = "trimmed"
+fails = ["t04", "t05", "t07"]

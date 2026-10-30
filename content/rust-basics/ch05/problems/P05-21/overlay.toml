@@ -1,0 +1,24 @@
+[[tests]]
+key = "t19"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["multi_impl:Ledger"], message = "Split `Ledger`'s methods across at least two `impl Ledger` blocks." },
+]
+
+[[tests]]
+key = "t21"
+run = { kind = "suite", script = "t21" }
+asserts = [{ check = "returns" }]
+
+[[wrong]]
+name = "one-impl"
+fails = ["t19"]
+
+[[wrong]]
+name = "transfer-onto-taken"
+fails = ["t09", "t15", "t21"]
+
+[[wrong]]
+name = "seat-bound"
+fails = ["t04", "t21"]
+

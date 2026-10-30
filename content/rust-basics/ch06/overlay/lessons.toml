@@ -1,0 +1,973 @@
+# Chapter 6 lesson visuals, authored from the "Visual state" columns of lessons.md.
+# Merged onto chapter.gen.json: lessons by `id`, screens by `key`, steps by `n`.
+# A "type" panel is the spec's Type explorer: the enum as a tree, its variants (with their
+# payload shapes) as children, `sub = "variant"`. The variant a new value uses lights up.
+# An "owners" / "stack" / "vars" panel is a scene of bindings; an enum value is a binding
+# node whose `value` is the active variant (`North`, `Some(5)`, `None`, `Write(String)`)
+# and whose `sub` is its type. A String payload's text sits in a "heap" panel, owned via a
+# note ("owns → A"), as in Chapters 4 and 5. Borrows are notes ("⇢ d") with an "&" badge.
+# A "flow" panel is the spec's Match flow: the `match` (or `if let`) as the root node, its
+# value being the input under test, and one child node per arm, labelled `pattern => …`.
+# An arm tested and rejected is lit red ("no match"); the chosen arm is lit green with a
+# "chosen" badge; arms never reached are ghosted with a "skipped" badge. A binding the
+# pattern creates (`state`, `i`, `other`) is a hidden child of its arm, shown when bound.
+# A "calls" panel lists Option-returning calls, one node per call, value = what it returned.
+# The diagrams are explanatory models: no promise about discriminant size, payload layout,
+# stack placement or addresses. State panels show conceptual values, not extra output.
+# Output is printed at the step whose line produces it (or the first step after it); a
+# println! that runs after a screen's last step gets no output panel (as in Chapters 4–5).
+
+# ---------------------------------------------------------------- L6.1
+[[lessons]]
+id = "L6.1"
+read_more = ["ch06-00-enums.md", "ch06-01-defining-an-enum.md"]
+
+# Screen 1 · An enum lists every possible kind
+[[lessons.screens]]
+key = "s1"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "type"
+layout = "tree"
+nodes = [
+  { id = "dir", label = "enum Direction", sub = "type" },
+  { id = "north", label = "North", sub = "variant", parent = "dir" },
+  { id = "east", label = "East", sub = "variant", parent = "dir" },
+  { id = "south", label = "South", sub = "variant", parent = "dir" },
+  { id = "west", label = "West", sub = "variant", parent = "dir" },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "owners"
+layout = "grid"
+nodes = [
+  { id = "heading", label = "heading", sub = "Direction", state = { ghost = true } },
+  { id = "next", label = "next", sub = "Direction", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "type", op = "node", id = "dir", lit = true, note = "always exactly one of four variants" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "type", op = "node", id = "dir", lit = false, note = "" },
+  { panel = "type", op = "node", id = "north", lit = true, badge = "selected" },
+  { panel = "owners", op = "node", id = "heading", ghost = false, lit = true, value = "North", note = "Direction::North" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "type", op = "node", id = "north", lit = false, badge = "" },
+  { panel = "type", op = "node", id = "east", lit = true, badge = "selected" },
+  { panel = "owners", op = "node", id = "heading", lit = false, note = "" },
+  { panel = "owners", op = "node", id = "next", ghost = false, lit = true, value = "East", note = "same type, different variant" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "type", op = "node", id = "east", lit = false, badge = "" },
+  { panel = "type", op = "node", id = "dir", badge = "Debug" },
+  { panel = "owners", op = "node", id = "next", lit = false, note = "" },
+  { panel = "out", op = "print", text = "North then East\n" },
+]
+
+# Screen 3 · Variants can carry data
+# The println! lines 14–17 run after the last step (line 13), so there is no output panel.
+[[lessons.screens]]
+key = "s3"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "type"
+layout = "tree"
+nodes = [
+  { id = "msg", label = "enum Message", sub = "type" },
+  { id = "quit", label = "Quit", sub = "variant · no data", parent = "msg" },
+  { id = "move", label = "Move { x: i32, y: i32 }", sub = "variant · named fields", parent = "msg" },
+  { id = "write", label = "Write(String)", sub = "variant · one unnamed field", parent = "msg" },
+  { id = "color", label = "ChangeColor(u8, u8, u8)", sub = "variant · three unnamed fields", parent = "msg" },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "owners"
+layout = "grid"
+nodes = [
+  { id = "a", label = "a", sub = "Message", state = { ghost = true } },
+  { id = "b", label = "b", sub = "Message", state = { ghost = true } },
+  { id = "c", label = "c", sub = "Message", state = { ghost = true } },
+  { id = "d", label = "d", sub = "Message", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "heap"
+layout = "grid"
+nodes = [{ id = "ba", label = "A", state = { ghost = true } }]
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "type", op = "node", id = "msg", lit = true, note = "each variant carries its own data" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "type", op = "node", id = "msg", lit = false, note = "" },
+  { panel = "type", op = "node", id = "quit", lit = true, badge = "selected" },
+  { panel = "owners", op = "node", id = "a", ghost = false, lit = true, value = "Quit", note = "no payload" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "type", op = "node", id = "quit", lit = false, badge = "" },
+  { panel = "type", op = "node", id = "move", lit = true, badge = "selected" },
+  { panel = "owners", op = "node", id = "a", lit = false },
+  { panel = "owners", op = "node", id = "b", ghost = false, lit = true, value = "Move { x: 3, y: -1 }", note = "fields by name" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "type", op = "node", id = "move", lit = false, badge = "" },
+  { panel = "type", op = "node", id = "write", lit = true, badge = "selected" },
+  { panel = "owners", op = "node", id = "b", lit = false },
+  { panel = "owners", op = "node", id = "c", ghost = false, lit = true, value = "Write(String)", note = "owns → A" },
+  { panel = "heap", op = "node", id = "ba", ghost = false, lit = true, value = "hi" },
+]
+[[lessons.screens.steps]]
+n = 5
+ops = [
+  { panel = "type", op = "node", id = "write", lit = false, badge = "" },
+  { panel = "type", op = "node", id = "color", lit = true, badge = "selected" },
+  { panel = "type", op = "node", id = "msg", note = "a, b, c, d: all Message" },
+  { panel = "owners", op = "node", id = "c", lit = false },
+  { panel = "heap", op = "node", id = "ba", lit = false },
+  { panel = "owners", op = "node", id = "d", ghost = false, lit = true, value = "ChangeColor(255, 0, 0)" },
+]
+
+# Screen 5 · Enums can have methods
+# Call stack, newest frame first; `self` borrows the value the method was called on.
+[[lessons.screens]]
+key = "s5"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "stack"
+layout = "tree"
+nodes = [
+  { id = "report", label = "report", state = { hidden = true } },
+  { id = "self", label = "self", parent = "report", state = { hidden = true } },
+  { id = "main", label = "main" },
+  { id = "d", label = "d", sub = "Direction", parent = "main", state = { ghost = true } },
+  { id = "n", label = "n", sub = "Direction", parent = "main", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "stack", op = "node", id = "d", ghost = false, lit = true, value = "West" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "stack", op = "node", id = "d", lit = false },
+  { panel = "stack", op = "node", id = "main", note = "waiting" },
+  { panel = "stack", op = "node", id = "report", hidden = false, badge = "new frame" },
+  { panel = "stack", op = "node", id = "self", hidden = false, lit = true, value = "&Direction", badge = "&", note = "⇢ d · is_north() → false" },
+  { panel = "out", op = "print", text = "Heading West, north: false\n" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "stack", op = "node", id = "report", hidden = true, badge = "" },
+  { panel = "stack", op = "node", id = "self", hidden = true, lit = false, note = "" },
+  { panel = "stack", op = "node", id = "main", note = "resumed" },
+  { panel = "stack", op = "node", id = "d", note = "still usable" },
+  { panel = "stack", op = "node", id = "n", ghost = false, lit = true, value = "North" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "stack", op = "node", id = "n", lit = false },
+  { panel = "stack", op = "node", id = "main", note = "waiting" },
+  { panel = "stack", op = "node", id = "report", hidden = false, badge = "new frame" },
+  { panel = "stack", op = "node", id = "self", hidden = false, lit = true, note = "⇢ n · is_north() → true" },
+  { panel = "out", op = "print", text = "Heading North, north: true\n" },
+]
+
+# Screen 7 · Enum ownership follows its payloads
+# `a` exists before step 1 (line 6). Line 8 prints before step 2 (line 10), so step 2
+# shows that output; the println! on line 11 runs after the last step.
+[[lessons.screens]]
+key = "s7"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "owners"
+layout = "grid"
+nodes = [
+  { id = "a", label = "a", sub = "Number", state = { value = "Count(3)", badge = "Copy" } },
+  { id = "b", label = "b", sub = "Number", state = { ghost = true } },
+  { id = "owner", label = "owner", sub = "Label", state = { ghost = true } },
+  { id = "moved", label = "moved", sub = "Label", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "heap"
+layout = "grid"
+nodes = [{ id = "ba", label = "A", state = { ghost = true } }]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "owners", op = "node", id = "a", note = "still usable" },
+  { panel = "owners", op = "node", id = "b", ghost = false, lit = true, value = "Count(3)", badge = "copy", note = "independent copy" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "owners", op = "node", id = "b", lit = false },
+  { panel = "owners", op = "node", id = "owner", value = "", badge = "moved", note = "unusable" },
+  { panel = "owners", op = "node", id = "moved", ghost = false, lit = true, value = "Text(String)", note = "owns → A" },
+  { panel = "heap", op = "node", id = "ba", ghost = false, lit = true, value = "hi", note = "one buffer · no implicit clone" },
+  { panel = "out", op = "print", text = "Count(3) Count(3)\n" },
+]
+
+# ---------------------------------------------------------------- L6.2
+[[lessons]]
+id = "L6.2"
+read_more = ["ch06-01-defining-an-enum.md"]
+
+# Screen 3 · Asking what's inside
+# Line 4 prints at step 2; line 7 prints at step 5.
+[[lessons.screens]]
+key = "s3"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "owners"
+layout = "grid"
+nodes = [
+  { id = "found", label = "found", sub = "Option<i32>", state = { ghost = true } },
+  { id = "missing", label = "missing", sub = "Option<i32>", state = { ghost = true } },
+  { id = "a", label = "a", sub = "i32", state = { ghost = true } },
+  { id = "b", label = "b", sub = "i32", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "owners", op = "node", id = "found", ghost = false, lit = true, value = "Some(3)" },
+  { panel = "owners", op = "node", id = "missing", ghost = false, lit = true, value = "None", note = "holds nothing" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "owners", op = "node", id = "found", note = "is_some() → true · still usable" },
+  { panel = "owners", op = "node", id = "missing", note = "is_none() → true · still usable" },
+  { panel = "out", op = "print", text = "true true\n" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "owners", op = "node", id = "missing", lit = false, note = "" },
+  { panel = "owners", op = "node", id = "found", note = "unwrap_or(0): has a value" },
+  { panel = "owners", op = "node", id = "a", ghost = false, lit = true, value = "3", note = "the value inside" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "owners", op = "node", id = "found", lit = false, note = "" },
+  { panel = "owners", op = "node", id = "a", lit = false, note = "" },
+  { panel = "owners", op = "node", id = "missing", lit = true, note = "unwrap_or(0): nothing inside" },
+  { panel = "owners", op = "node", id = "b", ghost = false, lit = true, value = "0", note = "the default" },
+]
+[[lessons.screens.steps]]
+n = 5
+ops = [
+  { panel = "owners", op = "node", id = "missing", lit = false, note = "" },
+  { panel = "owners", op = "node", id = "b", note = "" },
+  { panel = "owners", op = "node", id = "a", lit = true },
+  { panel = "out", op = "print", text = "3 0\n" },
+]
+
+# Screen 4 · Standard methods that might find nothing
+# `{:?}` prints Some(&20) as Some(20); the calls panel shows the reference.
+[[lessons.screens]]
+key = "s4"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "owners"
+layout = "grid"
+nodes = [{ id = "scores", label = "scores", sub = "[i32; 3]", state = { value = "[10, 20, 30]" } }]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "calls"
+layout = "grid"
+nodes = [
+  { id = "get1", label = "scores.get(1)", sub = "Option<&i32>", state = { ghost = true } },
+  { id = "get5", label = "scores.get(5)", sub = "Option<&i32>", state = { ghost = true } },
+  { id = "first", label = "scores.first()", sub = "Option<&i32>", state = { ghost = true } },
+  { id = "findl", label = "\"hello\".find('l')", sub = "Option<usize>", state = { ghost = true } },
+  { id = "findz", label = "\"hello\".find('z')", sub = "Option<usize>", state = { ghost = true } },
+  { id = "d7", label = "'7'.to_digit(10)", sub = "Option<u32>", state = { ghost = true } },
+  { id = "dx", label = "'x'.to_digit(10)", sub = "Option<u32>", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "calls", op = "node", id = "get1", ghost = false, lit = true, value = "Some(&20)", note = "index in range" },
+  { panel = "calls", op = "node", id = "get5", ghost = false, lit = true, value = "None", note = "past the end · no panic" },
+  { panel = "out", op = "print", text = "Some(20)\nNone\n" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "calls", op = "node", id = "get1", lit = false },
+  { panel = "calls", op = "node", id = "get5", lit = false },
+  { panel = "calls", op = "node", id = "first", ghost = false, lit = true, value = "Some(&10)" },
+  { panel = "owners", op = "node", id = "scores", note = "no element removed" },
+  { panel = "out", op = "print", text = "Some(10)\n" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "calls", op = "node", id = "first", lit = false },
+  { panel = "owners", op = "node", id = "scores", note = "" },
+  { panel = "calls", op = "node", id = "findl", ghost = false, lit = true, value = "Some(2)", note = "byte position" },
+  { panel = "calls", op = "node", id = "findz", ghost = false, lit = true, value = "None", note = "no match" },
+  { panel = "out", op = "print", text = "Some(2)\nNone\n" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "calls", op = "node", id = "findl", lit = false },
+  { panel = "calls", op = "node", id = "findz", lit = false },
+  { panel = "calls", op = "node", id = "d7", ghost = false, lit = true, value = "Some(7)" },
+  { panel = "calls", op = "node", id = "dx", ghost = false, lit = true, value = "None", note = "not a radix-10 digit" },
+  { panel = "out", op = "print", text = "Some(7)\nNone\n" },
+]
+
+# Screen 7 · Optional references to slice endpoints
+# `elems`: one cell per array element, labelled by index. Line 6 prints before step 3
+# (line 7), so step 3 shows both lines of output.
+[[lessons.screens]]
+key = "s7"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "owners"
+layout = "grid"
+nodes = [
+  { id = "scores", label = "scores", sub = "[i32; 3]", state = { value = "[10, 20, 30]", note = "owner" } },
+  { id = "empty", label = "empty", sub = "[i32; 0]", state = { value = "[]", note = "no endpoints" } },
+  { id = "first", label = "first", sub = "&i32", state = { ghost = true } },
+  { id = "last", label = "last", sub = "&i32", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "elems"
+layout = "grid"
+nodes = [
+  { id = "e0", label = "0", state = { value = "10" } },
+  { id = "e1", label = "1", state = { value = "20" } },
+  { id = "e2", label = "2", state = { value = "30" } },
+  { id = "fallback", label = "fallback", state = { ghost = true, value = "7" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "owners", op = "node", id = "first", ghost = false, lit = true, value = "10", badge = "&", note = "⇢ scores[0] · Some payload" },
+  { panel = "elems", op = "node", id = "e0", lit = true, style = "rust" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "owners", op = "node", id = "first", lit = false },
+  { panel = "elems", op = "node", id = "e0", lit = false },
+  { panel = "owners", op = "node", id = "last", ghost = false, lit = true, value = "30", badge = "&", note = "⇢ scores[2] · Some payload" },
+  { panel = "elems", op = "node", id = "e2", lit = true, style = "rust" },
+  { panel = "owners", op = "node", id = "scores", note = "owner · still usable" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "owners", op = "node", id = "last", lit = false },
+  { panel = "elems", op = "node", id = "e2", lit = false },
+  { panel = "owners", op = "node", id = "scores", note = "get(99) → None · no index 99" },
+  { panel = "elems", op = "node", id = "fallback", ghost = false, lit = true, style = "rust", badge = "&", note = "unwrap_or(&7) · read through *" },
+  { panel = "out", op = "print", text = "10 30 None\n7\n" },
+]
+
+# Screen 8 · A scalar may not be a digit
+# Lines 2–3 print before step 1 (line 4); line 6 prints before step 3 (line 7).
+[[lessons.screens]]
+key = "s8"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "calls"
+layout = "grid"
+nodes = [
+  { id = "a16", label = "'A'.to_digit(16)", sub = "Option<u32>", state = { ghost = true } },
+  { id = "fw", label = "'９'.to_digit(10)", sub = "Option<u32>", state = { ghost = true } },
+  { id = "fd10", label = "char::from_digit(10, 16)", sub = "Option<char>", state = { ghost = true } },
+  { id = "fd9", label = "char::from_digit(9, 2)", sub = "Option<char>", state = { ghost = true } },
+  { id = "div", label = "i32::MIN.checked_div(-1)", sub = "Option<i32>", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "calls", op = "node", id = "a16", ghost = false, lit = true, value = "Some(10)", note = "A is a radix-16 digit" },
+  { panel = "calls", op = "node", id = "fw", ghost = false, lit = true, value = "None", note = "full-width ９ is not ASCII" },
+  { panel = "out", op = "print", text = "Some('😀')\nNone\nSome(10) None\n" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "calls", op = "node", id = "a16", lit = false },
+  { panel = "calls", op = "node", id = "fw", lit = false },
+  { panel = "calls", op = "node", id = "fd10", ghost = false, lit = true, value = "Some('a')", note = "lowercase spelling" },
+  { panel = "calls", op = "node", id = "fd9", ghost = false, lit = true, value = "None", note = "9 does not fit radix 2" },
+  { panel = "out", op = "print", text = "Some('a') None\n" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "calls", op = "node", id = "fd10", lit = false },
+  { panel = "calls", op = "node", id = "fd9", lit = false },
+  { panel = "calls", op = "node", id = "div", ghost = false, lit = true, value = "None", note = "MIN / -1 does not fit in i32" },
+  { panel = "out", op = "print", text = "None None\nNone\n" },
+]
+
+# ---------------------------------------------------------------- L6.3
+[[lessons]]
+id = "L6.3"
+read_more = ["ch06-02-match.md"]
+
+# Screen 1 · A value flows to the arm it fits
+[[lessons.screens]]
+key = "s1"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "flow"
+layout = "tree"
+nodes = [
+  { id = "match", label = "match coin", sub = "input", state = { value = "?" } },
+  { id = "penny", label = "Coin::Penny => 1", parent = "match" },
+  { id = "nickel", label = "Coin::Nickel => 5", parent = "match" },
+  { id = "dime", label = "Coin::Dime => 10", parent = "match" },
+  { id = "quarter", label = "Coin::Quarter => 25", parent = "match" },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "owners"
+layout = "grid"
+nodes = [{ id = "cents", label = "cents", sub = "u8", state = { ghost = true } }]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "flow", op = "node", id = "match", lit = true, value = "Coin::Dime", note = "compared with each arm in turn" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "flow", op = "node", id = "match", lit = false },
+  { panel = "flow", op = "node", id = "penny", lit = true, style = "red", value = "no match" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "flow", op = "node", id = "penny", lit = false },
+  { panel = "flow", op = "node", id = "nickel", lit = true, style = "red", value = "no match" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "flow", op = "node", id = "nickel", lit = false },
+  { panel = "flow", op = "node", id = "dime", lit = true, style = "green", value = "matches → 10", badge = "chosen" },
+  { panel = "flow", op = "node", id = "quarter", ghost = true, badge = "skipped" },
+]
+[[lessons.screens.steps]]
+n = 5
+ops = [
+  { panel = "flow", op = "node", id = "dime", lit = false },
+  { panel = "flow", op = "node", id = "match", note = "value of the match = 10" },
+  { panel = "owners", op = "node", id = "cents", ghost = false, lit = true, value = "10", note = "returned" },
+  { panel = "out", op = "print", text = "10\n" },
+]
+
+# Screen 4 · Patterns can pull data out
+[[lessons.screens]]
+key = "s4"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "flow"
+layout = "tree"
+nodes = [
+  { id = "match", label = "match coin", sub = "input", state = { value = "?" } },
+  { id = "penny", label = "Coin::Penny => 1", parent = "match" },
+  { id = "quarter", label = "Coin::Quarter(state) => { … 25 }", parent = "match" },
+  { id = "state", label = "state", sub = "UsState", parent = "quarter", state = { hidden = true } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "owners"
+layout = "grid"
+nodes = [{ id = "cents", label = "cents", sub = "u8", state = { ghost = true } }]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "flow", op = "node", id = "match", lit = true, value = "Coin::Quarter(UsState::Alaska)", note = "carries Alaska" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "flow", op = "node", id = "match", lit = false },
+  { panel = "flow", op = "node", id = "penny", lit = true, style = "red", value = "no match", note = "no binding" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "flow", op = "node", id = "penny", lit = false },
+  { panel = "flow", op = "node", id = "quarter", lit = true, style = "green", value = "matches", badge = "chosen" },
+  { panel = "flow", op = "node", id = "state", hidden = false, lit = true, value = "UsState::Alaska", badge = "bound" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "flow", op = "node", id = "quarter", lit = false },
+  { panel = "flow", op = "node", id = "state", badge = "", note = "an ordinary variable" },
+  { panel = "out", op = "print", text = "State quarter from Alaska!\n" },
+]
+[[lessons.screens.steps]]
+n = 5
+ops = [
+  { panel = "flow", op = "node", id = "quarter", value = "matches → 25" },
+  { panel = "flow", op = "node", id = "state", lit = false, ghost = true, badge = "ended", note = "" },
+  { panel = "owners", op = "node", id = "cents", ghost = false, lit = true, value = "25", note = "returned" },
+  { panel = "out", op = "print", text = "25\n" },
+]
+
+# Screen 5 · Matching `Option<T>`
+# `five` exists before step 1 (line 9). The flow panel is reused for the second call.
+[[lessons.screens]]
+key = "s5"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "flow"
+layout = "tree"
+nodes = [
+  { id = "match", label = "match x", sub = "input", state = { value = "?" } },
+  { id = "none_arm", label = "None => None", parent = "match" },
+  { id = "some_arm", label = "Some(i) => Some(i + 1)", parent = "match" },
+  { id = "i", label = "i", sub = "i32", parent = "some_arm", state = { hidden = true } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "owners"
+layout = "grid"
+nodes = [
+  { id = "five", label = "five", sub = "Option<i32>", state = { value = "Some(5)" } },
+  { id = "six", label = "six", sub = "Option<i32>", state = { ghost = true } },
+  { id = "none", label = "none", sub = "Option<i32>", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "owners", op = "node", id = "five", lit = true, note = "passed to plus_one" },
+  { panel = "flow", op = "node", id = "match", lit = true, value = "Some(5)", note = "first call" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "owners", op = "node", id = "five", lit = false, note = "" },
+  { panel = "flow", op = "node", id = "match", lit = false },
+  { panel = "flow", op = "node", id = "none_arm", lit = true, style = "red", value = "no match" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "flow", op = "node", id = "none_arm", lit = false },
+  { panel = "flow", op = "node", id = "some_arm", lit = true, style = "green", value = "matches → Some(6)", badge = "chosen" },
+  { panel = "flow", op = "node", id = "i", hidden = false, lit = true, value = "5", badge = "bound" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "owners", op = "node", id = "six", ghost = false, lit = true, value = "Some(6)", note = "returned" },
+  { panel = "flow", op = "node", id = "i", hidden = true, lit = false, badge = "" },
+  { panel = "flow", op = "node", id = "some_arm", lit = false, style = "plain", value = "", badge = "" },
+  { panel = "flow", op = "node", id = "none_arm", style = "plain", value = "" },
+  { panel = "flow", op = "node", id = "match", lit = true, value = "None", note = "second call · no payload" },
+]
+[[lessons.screens.steps]]
+n = 5
+ops = [
+  { panel = "owners", op = "node", id = "six", lit = false, note = "" },
+  { panel = "flow", op = "node", id = "match", lit = false },
+  { panel = "flow", op = "node", id = "none_arm", lit = true, style = "green", value = "matches → None", badge = "chosen" },
+  { panel = "flow", op = "node", id = "some_arm", ghost = true, badge = "skipped" },
+]
+[[lessons.screens.steps]]
+n = 6
+ops = [
+  { panel = "flow", op = "node", id = "none_arm", lit = false },
+  { panel = "owners", op = "node", id = "none", ghost = false, lit = true, value = "None", note = "returned" },
+  { panel = "out", op = "print", text = "Some(6) None\n" },
+]
+
+# ---------------------------------------------------------------- L6.4
+[[lessons]]
+id = "L6.4"
+read_more = ["ch06-02-match.md", "ch19-03-pattern-syntax.md"]
+
+# Screen 2 · Catch everything else with a name
+[[lessons.screens]]
+key = "s2"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "flow"
+layout = "tree"
+nodes = [
+  { id = "match", label = "match roll", sub = "input", state = { value = "?" } },
+  { id = "a3", label = "3 => println!(\"You get a hat\")", parent = "match" },
+  { id = "a7", label = "7 => println!(\"You lose your hat\")", parent = "match" },
+  { id = "other_arm", label = "other => println!(\"Move {other} spaces\")", sub = "catch-all", parent = "match" },
+  { id = "other", label = "other", sub = "i32", parent = "other_arm", state = { hidden = true } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "flow", op = "node", id = "match", lit = true, value = "9", note = "roll: any i32" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "flow", op = "node", id = "match", lit = false },
+  { panel = "flow", op = "node", id = "a3", lit = true, style = "red", value = "no match" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "flow", op = "node", id = "a3", lit = false },
+  { panel = "flow", op = "node", id = "a7", lit = true, style = "red", value = "no match" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "flow", op = "node", id = "a7", lit = false },
+  { panel = "flow", op = "node", id = "other_arm", lit = true, style = "green", value = "matches any value", badge = "chosen" },
+  { panel = "flow", op = "node", id = "other", hidden = false, lit = true, value = "9", badge = "bound" },
+  { panel = "out", op = "print", text = "Move 9 spaces\n" },
+]
+
+# Screen 4 · Several values in one arm
+# One step per loop iteration; the arms are reset for each new input.
+[[lessons.screens]]
+key = "s4"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "flow"
+layout = "tree"
+nodes = [
+  { id = "match", label = "match c", sub = "input", state = { value = "?" } },
+  { id = "vowel", label = "'a' | 'e' | 'i' | 'o' | 'u' => vowel", sub = "or-pattern", parent = "match" },
+  { id = "range", label = "'a'..='z' => consonant", sub = "range pattern", parent = "match" },
+  { id = "wild", label = "_ => not a lowercase letter", sub = "catch-all", parent = "match" },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "flow", op = "node", id = "match", value = "'e'" },
+  { panel = "flow", op = "node", id = "vowel", lit = true, style = "green", value = "matches 'e'", badge = "chosen" },
+  { panel = "flow", op = "node", id = "range", ghost = true, badge = "skipped" },
+  { panel = "flow", op = "node", id = "wild", ghost = true, badge = "skipped" },
+  { panel = "out", op = "print", text = "e: vowel\n" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "flow", op = "node", id = "match", value = "'x'" },
+  { panel = "flow", op = "node", id = "vowel", lit = true, style = "red", value = "no match", badge = "" },
+  { panel = "flow", op = "node", id = "range", ghost = false, lit = true, style = "green", value = "matches 'x'", badge = "chosen" },
+  { panel = "flow", op = "node", id = "wild", ghost = true, badge = "skipped" },
+  { panel = "out", op = "print", text = "x: consonant\n" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "flow", op = "node", id = "match", value = "'7'" },
+  { panel = "flow", op = "node", id = "vowel", lit = true, style = "red", value = "no match", badge = "" },
+  { panel = "flow", op = "node", id = "range", lit = true, style = "red", value = "no match", badge = "" },
+  { panel = "flow", op = "node", id = "wild", ghost = false, lit = true, style = "green", value = "matches '7'", badge = "chosen" },
+  { panel = "out", op = "print", text = "7: not a lowercase letter\n" },
+]
+
+# Screen 5 · Ranges of numbers
+# One step per grade call; the arms are reset for each new input. The println! on line
+# 12 is the statement making the three calls, so its output is shown at step 3, as the
+# spec's visual state says.
+[[lessons.screens]]
+key = "s5"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "flow"
+layout = "tree"
+nodes = [
+  { id = "match", label = "match score", sub = "input", state = { value = "?" } },
+  { id = "ga", label = "90..=100 => 'A'", parent = "match" },
+  { id = "gb", label = "80..=89 => 'B'", parent = "match" },
+  { id = "gc", label = "70..=79 => 'C'", parent = "match" },
+  { id = "gf", label = "0..=69 => 'F'", parent = "match" },
+  { id = "wild", label = "_ => '?'", sub = "catch-all", parent = "match" },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "calls"
+layout = "grid"
+nodes = [
+  { id = "g95", label = "grade(95)", sub = "char", state = { ghost = true } },
+  { id = "g80", label = "grade(80)", sub = "char", state = { ghost = true } },
+  { id = "g120", label = "grade(120)", sub = "char", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "flow", op = "node", id = "match", value = "95" },
+  { panel = "flow", op = "node", id = "ga", lit = true, style = "green", value = "matches → 'A'", badge = "chosen" },
+  { panel = "flow", op = "node", id = "gb", ghost = true, badge = "skipped" },
+  { panel = "flow", op = "node", id = "gc", ghost = true, badge = "skipped" },
+  { panel = "flow", op = "node", id = "gf", ghost = true, badge = "skipped" },
+  { panel = "flow", op = "node", id = "wild", ghost = true, badge = "skipped" },
+  { panel = "calls", op = "node", id = "g95", ghost = false, lit = true, value = "'A'" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "flow", op = "node", id = "match", value = "80" },
+  { panel = "flow", op = "node", id = "ga", lit = true, style = "red", value = "no match", badge = "" },
+  { panel = "flow", op = "node", id = "gb", ghost = false, lit = true, style = "green", value = "matches → 'B'", badge = "chosen", note = "80 included: ..= includes both ends" },
+  { panel = "calls", op = "node", id = "g95", lit = false },
+  { panel = "calls", op = "node", id = "g80", ghost = false, lit = true, value = "'B'" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "flow", op = "node", id = "match", value = "120" },
+  { panel = "flow", op = "node", id = "ga", lit = true, style = "red", value = "no match" },
+  { panel = "flow", op = "node", id = "gb", lit = true, style = "red", value = "no match", badge = "", note = "" },
+  { panel = "flow", op = "node", id = "gc", ghost = false, lit = true, style = "red", value = "no match", badge = "" },
+  { panel = "flow", op = "node", id = "gf", ghost = false, lit = true, style = "red", value = "no match", badge = "" },
+  { panel = "flow", op = "node", id = "wild", ghost = false, lit = true, style = "green", value = "matches → '?'", badge = "chosen" },
+  { panel = "calls", op = "node", id = "g80", lit = false },
+  { panel = "calls", op = "node", id = "g120", ghost = false, lit = true, value = "'?'", note = "u32 can exceed 100" },
+  { panel = "out", op = "print", text = "A B ?\n" },
+]
+
+# ---------------------------------------------------------------- L6.5
+[[lessons]]
+id = "L6.5"
+read_more = ["ch06-03-if-let.md"]
+
+# Screen 2 · `if let` with `else`
+# The flow panel is the `if let`: one pattern branch, plus the `else` branch.
+[[lessons.screens]]
+key = "s2"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "flow"
+layout = "tree"
+nodes = [
+  { id = "iflet", label = "if let Coin::Quarter(state) = coin", sub = "input", state = { value = "?" } },
+  { id = "then", label = "{ println!(\"State quarter from {state}!\") }", sub = "pattern fits", parent = "iflet" },
+  { id = "state", label = "state", sub = "String", parent = "then", state = { hidden = true } },
+  { id = "else", label = "else { others += 1 }", sub = "anything else", parent = "iflet" },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "vars"
+layout = "grid"
+nodes = [
+  { id = "coins", label = "coins", sub = "[Coin; 2]", state = { ghost = true } },
+  { id = "others", label = "others", sub = "i32", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "vars", op = "node", id = "coins", ghost = false, lit = true, value = "[Quarter(\"Alaska\"), Penny]" },
+  { panel = "vars", op = "node", id = "others", ghost = false, lit = true, value = "0", badge = "mut" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "vars", op = "node", id = "coins", lit = false, ghost = true, badge = "moved", note = "into the for loop" },
+  { panel = "vars", op = "node", id = "others", lit = false },
+  { panel = "flow", op = "node", id = "iflet", value = "Quarter(\"Alaska\")", note = "first coin" },
+  { panel = "flow", op = "node", id = "then", lit = true, style = "green", value = "matches", badge = "chosen" },
+  { panel = "flow", op = "node", id = "state", hidden = false, lit = true, value = "\"Alaska\"", badge = "bound" },
+  { panel = "flow", op = "node", id = "else", ghost = true, badge = "skipped" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "flow", op = "node", id = "then", badge = "runs" },
+  { panel = "flow", op = "node", id = "state", lit = false, badge = "" },
+  { panel = "vars", op = "node", id = "others", note = "still 0" },
+  { panel = "out", op = "print", text = "State quarter from Alaska!\n" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "vars", op = "node", id = "others", note = "" },
+  { panel = "flow", op = "node", id = "iflet", value = "Penny", note = "second coin" },
+  { panel = "flow", op = "node", id = "then", lit = true, style = "red", value = "no match", badge = "" },
+  { panel = "flow", op = "node", id = "state", hidden = true },
+  { panel = "flow", op = "node", id = "else", ghost = false, lit = true, style = "green", badge = "chosen" },
+]
+[[lessons.screens.steps]]
+n = 5
+ops = [
+  { panel = "flow", op = "node", id = "then", lit = false },
+  { panel = "flow", op = "node", id = "else", badge = "runs" },
+  { panel = "vars", op = "node", id = "others", lit = true, value = "1", note = "0 → 1" },
+]
+[[lessons.screens.steps]]
+n = 6
+ops = [
+  { panel = "flow", op = "node", id = "else", lit = false, badge = "" },
+  { panel = "flow", op = "node", id = "iflet", note = "loop finished" },
+  { panel = "vars", op = "node", id = "others", note = "" },
+  { panel = "out", op = "print", text = "Other coins: 1\n" },
+]
+
+# Screen 4 · `let...else`: get the value or leave
+# Call stack, newest frame first; a "guards" grid shows the two `let...else` checks,
+# reset for the second call.
+[[lessons.screens]]
+key = "s4"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "stack"
+layout = "tree"
+nodes = [
+  { id = "dfd", label = "double_first_digit", state = { hidden = true } },
+  { id = "s", label = "s", sub = "&str", parent = "dfd", state = { hidden = true } },
+  { id = "c", label = "c", sub = "char", parent = "dfd", state = { hidden = true } },
+  { id = "d", label = "d", sub = "u32", parent = "dfd", state = { hidden = true } },
+  { id = "main", label = "main" },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "guards"
+layout = "grid"
+nodes = [
+  { id = "g1", label = "let Some(c) = s.chars().next() else { return 0; }", state = { value = "?" } },
+  { id = "g2", label = "let Some(d) = c.to_digit(10) else { return 0; }", state = { value = "?" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "stack", op = "node", id = "main", note = "waiting" },
+  { panel = "stack", op = "node", id = "dfd", hidden = false, badge = "new frame" },
+  { panel = "stack", op = "node", id = "s", hidden = false, lit = true, value = "\"7up\"" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "stack", op = "node", id = "s", lit = false },
+  { panel = "guards", op = "node", id = "g1", lit = true, style = "green", value = "Some('7') fits" },
+  { panel = "stack", op = "node", id = "c", hidden = false, lit = true, value = "'7'", badge = "bound" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "guards", op = "node", id = "g1", lit = false },
+  { panel = "stack", op = "node", id = "c", lit = false, badge = "" },
+  { panel = "guards", op = "node", id = "g2", lit = true, style = "green", value = "Some(7) fits" },
+  { panel = "stack", op = "node", id = "d", hidden = false, lit = true, value = "7", badge = "bound" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "guards", op = "node", id = "g2", lit = false },
+  { panel = "stack", op = "node", id = "d", lit = false, badge = "" },
+  { panel = "stack", op = "node", id = "dfd", lit = true, badge = "returns 14", note = "happy path · no else ran" },
+  { panel = "out", op = "print", text = "14\n" },
+]
+[[lessons.screens.steps]]
+n = 5
+ops = [
+  { panel = "stack", op = "node", id = "dfd", lit = false, badge = "new frame", note = "" },
+  { panel = "stack", op = "node", id = "s", lit = true, value = "\"abc\"" },
+  { panel = "stack", op = "node", id = "c", hidden = true, value = "" },
+  { panel = "stack", op = "node", id = "d", hidden = true, value = "" },
+  { panel = "guards", op = "node", id = "g1", style = "plain", value = "?" },
+  { panel = "guards", op = "node", id = "g2", style = "plain", value = "?" },
+]
+[[lessons.screens.steps]]
+n = 6
+ops = [
+  { panel = "stack", op = "node", id = "s", lit = false },
+  { panel = "guards", op = "node", id = "g1", lit = true, style = "green", value = "Some('a') fits" },
+  { panel = "stack", op = "node", id = "c", hidden = false, lit = true, value = "'a'", badge = "bound" },
+]
+[[lessons.screens.steps]]
+n = 7
+ops = [
+  { panel = "guards", op = "node", id = "g1", lit = false },
+  { panel = "stack", op = "node", id = "c", lit = false, badge = "" },
+  { panel = "guards", op = "node", id = "g2", lit = true, style = "red", value = "None · else runs" },
+  { panel = "stack", op = "node", id = "dfd", lit = true, badge = "returns 0", note = "d never bound" },
+  { panel = "out", op = "print", text = "0\n" },
+]

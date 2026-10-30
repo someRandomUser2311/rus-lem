@@ -1,0 +1,594 @@
+# Chapter 5 lesson visuals, authored from the "Visual state" columns of lessons.md.
+# Merged onto chapter.gen.json: lessons by `id`, screens by `key`, steps by `n`.
+# A "type" panel is the spec's Type explorer: the struct as a tree, its fields (and any
+# methods / associated functions) as children, with field types in `sub`.
+# An "owners" / "stack" panel is a scene of bindings; a struct instance is a binding node
+# with its fields as child nodes (tree layout), or a single value string like
+# `Rectangle { width: 30, height: 50 }` when the fields are not the point.
+# A "heap" panel holds the text buffers that String fields own; ownership is a note
+# ("owns → A"). Borrows are notes ("⇢ rect1" shared, "⇒ c" exclusive) with "&" / "&mut"
+# badges. Moved or dropped bindings and fields are ghosted with a badge.
+# The diagrams are explanatory models: no promise about field layout, addresses or capacity.
+# State panels show conceptual values, not extra program output. A println! that runs
+# after a screen's last step gets no output panel (as in Chapter 4).
+
+# ---------------------------------------------------------------- L5.1
+[[lessons]]
+id = "L5.1"
+read_more = ["ch05-00-structs.md", "ch05-01-defining-structs.md"]
+
+# Screen 2 · Creating an instance
+# Type explorer (the blueprint) beside the one instance built from it.
+[[lessons.screens]]
+key = "s2"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "type"
+layout = "tree"
+nodes = [
+  { id = "user", label = "struct User", sub = "type (blueprint)" },
+  { id = "active", label = "active", sub = "bool", parent = "user" },
+  { id = "username", label = "username", sub = "String", parent = "user" },
+  { id = "email", label = "email", sub = "String", parent = "user" },
+  { id = "count", label = "sign_in_count", sub = "u64", parent = "user" },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "owners"
+layout = "tree"
+nodes = [
+  { id = "user1", label = "user1", sub = "User", state = { ghost = true, value = "no instance yet" } },
+  { id = "active", label = "active", parent = "user1", state = { hidden = true } },
+  { id = "username", label = "username", parent = "user1", state = { hidden = true } },
+  { id = "email", label = "email", parent = "user1", state = { hidden = true } },
+  { id = "count", label = "sign_in_count", parent = "user1", state = { hidden = true } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "type", op = "node", id = "user", lit = true, note = "names the fields; creates nothing" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "type", op = "node", id = "user", lit = false, note = "" },
+  { panel = "owners", op = "node", id = "user1", ghost = false, lit = true, value = "", badge = "instance" },
+  { panel = "owners", op = "node", id = "active", hidden = false, value = "true" },
+  { panel = "owners", op = "node", id = "username", hidden = false, value = "\"ferris\"" },
+  { panel = "owners", op = "node", id = "email", hidden = false, value = "\"ferris@example.com\"" },
+  { panel = "owners", op = "node", id = "count", hidden = false, value = "1" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "owners", op = "node", id = "user1", lit = false, note = "still available" },
+  { panel = "owners", op = "node", id = "email", lit = true, badge = "read", note = "user1.email" },
+  { panel = "out", op = "print", text = "ferris@example.com\n" },
+]
+
+# Screen 6 · A struct owns its fields
+# `name` gives its buffer A to the username field; the email field owns buffer B.
+[[lessons.screens]]
+key = "s6"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "owners"
+layout = "tree"
+nodes = [
+  { id = "name", label = "name", sub = "String", state = { ghost = true } },
+  { id = "user1", label = "user1", sub = "User", state = { ghost = true, value = "not yet constructed" } },
+  { id = "active", label = "active", parent = "user1", state = { hidden = true } },
+  { id = "username", label = "username", parent = "user1", state = { hidden = true } },
+  { id = "email", label = "email", parent = "user1", state = { hidden = true } },
+  { id = "count", label = "sign_in_count", parent = "user1", state = { hidden = true } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "heap"
+layout = "grid"
+nodes = [
+  { id = "a", label = "A", state = { ghost = true } },
+  { id = "b", label = "B", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "owners", op = "node", id = "name", ghost = false, lit = true, value = "String", note = "owns → A" },
+  { panel = "heap", op = "node", id = "a", ghost = false, lit = true, value = "ferris", note = "len 6 · cap ≥ 6" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "owners", op = "node", id = "name", lit = false, ghost = true, value = "", badge = "moved", note = "" },
+  { panel = "heap", op = "node", id = "a", lit = false, note = "same buffer, 6 bytes" },
+  { panel = "owners", op = "node", id = "user1", ghost = false, lit = true, value = "", note = "owns all four fields" },
+  { panel = "owners", op = "node", id = "active", hidden = false, value = "true" },
+  { panel = "owners", op = "node", id = "username", hidden = false, lit = true, value = "String", badge = "moved in", note = "owns → A" },
+  { panel = "owners", op = "node", id = "email", hidden = false, value = "String", note = "owns → B" },
+  { panel = "owners", op = "node", id = "count", hidden = false, value = "1" },
+  { panel = "heap", op = "node", id = "b", ghost = false, lit = true, value = "ferris@example.com", note = "18 bytes" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "owners", op = "node", id = "name", note = "owns nothing to release" },
+  { panel = "owners", op = "node", id = "user1", lit = false, ghost = true, badge = "dropped", note = "scope ended" },
+  { panel = "owners", op = "node", id = "active", ghost = true },
+  { panel = "owners", op = "node", id = "username", lit = false, ghost = true, badge = "dropped" },
+  { panel = "owners", op = "node", id = "email", ghost = true, badge = "dropped" },
+  { panel = "owners", op = "node", id = "count", ghost = true },
+  { panel = "heap", op = "node", id = "a", ghost = true, badge = "released", note = "" },
+  { panel = "heap", op = "node", id = "b", lit = false, ghost = true, badge = "released", note = "" },
+  { panel = "out", op = "print", text = "ferris\n" },
+]
+
+# Screen 8 · Numeric fields do not automatically mean Copy
+# The println! on line 5 runs after the last step, so there is no output panel.
+[[lessons.screens]]
+key = "s8"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "owners"
+layout = "grid"
+nodes = [
+  { id = "s2", label = "s2", sub = "Count", state = { ghost = true } },
+  { id = "s1", label = "s1", sub = "Count", state = { ghost = true, value = "not initialized" } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "data"
+layout = "grid"
+nodes = [{ id = "none", label = "heap", state = { value = "—", note = "no heap allocation needed by these fields" } }]
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "owners", op = "node", id = "s2", ghost = false, lit = true, value = "Count { n: 3 }", note = "owner" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "owners", op = "node", id = "s2", lit = false, ghost = true, value = "", badge = "moved", note = "Count is not Copy" },
+  { panel = "owners", op = "node", id = "s1", ghost = false, lit = true, value = "Count { n: 3 }", note = "owner" },
+  { panel = "data", op = "node", id = "none", note = "same numeric value; still one owner" },
+]
+
+# Screen 9 · Replacing an owned struct
+# The println! on line 6 runs after the last step, so there is no output panel.
+[[lessons.screens]]
+key = "s9"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "owners"
+layout = "grid"
+nodes = [
+  { id = "s1", label = "s1", sub = "Label", state = { value = "Label { text }", badge = "mut", note = "owns → A" } },
+  { id = "s2", label = "s2", sub = "Label", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "heap"
+layout = "grid"
+nodes = [
+  { id = "a", label = "A", state = { value = "old" } },
+  { id = "b", label = "B", state = { ghost = true } },
+]
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "owners", op = "node", id = "s2", ghost = false, lit = true, value = "Label { text }", note = "owns → B" },
+  { panel = "heap", op = "node", id = "b", ghost = false, lit = true, value = "incoming" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "owners", op = "node", id = "s2", lit = false, ghost = true, value = "", badge = "moved", note = "unusable" },
+  { panel = "owners", op = "node", id = "s1", lit = true, note = "owns → B" },
+  { panel = "heap", op = "node", id = "b", lit = false, note = "still owned" },
+  { panel = "heap", op = "node", id = "a", ghost = true, badge = "released", note = "old value dropped" },
+]
+
+# ---------------------------------------------------------------- L5.2
+[[lessons]]
+id = "L5.2"
+read_more = ["ch05-01-defining-structs.md"]
+
+# Screen 2 · Struct update can move fields
+# Two instances as trees. `..user1` copies the bool and u64, moves the username String
+# (buffer A) and leaves user1.email (buffer B) where it was; user2.email is new (C).
+[[lessons.screens]]
+key = "s2"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "owners"
+layout = "tree"
+nodes = [
+  { id = "user1", label = "user1", sub = "User" },
+  { id = "u1_active", label = "active", parent = "user1", state = { value = "true" } },
+  { id = "u1_username", label = "username", parent = "user1", state = { value = "String", note = "owns → A" } },
+  { id = "u1_email", label = "email", parent = "user1", state = { value = "String", note = "owns → B" } },
+  { id = "u1_count", label = "sign_in_count", parent = "user1", state = { value = "1" } },
+  { id = "user2", label = "user2", sub = "User", state = { hidden = true } },
+  { id = "u2_active", label = "active", parent = "user2", state = { hidden = true } },
+  { id = "u2_username", label = "username", parent = "user2", state = { hidden = true } },
+  { id = "u2_email", label = "email", parent = "user2", state = { hidden = true } },
+  { id = "u2_count", label = "sign_in_count", parent = "user2", state = { hidden = true } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "heap"
+layout = "grid"
+nodes = [
+  { id = "a", label = "A", state = { value = "ferris" } },
+  { id = "b", label = "B", state = { value = "ferris@example.com" } },
+  { id = "c", label = "C", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "owners", op = "node", id = "user1", lit = true, note = "owns two heap texts" },
+  { panel = "heap", op = "node", id = "a", lit = true },
+  { panel = "heap", op = "node", id = "b", lit = true },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "owners", op = "node", id = "user1", lit = false, badge = "partially moved", note = "" },
+  { panel = "heap", op = "node", id = "a", lit = false },
+  { panel = "heap", op = "node", id = "b", lit = false, note = "still owned by user1.email" },
+  { panel = "owners", op = "node", id = "u1_username", ghost = true, value = "", badge = "moved", note = "into user2" },
+  { panel = "owners", op = "node", id = "user2", hidden = false, lit = true },
+  { panel = "owners", op = "node", id = "u2_active", hidden = false, value = "true", badge = "copied" },
+  { panel = "owners", op = "node", id = "u2_username", hidden = false, lit = true, value = "String", badge = "moved in", note = "owns → A" },
+  { panel = "owners", op = "node", id = "u2_email", hidden = false, value = "String", badge = "new", note = "owns → C" },
+  { panel = "owners", op = "node", id = "u2_count", hidden = false, value = "1", badge = "copied" },
+  { panel = "heap", op = "node", id = "c", ghost = false, lit = true, value = "crab@example.com" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "owners", op = "node", id = "user2", lit = false },
+  { panel = "owners", op = "node", id = "u2_username", badge = "", note = "owns → A · readable" },
+  { panel = "owners", op = "node", id = "u2_active", badge = "" },
+  { panel = "owners", op = "node", id = "u2_email", badge = "" },
+  { panel = "owners", op = "node", id = "u2_count", badge = "" },
+  { panel = "owners", op = "node", id = "user1", note = "whole value unavailable" },
+  { panel = "owners", op = "node", id = "u1_email", lit = true, note = "owns → B · readable" },
+  { panel = "owners", op = "node", id = "u1_count", lit = true, note = "u64 is Copy · readable" },
+  { panel = "owners", op = "node", id = "u1_username", note = "unavailable" },
+  { panel = "heap", op = "node", id = "c", lit = false },
+  { panel = "out", op = "print", text = "ferris@example.com\n1\nferris\n" },
+]
+
+# ---------------------------------------------------------------- L5.3
+[[lessons]]
+id = "L5.3"
+read_more = ["ch05-02-example-structs.md"]
+
+# Screen 3 · Debug output: `{:?}` and `{:#?}`
+# Type explorer with the derived capability as a badge; the instance as a value string.
+[[lessons.screens]]
+key = "s3"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "type"
+layout = "tree"
+nodes = [
+  { id = "rect", label = "struct Rectangle", sub = "type" },
+  { id = "width", label = "width", sub = "u32", parent = "rect" },
+  { id = "height", label = "height", sub = "u32", parent = "rect" },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "owners"
+layout = "grid"
+nodes = [{ id = "rect1", label = "rect1", sub = "Rectangle", state = { ghost = true } }]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "type", op = "node", id = "rect", lit = true, badge = "Debug", note = "derived" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "type", op = "node", id = "rect", lit = false },
+  { panel = "owners", op = "node", id = "rect1", ghost = false, lit = true, value = "Rectangle { width: 30, height: 50 }", note = "{:?} · compact" },
+  { panel = "out", op = "print", text = "rect1 is Rectangle { width: 30, height: 50 }\n" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "owners", op = "node", id = "rect1", note = "{:#?} · one field per line" },
+  { panel = "out", op = "print", text = "rect1 is Rectangle {\n    width: 30,\n    height: 50,\n}\n" },
+]
+
+# Screen 4 · `dbg!`: print where a value came from
+# The terminal panel is the program's standard error (the spec's "stderr" panel); the
+# program writes nothing to stdout. Paths are shown as Cargo reports them (src/main.rs).
+[[lessons.screens]]
+key = "s4"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "owners"
+layout = "tree"
+nodes = [
+  { id = "scale", label = "scale", state = { value = "2" } },
+  { id = "rect1", label = "rect1", sub = "Rectangle", state = { ghost = true } },
+  { id = "width", label = "width", parent = "rect1", state = { hidden = true } },
+  { id = "height", label = "height", parent = "rect1", state = { hidden = true } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "err"
+title = "stderr"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "owners", op = "node", id = "rect1", ghost = false },
+  { panel = "owners", op = "node", id = "width", hidden = false, lit = true, value = "60", badge = "dbg! returned", note = "30 * scale" },
+  { panel = "owners", op = "node", id = "height", hidden = false, value = "50" },
+  { panel = "err", op = "print", text = "[src/main.rs:10:16] 30 * scale = 60\n" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "owners", op = "node", id = "width", lit = false, badge = "", note = "" },
+  { panel = "owners", op = "node", id = "rect1", lit = true, badge = "&", note = "dbg!(&rect1) borrows · still owned here" },
+  { panel = "err", op = "print", text = "[src/main.rs:13:5] &rect1 = Rectangle {\n    width: 60,\n    height: 50,\n}\n" },
+  { panel = "err", op = "badge", text = "standard error, not stdout" },
+]
+
+# Screen 6 · Compare numeric structs with and without Copy
+# The println! on line 10 runs after the last step, so there is no output panel.
+[[lessons.screens]]
+key = "s6"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "owners"
+layout = "grid"
+nodes = [
+  { id = "a", label = "a", sub = "CopyCount", state = { value = "n: 3" } },
+  { id = "b", label = "b", sub = "CopyCount", state = { ghost = true } },
+  { id = "x", label = "x", sub = "MoveCount", state = { ghost = true, value = "not initialized" } },
+  { id = "y", label = "y", sub = "MoveCount", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "data"
+layout = "grid"
+nodes = [{ id = "none", label = "heap", state = { value = "—", note = "numeric values only; heap allocation is not the deciding factor" } }]
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "owners", op = "node", id = "b", ghost = false, lit = true, value = "n: 3", badge = "copy", note = "a still usable" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "owners", op = "node", id = "b", value = "n: 9", badge = "mut", note = "a unchanged" },
+  { panel = "owners", op = "node", id = "a", note = "still 3" },
+  { panel = "owners", op = "node", id = "x", value = "", badge = "moved", note = "not Copy · unusable" },
+  { panel = "owners", op = "node", id = "y", ghost = false, lit = true, value = "n: 4", note = "owner" },
+  { panel = "data", op = "node", id = "none", note = "two independent copies; one transferred MoveCount" },
+]
+
+# Screen 7 · Clone owned fields independently
+# The println! on line 8 runs after the last step, so there is no output panel.
+[[lessons.screens]]
+key = "s7"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "owners"
+layout = "tree"
+nodes = [
+  { id = "a", label = "a", sub = "Label", state = { badge = "mut" } },
+  { id = "a_text", label = "text", parent = "a", state = { value = "String", note = "owns → A" } },
+  { id = "b", label = "b", sub = "Label", state = { ghost = true } },
+  { id = "b_text", label = "text", parent = "b", state = { hidden = true } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "heap"
+layout = "grid"
+nodes = [
+  { id = "ba", label = "A", state = { value = "hi" } },
+  { id = "bb", label = "B", state = { ghost = true } },
+]
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "owners", op = "node", id = "b", ghost = false, lit = true, badge = "clone" },
+  { panel = "owners", op = "node", id = "b_text", hidden = false, value = "String", note = "owns → B" },
+  { panel = "heap", op = "node", id = "bb", ghost = false, lit = true, value = "hi", note = "separate copy" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "owners", op = "node", id = "b", lit = false, badge = "mut" },
+  { panel = "heap", op = "node", id = "ba", lit = true, value = "hiA", note = "grown independently" },
+  { panel = "heap", op = "node", id = "bb", value = "hiB", note = "grown independently" },
+]
+
+# ---------------------------------------------------------------- L5.4
+[[lessons]]
+id = "L5.4"
+read_more = ["ch05-03-method-syntax.md"]
+
+# Screen 2 · What `self` is
+# Type explorer (fields + method) and a call stack, newest frame first.
+[[lessons.screens]]
+key = "s2"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "type"
+layout = "tree"
+nodes = [
+  { id = "rect", label = "struct Rectangle", sub = "type" },
+  { id = "width", label = "width", sub = "u32", parent = "rect" },
+  { id = "height", label = "height", sub = "u32", parent = "rect" },
+  { id = "area", label = "area(&self) -> u32", sub = "method", parent = "rect", state = { hidden = true } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "stack"
+layout = "tree"
+nodes = [
+  { id = "area_f", label = "area", state = { hidden = true } },
+  { id = "self", label = "self", parent = "area_f", state = { hidden = true } },
+  { id = "main", label = "main" },
+  { id = "rect1", label = "rect1", parent = "main", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "type", op = "node", id = "rect", lit = true, note = "impl Rectangle { … }" },
+  { panel = "type", op = "node", id = "area", hidden = false, lit = true, badge = "new" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "type", op = "node", id = "rect", lit = false },
+  { panel = "type", op = "node", id = "area", badge = "&", note = "&self = self: &Self · Self = Rectangle" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "type", op = "node", id = "area", lit = false },
+  { panel = "stack", op = "node", id = "rect1", ghost = false, lit = true, value = "Rectangle { width: 30, height: 50 }", note = "owner" },
+  { panel = "stack", op = "node", id = "main", note = "waiting" },
+  { panel = "stack", op = "node", id = "area_f", hidden = false, badge = "new frame" },
+  { panel = "stack", op = "node", id = "self", hidden = false, lit = true, value = "&Rectangle", badge = "&", note = "⇢ rect1 (auto-referenced)" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "stack", op = "node", id = "rect1", lit = false },
+  { panel = "stack", op = "node", id = "self", lit = false, note = "⇢ rect1 · reads self.width, self.height" },
+  { panel = "stack", op = "node", id = "area_f", lit = true, badge = "returns 1500" },
+  { panel = "out", op = "print", text = "The area of the rectangle is 1500 square pixels.\n" },
+]
+
+# Screen 4 · A Copy receiver is copied into self
+# Call stack, newest frame first; `self` is the callee's own copy of `original`.
+[[lessons.screens]]
+key = "s4"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "stack"
+layout = "tree"
+nodes = [
+  { id = "inc", label = "incremented", state = { hidden = true } },
+  { id = "self", label = "self", parent = "inc", state = { hidden = true } },
+  { id = "main", label = "main" },
+  { id = "original", label = "original", parent = "main", state = { ghost = true } },
+  { id = "next", label = "next", parent = "main", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "stack", op = "node", id = "original", ghost = false, lit = true, value = "Counter { value: 3 }", badge = "Copy", note = "no heap buffer" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "stack", op = "node", id = "original", lit = false, note = "still 3" },
+  { panel = "stack", op = "node", id = "main", note = "waiting" },
+  { panel = "stack", op = "node", id = "inc", hidden = false, badge = "new frame" },
+  { panel = "stack", op = "node", id = "self", hidden = false, lit = true, value = "Counter { value: 4 }", badge = "mut copy", note = "copied from original, then changed" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "stack", op = "node", id = "inc", hidden = true, badge = "" },
+  { panel = "stack", op = "node", id = "self", hidden = true, lit = false, badge = "" },
+  { panel = "stack", op = "node", id = "main", note = "resumed" },
+  { panel = "stack", op = "node", id = "next", ghost = false, lit = true, value = "Counter { value: 4 }", note = "returned value" },
+  { panel = "stack", op = "node", id = "original", note = "still usable · 3" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "stack", op = "node", id = "next", lit = false },
+  { panel = "stack", op = "node", id = "original", lit = true, note = "not consumed" },
+  { panel = "out", op = "print", text = "3 4\n" },
+]
+
+# ---------------------------------------------------------------- L5.5
+[[lessons]]
+id = "L5.5"
+read_more = ["ch05-03-method-syntax.md"]
+
+# Screen 2 · `Self` names the type
+# Type explorer with the associated function (no receiver); a call stack, newest first.
+[[lessons.screens]]
+key = "s2"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "type"
+layout = "tree"
+nodes = [
+  { id = "rect", label = "struct Rectangle", sub = "type" },
+  { id = "width", label = "width", sub = "u32", parent = "rect" },
+  { id = "height", label = "height", sub = "u32", parent = "rect" },
+  { id = "square", label = "square(size: u32) -> Self", sub = "associated function", parent = "rect" },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "stack"
+layout = "tree"
+nodes = [
+  { id = "square_f", label = "Rectangle::square", state = { hidden = true } },
+  { id = "size", label = "size", parent = "square_f", state = { hidden = true } },
+  { id = "built", label = "Self { … }", parent = "square_f", state = { hidden = true } },
+  { id = "main", label = "main" },
+  { id = "sq", label = "sq", parent = "main", state = { ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "type", op = "node", id = "square", lit = true, badge = "no self", note = "Self = Rectangle" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "type", op = "node", id = "square", lit = false },
+  { panel = "stack", op = "node", id = "square_f", hidden = false, badge = "no receiver" },
+  { panel = "stack", op = "node", id = "size", hidden = false, value = "3" },
+  { panel = "stack", op = "node", id = "built", hidden = false, lit = true, value = "Rectangle { width: 3, height: 3 }", note = "return value" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "stack", op = "node", id = "square_f", hidden = true, badge = "" },
+  { panel = "stack", op = "node", id = "size", hidden = true },
+  { panel = "stack", op = "node", id = "built", hidden = true, lit = false },
+  { panel = "stack", op = "node", id = "sq", ghost = false, lit = true, value = "Rectangle { width: 3, height: 3 }", note = "owner" },
+  { panel = "out", op = "print", text = "Rectangle { width: 3, height: 3 }\n" },
+]

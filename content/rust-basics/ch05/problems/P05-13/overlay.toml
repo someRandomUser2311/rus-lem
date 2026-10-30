@@ -1,0 +1,8 @@
+[[wrong]]
+name = "square-one-side"
+fails = ["t06", "t07", "t08"]
+
+[[wrong]]
+name = "swapped"
+fails = ["t01"]
+

@@ -1,0 +1,27 @@
+[[tests]]
+key = "t01"
+asserts = [{ check = "returns", value = "12.0", tol = 1e-6 }]
+
+[[tests]]
+key = "t02"
+asserts = [{ check = "returns", value = "10.0", tol = 1e-6 }]
+
+[[tests]]
+key = "t03"
+asserts = [{ check = "returns", value = "0.0", tol = 1e-6 }]
+
+[[tests]]
+key = "t04"
+asserts = [{ check = "returns", value = "10000000000.0", tol = 1e-6 }]
+
+[[tests]]
+key = "t05"
+asserts = [{ check = "returns", value = "0.125", tol = 1e-6 }]
+
+[[wrong]]
+name = "truncates"
+fails = ["t02", "t05"]
+
+[[wrong]]
+name = "adds"
+fails = ["t01", "t02", "t03", "t04", "t05"]

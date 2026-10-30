@@ -1,0 +1,21 @@
+[[tests]]
+key = "t14"
+run = { kind = "suite", script = "t14" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t15"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["type:Vec", "type:VecDeque", "type:HashMap", "type:HashSet", "type:BTreeMap", "type:BTreeSet", "macro:vec", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "try", "call:leak", "call:forget", "call:map", "call:and_then", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:zip", "call:sum", "call:product", "call:any", "call:all", "call:position", "call:windows", "call:chunks"], message = "Use only what Chapters 1–6 teach: enums, Option, match, if let and let...else are fine, but no Vec or other collections, no traits or trait implementations, no explicit lifetimes, no unsafe code, no `?` operator, and no adapters that take closures, such as map, and_then, filter or collect." },
+  { check = "uses", what = ["match", "pat_range_incl", "pat_wild"], within = "decimal", message = "`decimal` needs a `match` with an inclusive character range (`'0'..='9'`) and a `_` arm returning `None`." },
+]
+
+[[wrong]]
+name = "zero-missing"
+fails = ["t01", "t14"]
+
+[[wrong]]
+name = "no-match"
+fails = ["t15"]
+

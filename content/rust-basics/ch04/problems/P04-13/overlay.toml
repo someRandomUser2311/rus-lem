@@ -1,0 +1,23 @@
+[[tests]]
+key = "t10"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["reborrow_mut"], within = "append_twice", message = "Make each mutable borrow with a reborrow such as `let first = &mut *text;`, and finish using the first one before creating the second." },
+  { check = "uses", what = ["call:push"], within = "append_twice", message = "Append each marker with `push` through its own mutable borrow." },
+]
+
+[[tests]]
+key = "t11"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["type:Vec", "type:VecDeque", "type:HashMap", "type:HashSet", "type:BTreeMap", "type:BTreeSet", "macro:vec", "type:Option", "call:Some", "ident:None", "item:struct", "item:enum", "item:trait", "item:impl", "item:type", "item:static", "lifetime", "unsafe", "call:leak", "call:forget", "call:map", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:zip", "call:skip", "call:take", "call:sum", "call:product", "call:any", "call:all", "call:position", "call:windows", "call:chunks"], message = "Use only what Chapters 1–4 teach: no Vec or other collections, no Option, no struct/enum/trait/impl definitions, no explicit lifetimes, no unsafe code, and no iterator adapters such as map, filter or collect. Plain for loops over chars, bytes, char_indices or split_whitespace, and standard String methods, are fine." },
+]
+
+[[wrong]]
+name = "no-reborrows"
+fails = ["t10"]
+
+[[wrong]]
+name = "swapped-marks"
+fails = ["t01", "t02", "t03", "t04", "t05", "t06", "t07", "t08", "t09"]
+

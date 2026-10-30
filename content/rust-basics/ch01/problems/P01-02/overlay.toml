@@ -1,0 +1,43 @@
+
+[[tests]]
+key = "t02"
+asserts = [
+  { check = "line_count", count = 1 },
+]
+
+[[tests]]
+key = "t03"
+asserts = [
+  { check = "ends_with", text = "Go!\n" },
+]
+
+[[tests]]
+key = "t04"
+asserts = [
+  { check = "contains", text = "... S" },
+  { check = "contains", text = "... G" },
+]
+
+[[tests]]
+key = "t05"
+asserts = [
+  { check = "macro_count", name = "print", eq = 2 },
+]
+
+[[tests]]
+key = "t06"
+asserts = [
+  { check = "macro_count", name = "println", eq = 1 },
+]
+
+[[wrong]]
+name = "one-println"
+fails = ["t05"]
+
+[[wrong]]
+name = "no-spaces"
+fails = ["t01", "t04"]
+
+[[wrong]]
+name = "all-println"
+fails = ["t01", "t02", "t04", "t05", "t06"]

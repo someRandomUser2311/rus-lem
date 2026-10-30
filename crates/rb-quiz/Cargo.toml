@@ -1,0 +1,13 @@
+[package]
+name = "rb-quiz"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+rb-content.workspace = true
+serde.workspace = true
+ts-rs.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true

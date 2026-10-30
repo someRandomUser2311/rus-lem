@@ -1,0 +1,24 @@
+[[tests]]
+key = "t12"
+run = { kind = "suite", script = "t12" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t13"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["for"], within = "count_matches", message = "Visit the array's values with a `for` loop (`for value in values`) in `count_matches`." },
+  { check = "forbids", what = ["for_range"], within = "count_matches", message = "Loop over the array's values themselves (`for value in values`), not over a range of indexes." },
+]
+
+[[wrong]]
+name = "skips-last"
+fails = ["t02", "t05", "t06", "t07", "t10", "t11", "t13"]
+
+[[wrong]]
+name = "index-loop"
+fails = ["t13"]
+
+[[wrong]]
+name = "first-match-only"
+fails = ["t01", "t02", "t05", "t06", "t07", "t08", "t10"]

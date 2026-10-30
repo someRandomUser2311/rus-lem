@@ -1,0 +1,8 @@
+[[wrong]]
+name = "swapped-coordinates"
+fails = ["t01", "t02", "t04"]
+
+[[wrong]]
+name = "write-forgets-text"
+fails = ["t05", "t07", "t08"]
+

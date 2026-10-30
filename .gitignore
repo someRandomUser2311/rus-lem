@@ -1,0 +1,6 @@
+/target
+app/node_modules
+app/dist
+.DS_Store
+# Written by `course-check bundle` from content/
+app/src-tauri/resources/

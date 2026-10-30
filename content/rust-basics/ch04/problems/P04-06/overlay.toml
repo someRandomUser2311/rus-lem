@@ -1,0 +1,37 @@
+[[tests]]
+key = "t10"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:clone", "call:push_str"], within = "second_edition", message = "Clone `title`, then append the suffix to the clone with `push_str`." },
+]
+
+[[tests]]
+key = "t11"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["macro:format"], message = "Build the second title by appending to the clone (`push_str`), not with `format!`." },
+]
+
+[[tests]]
+key = "t14"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["type:Vec", "type:VecDeque", "type:HashMap", "type:HashSet", "type:BTreeMap", "type:BTreeSet", "macro:vec", "type:Option", "call:Some", "ident:None", "item:struct", "item:enum", "item:trait", "item:impl", "item:type", "item:static", "lifetime", "unsafe", "call:leak", "call:forget", "call:map", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:zip", "call:skip", "call:take", "call:sum", "call:product", "call:any", "call:all", "call:position", "call:windows", "call:chunks"], message = "Use only what Chapters 1–4 teach: no Vec or other collections, no Option, no struct/enum/trait/impl definitions, no explicit lifetimes, no unsafe code, and no iterator adapters such as map, filter or collect. Plain for loops over chars, bytes, char_indices or split_whitespace, and standard String methods, are fine." },
+]
+
+[[wrong]]
+name = "format-title"
+fails = ["t10", "t11"]
+
+[[wrong]]
+name = "clone-then-format"
+fails = ["t10", "t11"]
+
+[[wrong]]
+name = "copy-by-from"
+fails = ["t10"]
+
+[[wrong]]
+name = "same-year"
+fails = ["t01", "t02", "t03", "t04", "t05", "t06", "t07", "t08", "t09", "t12", "t13"]
+

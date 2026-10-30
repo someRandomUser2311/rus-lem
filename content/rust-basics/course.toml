@@ -1,0 +1,8 @@
+id = "rust-basics"
+title = "Basics of Rust"
+version = "0.1.0"
+
+[toolchain]
+edition = "2024"
+min_rustc = "1.85.0"
+target_rustc = "1.98"

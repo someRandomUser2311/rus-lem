@@ -1,0 +1,37 @@
+[[tests]]
+key = "t09"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["const:CENTS_PER_DOLLAR", "const_ty:u64"], message = "Keep `const CENTS_PER_DOLLAR: u64 = 100;`." },
+  { check = "uses", what = ["ident:CENTS_PER_DOLLAR", "op:/", "op:%"], within = "main", message = "Split the total with `/ CENTS_PER_DOLLAR` for dollars and `% CENTS_PER_DOLLAR` for cents, not the number 100." },
+]
+
+[[tests]]
+key = "t16"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["float"], within = "main", message = "Keep money in whole cents with integers; don't use `f64` or decimal literals." },
+]
+
+[[tests]]
+key = "t17"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["cast:u64"], within = "main", message = "Widen both numbers with `as u64` before multiplying, so a large total can't overflow `u32`." },
+]
+
+[[wrong]]
+name = "magic-hundred"
+fails = ["t09"]
+
+[[wrong]]
+name = "float-money"
+fails = ["t09", "t16", "t17"]
+
+[[wrong]]
+name = "from-not-as"
+fails = ["t17"]
+
+[[wrong]]
+name = "no-padding"
+fails = ["t03", "t04", "t05", "t06", "t07"]

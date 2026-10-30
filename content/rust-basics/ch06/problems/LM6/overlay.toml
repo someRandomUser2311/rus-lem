@@ -1,0 +1,394 @@
+checkpoints = true
+
+[[tests]]
+key = "t09"
+part = 1
+
+[[tests]]
+key = "t10"
+part = 1
+
+[[tests]]
+key = "t11"
+part = 1
+
+[[tests]]
+key = "t29"
+part = 1
+
+[[tests]]
+key = "t30"
+part = 1
+
+[[tests]]
+key = "t35"
+part = 1
+
+[[tests]]
+key = "t01"
+part = 2
+
+[[tests]]
+key = "t02"
+part = 2
+
+[[tests]]
+key = "t03"
+part = 2
+
+[[tests]]
+key = "t04"
+part = 2
+
+[[tests]]
+key = "t05"
+part = 2
+
+[[tests]]
+key = "t06"
+part = 2
+
+[[tests]]
+key = "t07"
+part = 2
+
+[[tests]]
+key = "t08"
+part = 2
+
+[[tests]]
+key = "t12"
+part = 2
+
+[[tests]]
+key = "t13"
+part = 2
+
+[[tests]]
+key = "t14"
+part = 2
+
+[[tests]]
+key = "t15"
+part = 2
+
+[[tests]]
+key = "t16"
+part = 2
+
+[[tests]]
+key = "t17"
+part = 2
+
+[[tests]]
+key = "t36"
+part = 2
+
+[[tests]]
+key = "t18"
+part = 3
+
+[[tests]]
+key = "t19"
+part = 3
+
+[[tests]]
+key = "t20"
+part = 3
+
+[[tests]]
+key = "t21"
+part = 3
+
+[[tests]]
+key = "t22"
+part = 3
+
+[[tests]]
+key = "t23"
+part = 3
+
+[[tests]]
+key = "t24"
+part = 3
+
+[[tests]]
+key = "t25"
+part = 3
+
+[[tests]]
+key = "t26"
+part = 3
+
+[[tests]]
+key = "t28"
+part = 3
+
+[[tests]]
+key = "t31"
+part = 3
+
+[[tests]]
+key = "t32"
+part = 3
+
+[[tests]]
+key = "t33"
+part = 3
+
+[[tests]]
+key = "t34"
+part = 3
+
+[[tests]]
+key = "t27"
+part = 4
+
+[[tests]]
+key = "t37"
+part = 4
+
+[[tests]]
+key = "t38"
+part = 4
+
+[[tests]]
+key = "t39"
+part = 4
+
+[[tests]]
+key = "t40"
+part = 4
+
+[[tests]]
+key = "t41"
+part = 4
+
+[[tests]]
+key = "t42"
+part = 4
+
+[[tests]]
+key = "t43"
+part = 4
+
+[[tests]]
+key = "t44"
+part = 4
+
+[[tests]]
+key = "t45"
+part = 4
+
+[[tests]]
+key = "t46"
+part = 4
+
+[[tests]]
+key = "t47"
+part = 4
+
+[[tests]]
+key = "t48"
+part = 4
+
+[[tests]]
+key = "t49"
+part = 4
+
+[[tests]]
+key = "t38"
+part = 4
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["type:Vec", "type:VecDeque", "type:HashMap", "type:HashSet", "type:BTreeMap", "type:BTreeSet", "macro:vec", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "try", "call:leak", "call:forget", "call:map", "call:and_then", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:zip", "call:sum", "call:product", "call:any", "call:all", "call:position", "call:windows", "call:chunks"], message = "Use only what Chapters 1–6 teach: enums, Option, match, if let and let...else are fine, but no Vec or other collections, no traits or trait implementations, no explicit lifetimes, no unsafe code, no `?` operator, and no adapters that take closures, such as map, and_then, filter or collect." },
+  { check = "uses", what = ["variant_shape:Available", "variant_shape:Borrowed{member_id:u32,due_day:u32}", "variant_shape:Lost", "derive:Debug", "derive:Clone", "derive:Copy", "derive:PartialEq"], inside = "enum:Status", message = "Keep `Status` exactly as supplied: `#[derive(Debug, Clone, Copy, PartialEq)]` with `Available`, `Borrowed { member_id: u32, due_day: u32 }` and `Lost`." },
+  { check = "uses", what = ["field:id:u32", "field:title:String", "field:author:String", "field:year:u16", "field:status:Status"], inside = "struct:Book", message = "`Book` keeps its LM5 fields and adds `pub status: Status`." },
+  { check = "uses", what = ["field:id:u32", "field:name:String", "field:premium:bool", "field:borrowed:u8"], inside = "struct:Member", message = "Keep `Member` exactly as in LM5." },
+  { check = "uses", what = ["recv:ref"], within = "is_available", message = "`is_available` must take `&self`." },
+  { check = "uses", what = ["recv:ref"], within = "borrower", message = "`borrower` must take `&self`." },
+  { check = "uses", what = ["recv:mut", "call:due_day", "call:can_borrow"], within = "checkout", message = "`checkout` takes `&mut self`, checks `member.can_borrow()` and computes the due day with LM3's `due_day`." },
+  { check = "uses", what = ["recv:mut", "call:late_fee_cents", "call:days_late", "call:record_return"], within = "return_to_shelf", message = "`return_to_shelf` takes `&mut self`, charges LM3's `late_fee_cents(days_late(…))` and calls `member.record_return()`." },
+  { check = "uses", what = ["recv:mut"], within = "mark_lost", message = "`mark_lost` must take `&mut self`." },
+  { check = "uses", what = ["fn:normalize_title", "fn:sort_key", "fn:title_matches", "fn:due_day", "fn:days_late", "fn:late_fee_cents", "fn:format_cents", "fn:main", "fn:summary", "fn:limit", "fn:record_borrow"], message = "Keep everything from LM5: the title helpers, the fee functions, `Book::summary`, the `Member` methods and the menu in `main`." },
+]
+
+[[tests]]
+key = "t37"
+part = 4
+run = { kind = "suite", script = "t37" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t39"
+n = 39
+visible = false
+category = "output"
+input_md = "stdin: `\"\"`"
+expected_md = "stdout: `\"==============================\\n  Riverside Community Library\\n==============================\\nOpen daily, 9:00 to 17:00\\n1) List books\\n2) Borrow a book\\n3) Return a book\\n4) Quit\\nChoose an option:\\nGoodbye!\\n\"`"
+checks_md = "`io.read_line`: Inherited menu: immediate EOF prints the banner once and quits."
+concept = "io.read_line"
+part = 4
+run = { kind = "process", stdin = "" }
+asserts = [{ check = "stdout_eq", text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" }]
+
+[[tests]]
+key = "t40"
+n = 40
+visible = false
+category = "output"
+input_md = "stdin: `\"4\\n\"`"
+expected_md = "stdout: `\"==============================\\n  Riverside Community Library\\n==============================\\nOpen daily, 9:00 to 17:00\\n1) List books\\n2) Borrow a book\\n3) Return a book\\n4) Quit\\nChoose an option:\\nGoodbye!\\n\"`"
+checks_md = "`io.read_line`: Inherited menu: explicit Quit prints Goodbye once."
+concept = "io.read_line"
+part = 4
+run = { kind = "process", stdin = "4\n" }
+asserts = [{ check = "stdout_eq", text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" }]
+
+[[tests]]
+key = "t41"
+n = 41
+visible = false
+category = "output"
+input_md = "stdin: `\"1\\n4\\n\"`"
+expected_md = "stdout: `\"==============================\\n  Riverside Community Library\\n==============================\\nOpen daily, 9:00 to 17:00\\n1) List books\\n2) Borrow a book\\n3) Return a book\\n4) Quit\\nChoose an option:\\nYou chose: List books\\n1) List books\\n2) Borrow a book\\n3) Return a book\\n4) Quit\\nChoose an option:\\nGoodbye!\\n\"`"
+checks_md = "`io.read_line`: Inherited menu: List acknowledgement is followed by a fresh menu."
+concept = "io.read_line"
+part = 4
+run = { kind = "process", stdin = "1\n4\n" }
+asserts = [{ check = "stdout_eq", text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nYou chose: List books\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" }]
+
+[[tests]]
+key = "t42"
+n = 42
+visible = false
+category = "output"
+input_md = "stdin: `\"2\\n3\\n4\"`"
+expected_md = "stdout: `\"==============================\\n  Riverside Community Library\\n==============================\\nOpen daily, 9:00 to 17:00\\n1) List books\\n2) Borrow a book\\n3) Return a book\\n4) Quit\\nChoose an option:\\nYou chose: Borrow a book\\n1) List books\\n2) Borrow a book\\n3) Return a book\\n4) Quit\\nChoose an option:\\nYou chose: Return a book\\n1) List books\\n2) Borrow a book\\n3) Return a book\\n4) Quit\\nChoose an option:\\nGoodbye!\\n\"`"
+checks_md = "`io.read_line`: Inherited menu: Borrow and Return acknowledgements work before Quit without a final newline."
+concept = "io.read_line"
+part = 4
+run = { kind = "process", stdin = "2\n3\n4" }
+asserts = [{ check = "stdout_eq", text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nYou chose: Borrow a book\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nYou chose: Return a book\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" }]
+
+[[tests]]
+key = "t43"
+n = 43
+visible = false
+category = "output"
+input_md = "stdin: `\"x\\n4\\n\"`"
+expected_md = "stdout: `\"==============================\\n  Riverside Community Library\\n==============================\\nOpen daily, 9:00 to 17:00\\n1) List books\\n2) Borrow a book\\n3) Return a book\\n4) Quit\\nChoose an option:\\nPlease type a number from 1 to 4.\\n1) List books\\n2) Borrow a book\\n3) Return a book\\n4) Quit\\nChoose an option:\\nGoodbye!\\n\"`"
+checks_md = "`io.read_line`: Inherited menu: invalid text reports the contracted error and recovers."
+concept = "io.read_line"
+part = 4
+run = { kind = "process", stdin = "x\n4\n" }
+asserts = [{ check = "stdout_eq", text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nPlease type a number from 1 to 4.\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" }]
+
+[[tests]]
+key = "t44"
+n = 44
+visible = false
+category = "output"
+input_md = "stdin: `\" \\t4 \\n\"`"
+expected_md = "stdout: `\"==============================\\n  Riverside Community Library\\n==============================\\nOpen daily, 9:00 to 17:00\\n1) List books\\n2) Borrow a book\\n3) Return a book\\n4) Quit\\nChoose an option:\\nGoodbye!\\n\"`"
+checks_md = "`io.read_line`: Inherited menu: surrounding tab/space whitespace is accepted for Quit."
+concept = "io.read_line"
+part = 4
+run = { kind = "process", stdin = " \t4 \n" }
+asserts = [{ check = "stdout_eq", text = "==============================\n  Riverside Community Library\n==============================\nOpen daily, 9:00 to 17:00\n1) List books\n2) Borrow a book\n3) Return a book\n4) Quit\nChoose an option:\nGoodbye!\n" }]
+
+[[tests]]
+key = "t45"
+n = 45
+visible = false
+category = "random"
+input_md = "Inherited regression suite: LM5's 300-case `Member` borrow/return suite (seed `0x05020000`)"
+expected_md = "Same results as the combined LM6 reference"
+checks_md = "`struct.method`: Earlier milestones keep working after `Status` is added."
+concept = "struct.method"
+part = 4
+run = { kind = "suite", script = "t45" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t46"
+n = 46
+visible = false
+category = "random"
+input_md = "Inherited regression suite: LM2's 20 stdin fixtures, its 300-case seeded suite and its 10,000-line session"
+expected_md = "Same results as the combined LM6 reference"
+checks_md = "`io.read_line`: Earlier milestones keep working after `Status` is added."
+concept = "io.read_line"
+part = 4
+run = { kind = "suite", script = "t46" }
+asserts = [{ check = "same_as_reference" }]
+
+[[tests]]
+key = "t47"
+n = 47
+visible = false
+category = "random"
+input_md = "Inherited regression suite: LM4's 300-case `normalize_title` suite (seed `0x0004B001`)"
+expected_md = "Same results as the combined LM6 reference"
+checks_md = "`struct.method`: Earlier milestones keep working after `Status` is added."
+concept = "struct.method"
+part = 4
+run = { kind = "suite", script = "t47" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t48"
+n = 48
+visible = false
+category = "random"
+input_md = "Inherited regression suite: LM4's 300-case `sort_key` suite (seed `0x0004B002`)"
+expected_md = "Same results as the combined LM6 reference"
+checks_md = "`struct.method`: Earlier milestones keep working after `Status` is added."
+concept = "struct.method"
+part = 4
+run = { kind = "suite", script = "t48" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t49"
+n = 49
+visible = false
+category = "random"
+input_md = "Inherited regression suite: LM4's 300-case `title_matches` suite (seed `0x0004B003`)"
+expected_md = "Same results as the combined LM6 reference"
+checks_md = "`struct.method`: Earlier milestones keep working after `Status` is added."
+concept = "struct.method"
+part = 4
+run = { kind = "suite", script = "t49" }
+asserts = [{ check = "returns" }]
+
+[[wrong]]
+name = "borrowed-is-available"
+part = 1
+fails = ["t11"]
+
+[[wrong]]
+name = "premium-ignored"
+part = 2
+fails = ["t05", "t06", "t07", "t08"]
+
+[[wrong]]
+name = "limit-unchecked"
+part = 2
+fails = ["t12", "t13", "t14", "t15"]
+
+[[wrong]]
+name = "any-member-returns"
+part = 3
+fails = ["t26"]
+
+[[wrong]]
+name = "no-late-fee"
+part = 3
+fails = ["t20", "t21", "t22", "t23", "t24", "t25", "t33", "t34"]
+
+[[wrong]]
+name = "lost-is-available"
+part = 4
+fails = ["t27"]
+

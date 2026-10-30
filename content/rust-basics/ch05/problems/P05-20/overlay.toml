@@ -1,0 +1,27 @@
+[[tests]]
+key = "t15"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["tuple_struct:Millimetres"], message = "Keep `Millimetres` a tuple struct: `pub struct Millimetres(pub u32);`." },
+  { check = "uses", what = ["recv:none"], within = "new", inside = "impl:Parcel", message = "`Parcel::new` is an associated function: no `self` parameter." },
+  { check = "uses", what = ["recv:ref", "ret:u64"], within = "area", inside = "impl:Parcel", message = "`area` must take `&self` and return `u64`." },
+  { check = "uses", what = ["recv:ref", "ret:bool"], within = "fits", inside = "impl:Parcel", message = "`fits` must take `&self` and return `bool`." },
+]
+
+[[tests]]
+key = "t20"
+run = { kind = "suite", script = "t20" }
+asserts = [{ check = "returns" }]
+
+[[wrong]]
+name = "no-rotation"
+fails = ["t07", "t11", "t13", "t16", "t19", "t20"]
+
+[[wrong]]
+name = "last-minimum"
+fails = ["t07", "t11", "t12", "t14"]
+
+[[wrong]]
+name = "u32-area"
+fails = ["t03", "t20"]
+

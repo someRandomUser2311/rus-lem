@@ -1,0 +1,59 @@
+
+[[tests]]
+key = "t15"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:is_alphabetic"], within = "main", message = "Use `c.is_alphabetic()` for its field; don't rebuild it from other checks." },
+]
+
+[[tests]]
+key = "t16"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:is_numeric"], within = "main", message = "Use `c.is_numeric()` for its field; don't rebuild it from other checks." },
+]
+
+[[tests]]
+key = "t17"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:is_ascii_digit"], within = "main", message = "Use `c.is_ascii_digit()` for its field; don't rebuild it from other checks." },
+]
+
+[[tests]]
+key = "t18"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:is_uppercase"], within = "main", message = "Use `c.is_uppercase()` for its field; don't rebuild it from other checks." },
+]
+
+[[tests]]
+key = "t19"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:to_ascii_uppercase"], within = "main", message = "Use `c.to_ascii_uppercase()` for its field; don't rebuild it from other checks." },
+]
+
+[[tests]]
+key = "t20"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:to_ascii_lowercase"], within = "main", message = "Use `c.to_ascii_lowercase()` for its field; don't rebuild it from other checks." },
+]
+
+[[wrong]]
+name = "numeric-ascii-only"
+fails = ["t05", "t16"]
+
+[[wrong]]
+name = "alphabetic-by-elimination"
+fails = ["t15"]
+
+[[wrong]]
+name = "digit-by-elimination"
+fails = ["t17"]
+
+[[wrong]]
+name = "manual-upper"
+fails = ["t19"]
+

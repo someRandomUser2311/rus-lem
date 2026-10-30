@@ -1,0 +1,25 @@
+[[tests]]
+key = "t18"
+run = { kind = "suite", script = "t18" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t19"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["loop", "break_value"], within = "collatz_report", message = "Run the process in a `loop` expression and return the report with `break (n, steps, reached)`." },
+  { check = "uses", what = ["call:overflowing_mul"], within = "collatz_report", inside = "loop", message = "Detect an odd step that would overflow with explicit overflowing arithmetic (`overflowing_mul`, `overflowing_add`) before applying it." },
+]
+
+[[wrong]]
+name = "wrapping"
+fails = ["t08", "t09", "t16", "t18"]
+
+[[wrong]]
+name = "limit-first"
+fails = ["t06", "t12", "t14"]
+
+[[wrong]]
+name = "checked-while"
+fails = ["t19"]
+

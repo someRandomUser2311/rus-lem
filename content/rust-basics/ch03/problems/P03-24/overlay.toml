@@ -1,0 +1,25 @@
+[[tests]]
+key = "t12"
+run = { kind = "suite", script = "t12" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t13"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["ident:BYTE_CAP", "call:saturating_add"], within = "capped_counter", inside = "loop", message = "Inside a `loop` in `capped_counter`, stop at `BYTE_CAP` and increment with `saturating_add`." },
+  { check = "uses", what = ["break_value"], within = "capped_counter", message = "Return the result from the loop with `break (start, applied)`." },
+]
+
+[[wrong]]
+name = "counts-capped-steps"
+fails = ["t02", "t07", "t08", "t09", "t12", "t13"]
+
+[[wrong]]
+name = "plain-add"
+fails = ["t13"]
+
+[[wrong]]
+name = "return-after-loop"
+fails = ["t13"]
+

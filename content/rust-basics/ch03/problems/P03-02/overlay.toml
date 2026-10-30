@@ -1,0 +1,15 @@
+[[tests]]
+key = "t09"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["let_mut:counter", "assign:counter"], within = "main", message = "Make the declaration `let mut counter = initial;` and keep the assignment `counter = 20;`." },
+  { check = "forbids", what = ["shadow:counter"], within = "main", message = "Don't fix the error by declaring `counter` again with `let`; make the first declaration mutable." },
+]
+
+[[wrong]]
+name = "shadow"
+fails = ["t09"]
+
+[[wrong]]
+name = "start-at-20"
+fails = ["t01", "t03", "t06", "t07", "t10", "t11", "t12"]

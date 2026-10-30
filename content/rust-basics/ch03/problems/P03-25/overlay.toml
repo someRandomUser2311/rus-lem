@@ -1,0 +1,25 @@
+[[tests]]
+key = "t12"
+run = { kind = "suite", script = "t12" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t13"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["labeled_loop", "labeled_break", "break_value"], within = "find_cell", message = "Search inside a labeled loop (`'search: loop`) and leave it with `break 'search (row, col)` from inside the inner array loop." },
+  { check = "uses", what = ["labeled_break"], within = "find_cell", inside = "for", message = "Break out of the labeled loop from inside the inner loop over the row's values." },
+]
+
+[[wrong]]
+name = "last-match"
+fails = ["t03", "t05", "t06", "t10", "t13"]
+
+[[wrong]]
+name = "swapped"
+fails = ["t02"]
+
+[[wrong]]
+name = "plain-returns"
+fails = ["t13"]
+

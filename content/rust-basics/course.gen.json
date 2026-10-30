@@ -1,0 +1,2304 @@
+{
+  "chapters": [
+    {
+      "available": false,
+      "id": "ch01",
+      "num": 1,
+      "part": "I",
+      "title": "Getting Started"
+    },
+    {
+      "available": false,
+      "id": "ch02",
+      "num": 2,
+      "part": "I",
+      "title": "Programming a Guessing Game"
+    },
+    {
+      "available": false,
+      "id": "ch03",
+      "num": 3,
+      "part": "I",
+      "title": "Common Programming Concepts"
+    },
+    {
+      "available": false,
+      "id": "ch04",
+      "num": 4,
+      "part": "I",
+      "title": "Understanding Ownership"
+    },
+    {
+      "available": false,
+      "id": "ch05",
+      "num": 5,
+      "part": "I",
+      "title": "Using Structs"
+    },
+    {
+      "available": false,
+      "id": "ch06",
+      "num": 6,
+      "part": "I",
+      "title": "Enums and Pattern Matching"
+    },
+    {
+      "available": false,
+      "id": "ch07",
+      "num": 7,
+      "part": "II",
+      "title": "Packages, Crates, and Modules"
+    },
+    {
+      "available": false,
+      "id": "ch08",
+      "num": 8,
+      "part": "II",
+      "title": "Common Collections"
+    },
+    {
+      "available": false,
+      "id": "ch09",
+      "num": 9,
+      "part": "II",
+      "title": "Error Handling"
+    },
+    {
+      "available": false,
+      "id": "ch10",
+      "num": 10,
+      "part": "II",
+      "title": "Generic Types, Traits, and Lifetimes"
+    },
+    {
+      "available": false,
+      "id": "ch11",
+      "num": 11,
+      "part": "II",
+      "title": "Writing Automated Tests"
+    },
+    {
+      "available": false,
+      "id": "ch12",
+      "num": 12,
+      "part": "III",
+      "title": "An I/O Project (minigrep)"
+    },
+    {
+      "available": false,
+      "id": "ch13",
+      "num": 13,
+      "part": "III",
+      "title": "Closures and Iterators"
+    },
+    {
+      "available": false,
+      "id": "ch14",
+      "num": 14,
+      "part": "III",
+      "title": "More about Cargo and Crates.io"
+    },
+    {
+      "available": false,
+      "id": "ch15",
+      "num": 15,
+      "part": "III",
+      "title": "Smart Pointers"
+    },
+    {
+      "available": false,
+      "id": "ch16",
+      "num": 16,
+      "part": "III",
+      "title": "Fearless Concurrency"
+    },
+    {
+      "available": false,
+      "id": "ch17",
+      "num": 17,
+      "part": "IV",
+      "title": "Async and Await"
+    },
+    {
+      "available": false,
+      "id": "ch18",
+      "num": 18,
+      "part": "IV",
+      "title": "Object-Oriented Programming Features"
+    },
+    {
+      "available": false,
+      "id": "ch19",
+      "num": 19,
+      "part": "IV",
+      "title": "Patterns and Matching"
+    },
+    {
+      "available": false,
+      "id": "ch20",
+      "num": 20,
+      "part": "IV",
+      "title": "Advanced Features"
+    },
+    {
+      "available": false,
+      "id": "ch21",
+      "num": 21,
+      "part": "IV",
+      "title": "Final Project: A Multithreaded Web Server"
+    }
+  ],
+  "concepts": [
+    {
+      "chapter": 1,
+      "definition": "Rust source is compiled ahead of time into a program; `rustc main.rs` produces an executable. The compiler checks the program before it can run.",
+      "id": "tool.rustc",
+      "lesson": "L1.1",
+      "name": "Compiling with `rustc`",
+      "tested_by": "quiz"
+    },
+    {
+      "chapter": 1,
+      "definition": "`fn main() { }` is where every executable program starts. Function bodies are inside `{ }`. Statements end with `;`.",
+      "id": "basic.main",
+      "lesson": "L1.2",
+      "name": "The `main` function",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 1,
+      "definition": "`println!` prints text and a newline; `print!` prints without the newline. Placeholders: `{}` with arguments, or a variable name inline: `{name}`. `{{` and `}}` print literal braces.",
+      "id": "basic.println",
+      "lesson": "L1.2",
+      "name": "Printing with `println!` and `print!`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 1,
+      "definition": "A name followed by `!` is a macro call, not a function call. Macros can take a variable number of arguments.",
+      "id": "basic.macro",
+      "lesson": "L1.2",
+      "name": "Macros vs functions",
+      "tested_by": "quiz"
+    },
+    {
+      "chapter": 1,
+      "definition": "`cargo new`, `cargo build`, `cargo run`, `cargo check`; the `src/main.rs` layout; `target/` holds build output.",
+      "id": "tool.cargo",
+      "lesson": "L1.3",
+      "name": "Cargo projects",
+      "tested_by": "quiz"
+    },
+    {
+      "chapter": 1,
+      "definition": "The manifest: `[package]` (name, version, edition) and `[dependencies]`.",
+      "id": "tool.cargo_toml",
+      "lesson": "L1.3",
+      "name": "`Cargo.toml`",
+      "tested_by": "quiz"
+    },
+    {
+      "chapter": 2,
+      "definition": "`let x = 5;` creates a variable. Variables are immutable by default. Deepened in L3.1.",
+      "id": "var.let",
+      "lesson": "L2.1",
+      "name": "`let` bindings",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 2,
+      "definition": "`let mut x = 5;` lets the value change. Deepened in L3.1.",
+      "id": "var.mut",
+      "lesson": "L2.1",
+      "name": "Mutable variables",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 2,
+      "definition": "`std::io::stdin().read_line(&mut buf)` appends a line (including the newline) to a `String`.",
+      "id": "io.read_line",
+      "lesson": "L2.1",
+      "name": "Reading a line of input",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 2,
+      "definition": "`String::new()` makes an empty string; `String::from(\"hi\")` and `\"hi\".to_string()` make one from text. Deepened in L4.1 and L8.3.",
+      "id": "str.new",
+      "lesson": "L2.1",
+      "name": "Creating a `String`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 2,
+      "definition": "An operation that can fail returns `Result`; `.expect(\"msg\")` gives the value or stops the program with the message. Deepened in L9.3.",
+      "id": "res.expect",
+      "lesson": "L2.1",
+      "name": "`.expect()` on a `Result`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 2,
+      "definition": "`use std::io;` brings a name into scope so it can be used without its full path. Deepened in L7.4.",
+      "id": "use.std",
+      "lesson": "L2.1",
+      "name": "`use` for standard library items",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 2,
+      "definition": "Adding `rand = \"0.10\"` under `[dependencies]` in `Cargo.toml`; Cargo fetches and builds it (in the app, crates are bundled). Semantic versioning basics; `Cargo.lock`.",
+      "id": "crate.dep",
+      "lesson": "L2.2",
+      "name": "Depending on a crate",
+      "tested_by": "quiz"
+    },
+    {
+      "chapter": 2,
+      "definition": "`rand::rng().random_range(1..=100)` picks a random number in an inclusive range.",
+      "id": "rand.range",
+      "lesson": "L2.2",
+      "name": "Random numbers with `rand`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 2,
+      "definition": "`a.cmp(&b)` returns `Ordering::Less`, `Equal` or `Greater` (from `std::cmp::Ordering`).",
+      "id": "cmp.ordering",
+      "lesson": "L2.3",
+      "name": "Comparing with `cmp` and `Ordering`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 2,
+      "definition": "`match value { pattern => expr, ... }` runs the first arm whose pattern fits. Patterns here: enum variants such as `Ordering::Less`, literals, `Ok(x)`/`Err(_)`, and `_`. Deepened in L6.3.",
+      "id": "match.intro",
+      "lesson": "L2.3",
+      "name": "A first look at `match`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 2,
+      "definition": "`s.trim().parse::<u32>()` or `let n: u32 = s.trim().parse()...` turns text into a number. It returns a `Result` because the text may not be a number.",
+      "id": "parse.num",
+      "lesson": "L2.3",
+      "name": "Parsing text into numbers",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 2,
+      "definition": "`let guess: u32 = guess.trim().parse()...` declares a new variable with the same name, possibly of a different type. Deepened in L3.2.",
+      "id": "var.shadow",
+      "lesson": "L2.3",
+      "name": "Shadowing",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 2,
+      "definition": "`loop { }` repeats forever until `break`; `continue` skips to the next iteration. Deepened in L3.8.",
+      "id": "loop.intro",
+      "lesson": "L2.3",
+      "name": "`loop`, `break` and `continue`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 3,
+      "definition": "Assigning twice to a variable without `mut` is a compile error (E0384). Immutability prevents accidental changes.",
+      "id": "var.immut",
+      "lesson": "L3.1",
+      "name": "Immutability by default",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 3,
+      "definition": "`const MAX_POINTS: u32 = 100_000;` must have a type, is always immutable, can be declared at module level, and must be a constant expression. Named in `SCREAMING_SNAKE_CASE`.",
+      "id": "var.const",
+      "lesson": "L3.2",
+      "name": "Constants",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 3,
+      "definition": "`i8`–`i128`, `u8`–`u128`, `isize`, `usize`; default `i32`. Literal forms: `1_000`, `0xff`, `0o77`, `0b1010`, `b'A'`, suffixes like `5u8`. Ranges of each type, e.g. `u8` is 0–255.",
+      "id": "type.int",
+      "lesson": "L3.3",
+      "name": "Integer types",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 3,
+      "definition": "In debug builds overflow panics; in release builds it wraps. Explicit handling: `wrapping_*`, `saturating_*`, `overflowing_*`, and `checked_*` (returns `Option`, used from Chapter 6).",
+      "id": "type.overflow",
+      "lesson": "L3.3",
+      "name": "Integer overflow",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 3,
+      "definition": "`f64` (default) and `f32`; float literals need a dot; comparing floats with `==` is risky; `.abs()`, `.sqrt()`, `.powi()`, `.round()`, `.floor()`, `.ceil()`.",
+      "id": "type.float",
+      "lesson": "L3.3",
+      "name": "Floating-point types",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 3,
+      "definition": "`+ - * / %`; integer division truncates toward zero; `%` keeps the sign of the left side; `+=` and friends; dividing an integer by zero panics. `.pow()`, `.abs()`, `.min()`, `.max()` on integers.",
+      "id": "type.arith",
+      "lesson": "L3.3",
+      "name": "Numeric operations",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 3,
+      "definition": "`bool` with `true`/`false`; `&&`, `||` (short-circuit), `!`; comparisons `== != < > <= >=` produce `bool`.",
+      "id": "type.bool",
+      "lesson": "L3.3",
+      "name": "Booleans",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 3,
+      "definition": "`char` is a 4-byte Unicode scalar value, written with single quotes: `'z'`, `'é'`, `'😻'`. Methods: `is_alphabetic`, `is_numeric`, `is_ascii_digit`, `is_whitespace`, `is_uppercase`, `to_ascii_uppercase`, `to_ascii_lowercase`; `c as u32`; `(b'a' + 2) as char`.",
+      "id": "type.char",
+      "lesson": "L3.3",
+      "name": "Characters",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 3,
+      "definition": "`x as f64`, `c as u32`, `n as u8` (truncates), float to int truncates and saturates.",
+      "id": "type.cast",
+      "lesson": "L3.3",
+      "name": "Casting with `as`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 3,
+      "definition": "The compiler infers types; annotations (`let x: u64 = 5;`) are needed when it can't, e.g. for `parse`.",
+      "id": "type.annot",
+      "lesson": "L3.3",
+      "name": "Type annotations and inference",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 3,
+      "definition": "`{:.2}` (precision), `{:5}` / `{:<5}` / `{:>5}` / `{:^5}` (width and alignment), `{:05}` (zero padding), `{:+}`, `{:b}`, `{:x}`, `{:e}`; and `format!` to build a `String` the same way. *(course addition)*",
+      "id": "fmt.spec",
+      "lesson": "L3.3",
+      "name": "Format specifiers",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 3,
+      "definition": "`(i32, f64, char)`; access with `.0`, `.1`; destructure with `let (a, b) = t;`; the unit type `()`. Functions can return several values as a tuple.",
+      "id": "type.tuple",
+      "lesson": "L3.4",
+      "name": "Tuples",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 3,
+      "definition": "Fixed length, one type: `[i32; 5]`, `[0; 10]`; index with `a[i]` (`usize`); out-of-bounds index panics at run time; `.len()`.",
+      "id": "type.array",
+      "lesson": "L3.4",
+      "name": "Arrays",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 3,
+      "definition": "`fn name() { }`; `snake_case` names; functions can be defined in any order.",
+      "id": "fn.define",
+      "lesson": "L3.5",
+      "name": "Defining and calling functions",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 3,
+      "definition": "Every parameter must have a type: `fn f(x: i32, label: char)`.",
+      "id": "fn.params",
+      "lesson": "L3.5",
+      "name": "Parameters",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 3,
+      "definition": "`-> Type`; the last expression without a `;` is the return value; `return` returns early. Adding `;` to the last line returns `()` instead (error E0308).",
+      "id": "fn.return",
+      "lesson": "L3.5",
+      "name": "Return values",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 3,
+      "definition": "Statements do something and produce no value (`let`); expressions produce a value. A `{ }` block is an expression whose value is its last expression.",
+      "id": "expr.block",
+      "lesson": "L3.6",
+      "name": "Statements and expressions",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 3,
+      "definition": "`//` line comments; `/* */` block comments. Doc comments come in Chapter 14.",
+      "id": "basic.comment",
+      "lesson": "L3.6",
+      "name": "Comments",
+      "tested_by": "quiz"
+    },
+    {
+      "chapter": 3,
+      "definition": "The condition must be a `bool` (no truthy numbers).",
+      "id": "ctrl.if",
+      "lesson": "L3.7",
+      "name": "`if`, `else if`, `else`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 3,
+      "definition": "`let x = if c { 5 } else { 6 };`; both branches must have the same type.",
+      "id": "ctrl.if_expr",
+      "lesson": "L3.7",
+      "name": "`if` as an expression",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 3,
+      "definition": "`break value` returns a value from `loop`; loop labels `'outer: loop { break 'outer; }`. Builds on `loop.intro`.",
+      "id": "ctrl.loop",
+      "lesson": "L3.8",
+      "name": "`loop` with values and labels",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 3,
+      "definition": "Repeat while a condition is true.",
+      "id": "ctrl.while",
+      "lesson": "L3.8",
+      "name": "`while` loops",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 3,
+      "definition": "`for i in 0..n`, `for i in 1..=n`, `for i in (0..n).rev()`, `.step_by(k)`.",
+      "id": "ctrl.for_range",
+      "lesson": "L3.8",
+      "name": "`for` over ranges",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 3,
+      "definition": "`for x in arr` (copies of elements) and `for x in &arr`; preferred over index loops.",
+      "id": "ctrl.for_array",
+      "lesson": "L3.8",
+      "name": "`for` over an array",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 4,
+      "definition": "Fixed-size values live on the stack; growable data lives on the heap behind a pointer.",
+      "id": "mem.stack_heap",
+      "lesson": "L4.1",
+      "name": "Stack and heap",
+      "tested_by": "quiz"
+    },
+    {
+      "chapter": 4,
+      "definition": "Each value has one owner; there is one owner at a time; when the owner goes out of scope the value is dropped.",
+      "id": "own.scope",
+      "lesson": "L4.1",
+      "name": "Ownership rules and scope",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 4,
+      "definition": "A literal `\"hi\"` is a fixed `&str` built into the program; a `String` is growable heap text. `push_str`, `push`, `len`, `is_empty`.",
+      "id": "str.string_type",
+      "lesson": "L4.1",
+      "name": "`String` vs string literals",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 4,
+      "definition": "Assigning or passing a heap-owning value moves ownership; the old variable can't be used (E0382).",
+      "id": "own.move",
+      "lesson": "L4.2",
+      "name": "Moves",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 4,
+      "definition": "`.clone()` deep-copies heap data; it has a cost, so use it on purpose.",
+      "id": "own.clone",
+      "lesson": "L4.3",
+      "name": "`clone`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 4,
+      "definition": "Integers, floats, `bool`, `char`, and tuples/arrays of `Copy` types are copied, not moved.",
+      "id": "own.copy",
+      "lesson": "L4.3",
+      "name": "`Copy` types",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 4,
+      "definition": "Passing a `String` to a function moves it; passing an `i32` copies it.",
+      "id": "own.fn_move",
+      "lesson": "L4.4",
+      "name": "Passing ownership to functions",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 4,
+      "definition": "Returning a value moves ownership to the caller; \"take and give back\" with tuples.",
+      "id": "own.fn_return",
+      "lesson": "L4.4",
+      "name": "Returning ownership",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 4,
+      "definition": "`&s` borrows without taking ownership; the function can read but not change.",
+      "id": "borrow.shared",
+      "lesson": "L4.5",
+      "name": "Shared references `&T`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 4,
+      "definition": "`&mut s` borrows with permission to change; the variable itself must be `mut`; dereference with `*r` for `Copy` values.",
+      "id": "borrow.mut",
+      "lesson": "L4.6",
+      "name": "Mutable references `&mut T`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 4,
+      "definition": "At any time, either one `&mut` or any number of `&`; a reference's use ends at its last use (non-lexical lifetimes). Errors E0499, E0502, E0506.",
+      "id": "borrow.rules",
+      "lesson": "L4.6",
+      "name": "The borrowing rules",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 4,
+      "definition": "You can't return a reference to a local value (E0106); return the owned value instead.",
+      "id": "borrow.dangling",
+      "lesson": "L4.6",
+      "name": "No dangling references",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 4,
+      "definition": "`&s[a..b]`, `&s[..b]`, `&s[a..]`, `&s[..]`; indices are **byte** positions; slicing inside a multi-byte character panics.",
+      "id": "slice.str",
+      "lesson": "L4.7",
+      "name": "String slices",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 4,
+      "definition": "Write `fn f(s: &str)` so it accepts both `&String` (via deref coercion) and literals.",
+      "id": "slice.str_param",
+      "lesson": "L4.7",
+      "name": "`&str` parameters",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 4,
+      "definition": "`&a[1..3]` has type `&[i32]`; `fn f(xs: &[i32])` accepts any slice of `i32`.",
+      "id": "slice.array",
+      "lesson": "L4.7",
+      "name": "Array slices",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 4,
+      "definition": "`for c in s.chars()`, `for b in s.bytes()`, `for (i, c) in s.char_indices()`, `for (i, &b) in s.as_bytes().iter().enumerate()`, `for w in s.split_whitespace()`. Loop use only; iterator chaining comes in Chapter 13.",
+      "id": "str.chars_loop",
+      "lesson": "L4.7",
+      "name": "Looping over text",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 4,
+      "definition": "`len` (bytes), `is_empty`, `trim`, `to_uppercase`, `to_lowercase`, `contains`, `starts_with`, `ends_with`, `chars().count()` (characters), `chars().rev()` in a `for` loop, `repeat`.",
+      "id": "str.methods",
+      "lesson": "L4.7",
+      "name": "Common `&str` methods",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 5,
+      "definition": "`struct User { name: String, age: u32 }`; `PascalCase` type names.",
+      "id": "struct.define",
+      "lesson": "L5.1",
+      "name": "Defining structs",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 5,
+      "definition": "Create with all fields; read with `u.name`; the whole instance must be `mut` to change a field.",
+      "id": "struct.instance",
+      "lesson": "L5.1",
+      "name": "Creating and using instances",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 5,
+      "definition": "`User { name, age }` when variables share the field names.",
+      "id": "struct.shorthand",
+      "lesson": "L5.1",
+      "name": "Field init shorthand",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 5,
+      "definition": "Fields usually own their data (`String`, not `&str`); references in fields need lifetimes (Chapter 10).",
+      "id": "struct.owned_fields",
+      "lesson": "L5.1",
+      "name": "Owned data in struct fields",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 5,
+      "definition": "`User { name: n, ..other }`; moves non-`Copy` fields out of `other`.",
+      "id": "struct.update",
+      "lesson": "L5.2",
+      "name": "Struct update syntax",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 5,
+      "definition": "`struct Point(i32, i32);` with `.0`, `.1`; different tuple structs are different types even with the same fields (newtypes).",
+      "id": "struct.tuple",
+      "lesson": "L5.2",
+      "name": "Tuple structs",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 5,
+      "definition": "`struct AlwaysEqual;` — a type with no data.",
+      "id": "struct.unit",
+      "lesson": "L5.2",
+      "name": "Unit-like structs",
+      "tested_by": "quiz"
+    },
+    {
+      "chapter": 5,
+      "definition": "Debug output with `{:?}` and `{:#?}`; `dbg!` prints to stderr with file and line, and returns ownership.",
+      "id": "derive.debug",
+      "lesson": "L5.3",
+      "name": "`#[derive(Debug)]` and debug printing",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 5,
+      "definition": "`#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]`: what each gives. `PartialEq` allows `==` and `assert_eq!`. *(course addition, from Appendix C)*",
+      "id": "derive.common",
+      "lesson": "L5.3",
+      "name": "Deriving common traits",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 5,
+      "definition": "`impl Rect { fn area(&self) -> u32 }`; call with `r.area()`; automatic referencing.",
+      "id": "struct.method",
+      "lesson": "L5.4",
+      "name": "Methods with `&self`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 5,
+      "definition": "Read, change, or consume the instance.",
+      "id": "struct.self_kinds",
+      "lesson": "L5.4",
+      "name": "`&self`, `&mut self`, `self`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 5,
+      "definition": "`fn can_hold(&self, other: &Rect) -> bool`.",
+      "id": "struct.method_params",
+      "lesson": "L5.4",
+      "name": "Methods with more parameters",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 5,
+      "definition": "Functions in `impl` without `self`, called with `Type::name()`; constructors such as `new`; `Self` names the type.",
+      "id": "struct.assoc_fn",
+      "lesson": "L5.5",
+      "name": "Associated functions and `Self`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 5,
+      "definition": "A type can have several `impl` blocks.",
+      "id": "struct.multi_impl",
+      "lesson": "L5.5",
+      "name": "Multiple `impl` blocks",
+      "tested_by": "quiz"
+    },
+    {
+      "chapter": 6,
+      "definition": "`enum Direction { North, South }`; variants are namespaced: `Direction::North`.",
+      "id": "enum.define",
+      "lesson": "L6.1",
+      "name": "Defining enums",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 6,
+      "definition": "`Move { x: i32, y: i32 }`, `Write(String)`, `Quit`: each variant can hold different data.",
+      "id": "enum.data",
+      "lesson": "L6.1",
+      "name": "Variants with data",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 6,
+      "definition": "`impl Message { fn call(&self) }`.",
+      "id": "enum.impl",
+      "lesson": "L6.1",
+      "name": "Methods on enums",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 6,
+      "definition": "`Some(value)` or `None` instead of null; you must handle `None` before using the value; `.is_some()`, `.is_none()`, `.unwrap_or(default)`.",
+      "id": "enum.option",
+      "lesson": "L6.2",
+      "name": "`Option<T>`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 6,
+      "definition": "`slice.get(i)`, `.first()`, `.last()`, `s.find(pat)`, `s.chars().next()`, `c.to_digit(10)`, `char::from_digit`, `checked_add`/`checked_sub`/`checked_mul`/`checked_div`. *(course addition)*",
+      "id": "opt.std",
+      "lesson": "L6.2",
+      "name": "Standard methods that return `Option`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 6,
+      "definition": "One arm per variant; arms are expressions with the same type.",
+      "id": "match.enum",
+      "lesson": "L6.3",
+      "name": "`match` on enums",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 6,
+      "definition": "`Coin::Quarter(state) =>` binds the inner value.",
+      "id": "match.bind",
+      "lesson": "L6.3",
+      "name": "Binding values in patterns",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 6,
+      "definition": "`Some(x) => ..., None => ...`.",
+      "id": "match.option",
+      "lesson": "L6.3",
+      "name": "Matching `Option<T>`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 6,
+      "definition": "Every possible value must be covered, or the code doesn't compile (E0004).",
+      "id": "match.exhaustive",
+      "lesson": "L6.4",
+      "name": "Exhaustiveness",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 6,
+      "definition": "`other =>` binds the value; `_ =>` ignores it; `_ => ()` does nothing.",
+      "id": "match.catchall",
+      "lesson": "L6.4",
+      "name": "Catch-all arms",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 6,
+      "definition": "`1 | 2 =>`, `'a'..='z' =>`, `90..=100 =>`. *(course addition here; covered fully in L19.3)*",
+      "id": "match.or_range",
+      "lesson": "L6.4",
+      "name": "`|` and range patterns",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 6,
+      "definition": "`if let Some(x) = opt { } else { }` for one pattern.",
+      "id": "iflet.basic",
+      "lesson": "L6.5",
+      "name": "`if let`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 6,
+      "definition": "`let Some(x) = opt else { return ...; };` keeps the happy path unindented; the `else` must diverge.",
+      "id": "letelse.basic",
+      "lesson": "L6.5",
+      "name": "`let...else`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 7,
+      "definition": "Binary and library crates; `src/main.rs` and `src/lib.rs` as crate roots; a package can have both.",
+      "id": "mod.crate",
+      "lesson": "L7.1",
+      "name": "Packages and crates",
+      "tested_by": "quiz"
+    },
+    {
+      "chapter": 7,
+      "definition": "`mod name { }` groups items; modules nest into a tree under `crate`.",
+      "id": "mod.define",
+      "lesson": "L7.2",
+      "name": "Defining modules",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 7,
+      "definition": "Items are private to their parent module by default; `pub` makes them visible; children can see their ancestors' private items. Error E0603.",
+      "id": "mod.privacy",
+      "lesson": "L7.2",
+      "name": "Privacy",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 7,
+      "definition": "Absolute `crate::a::b` and relative `a::b`, `self::`, `super::`.",
+      "id": "mod.path",
+      "lesson": "L7.3",
+      "name": "Paths",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 7,
+      "definition": "A `pub struct`'s fields stay private unless each is `pub` (so it needs a constructor); a `pub enum`'s variants are all public.",
+      "id": "mod.pub_types",
+      "lesson": "L7.3",
+      "name": "Public structs and enums",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 7,
+      "definition": "`use crate::a::b;` then `b::f()`; bring functions' parent modules in, but types themselves. `use` only applies in its own scope.",
+      "id": "mod.use",
+      "lesson": "L7.4",
+      "name": "`use` and idiomatic paths",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 7,
+      "definition": "`use std::io::Result as IoResult;`.",
+      "id": "mod.as",
+      "lesson": "L7.4",
+      "name": "Renaming with `as`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 7,
+      "definition": "`pub use` makes an item available at a new path.",
+      "id": "mod.reexport",
+      "lesson": "L7.4",
+      "name": "Re-exporting with `pub use`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 7,
+      "definition": "`use std::{cmp::Ordering, io};`, `use std::io::{self, Write};`, `use std::collections::*;`.",
+      "id": "mod.nested_glob",
+      "lesson": "L7.4",
+      "name": "Nested paths and glob imports",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 7,
+      "definition": "`mod garden;` loads `src/garden.rs` (or `src/garden/mod.rs`); submodules in `src/garden/vegetables.rs`.",
+      "id": "mod.files",
+      "lesson": "L7.5",
+      "name": "Modules in separate files",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 8,
+      "definition": "`Vec::new()`, `vec![1, 2, 3]`, `vec![0; n]`, `push`; the vector must be `mut` to change.",
+      "id": "vec.create",
+      "lesson": "L8.1",
+      "name": "Creating and updating vectors",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 8,
+      "definition": "`v[i]` panics when out of range; `v.get(i)` returns `Option<&T>`.",
+      "id": "vec.access",
+      "lesson": "L8.1",
+      "name": "Reading elements",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 8,
+      "definition": "Holding `&v[0]` while calling `v.push` is an error (E0502), because pushing may move the buffer.",
+      "id": "vec.borrow",
+      "lesson": "L8.1",
+      "name": "Borrowing rules with vectors",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 8,
+      "definition": "`for x in &v`, `for x in &mut v { *x += 1 }`, `for x in v` (consumes).",
+      "id": "vec.iter",
+      "lesson": "L8.2",
+      "name": "Iterating over vectors",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 8,
+      "definition": "An enum lets one vector hold values of different kinds.",
+      "id": "vec.enum",
+      "lesson": "L8.2",
+      "name": "Vectors of enums",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 8,
+      "definition": "`len`, `is_empty`, `pop`, `insert`, `remove`, `swap`, `contains`, `sort`, `sort_unstable`, `dedup`, `reverse`, `extend_from_slice`, `truncate`, `clear`, `iter().sum()` / `max()` / `min()` in their simplest form, `join` on `Vec<String>`/`&[&str]`. Methods that take closures come in Chapter 13.",
+      "id": "vec.methods",
+      "lesson": "L8.2",
+      "name": "Common vector methods",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 8,
+      "definition": "`String::new`, `String::from`, `to_string`, `String::with_capacity`.",
+      "id": "str.create",
+      "lesson": "L8.3",
+      "name": "Creating strings",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 8,
+      "definition": "`push_str`, `push`, `+` (takes ownership of the left side, borrows the right), `format!`, `insert`, `pop`, `clear`.",
+      "id": "str.update",
+      "lesson": "L8.3",
+      "name": "Updating strings",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 8,
+      "definition": "No integer indexing (E0277); `len` counts bytes; three views: bytes, `char`s, grapheme clusters (not in std).",
+      "id": "str.utf8",
+      "lesson": "L8.4",
+      "name": "Strings are UTF-8",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 8,
+      "definition": "Byte ranges must land on character boundaries or the program panics; `is_char_boundary`, `char_indices` to find safe positions.",
+      "id": "str.slice_safe",
+      "lesson": "L8.4",
+      "name": "Slicing strings safely",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 8,
+      "definition": "`chars()`, `bytes()`, `char_indices()`, `lines()`, `split(pat)`, `split_whitespace()`, `trim_start`, `trim_end`, `strip_prefix` (returns `Option`).",
+      "id": "str.iterate",
+      "lesson": "L8.4",
+      "name": "Iterating strings",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 8,
+      "definition": "`use std::collections::HashMap;`, `HashMap::new()`, `insert`.",
+      "id": "map.create",
+      "lesson": "L8.5",
+      "name": "Creating hash maps",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 8,
+      "definition": "`get(&k)` returns `Option<&V>`; `.copied().unwrap_or(0)`; `contains_key`; `remove`; `len`.",
+      "id": "map.access",
+      "lesson": "L8.5",
+      "name": "Reading from hash maps",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 8,
+      "definition": "`for (k, v) in &map`; the order is **arbitrary**, so sort keys before producing ordered output.",
+      "id": "map.iter",
+      "lesson": "L8.5",
+      "name": "Iterating hash maps",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 8,
+      "definition": "Inserting a `String` key or value moves it into the map; `Copy` values are copied.",
+      "id": "map.ownership",
+      "lesson": "L8.5",
+      "name": "Ownership in hash maps",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 8,
+      "definition": "Overwrite with `insert`; insert only if missing; update from the old value.",
+      "id": "map.update",
+      "lesson": "L8.6",
+      "name": "Updating values",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 8,
+      "definition": "`*map.entry(k).or_insert(0) += 1`; `or_insert_with(Vec::new)`; `or_default()`.",
+      "id": "map.entry",
+      "lesson": "L8.6",
+      "name": "The `entry` API",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 8,
+      "definition": "Unique values: `insert` returns `bool`, `contains`, `remove`, `len`; iteration order is arbitrary. *(course addition)*",
+      "id": "coll.hashset",
+      "lesson": "L8.6",
+      "name": "`HashSet`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 9,
+      "definition": "Stops the program with a message; also triggered by bugs such as out-of-bounds indexing; `RUST_BACKTRACE=1`.",
+      "id": "err.panic",
+      "lesson": "L9.1",
+      "name": "`panic!`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 9,
+      "definition": "`Ok(value)` or `Err(error)`; handle with `match`. Returning `Result` from your own functions.",
+      "id": "err.result",
+      "lesson": "L9.2",
+      "name": "`Result<T, E>`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 9,
+      "definition": "`match e.kind() { ErrorKind::NotFound => ..., other => ... }`; parse errors (`ParseIntError`).",
+      "id": "err.match_kind",
+      "lesson": "L9.2",
+      "name": "Matching on error kinds",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 9,
+      "definition": "Shortcuts that panic on `Err`/`None`. Prefer `expect` with a message; from Chapter 9 on, graded code may not use `unwrap()` unless a problem says so.",
+      "id": "err.unwrap",
+      "lesson": "L9.3",
+      "name": "`unwrap` and `expect`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 9,
+      "definition": "Returning the `Err` to the caller instead of handling it.",
+      "id": "err.propagate",
+      "lesson": "L9.3",
+      "name": "Propagating errors",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 9,
+      "definition": "`let x = f()?;` returns early with the error; converts error types with `From`; only in functions that return `Result` (or `Option`). Error E0277 when used in a function returning `()`.",
+      "id": "err.question",
+      "lesson": "L9.3",
+      "name": "The `?` operator",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 9,
+      "definition": "`?` on an `Option` returns `None` early. Mixing `?` on `Option` and `Result` in one function doesn't work.",
+      "id": "err.question_option",
+      "lesson": "L9.3",
+      "name": "`?` with `Option`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 9,
+      "definition": "`opt.ok_or(err)`, `res.ok()`, `unwrap_or`, `unwrap_or_default`. Closure-taking forms (`map_err`, `ok_or_else`) come in Chapter 13. *(course addition)*",
+      "id": "err.convert",
+      "lesson": "L9.3",
+      "name": "Converting between `Option` and `Result`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 9,
+      "definition": "`fn main() -> Result<(), Box<dyn Error>>`; `Box<dyn Error>` as \"any error\" (fully explained in Chapter 18).",
+      "id": "err.main_result",
+      "lesson": "L9.3",
+      "name": "`main` returning `Result`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 9,
+      "definition": "An `enum` of error cases, deriving `Debug` and `PartialEq` so tests can compare; carrying data in variants. *(course addition)*",
+      "id": "err.custom",
+      "lesson": "L9.4",
+      "name": "Custom error types",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 9,
+      "definition": "Panic for broken invariants and bugs; `Result` for expected failures such as bad input.",
+      "id": "err.when_panic",
+      "lesson": "L9.4",
+      "name": "When to panic vs return `Result`",
+      "tested_by": "quiz"
+    },
+    {
+      "chapter": 9,
+      "definition": "A type whose constructor checks its value (e.g. `Guess::new` for 1–100), with a private field and a getter.",
+      "id": "err.validation_type",
+      "lesson": "L9.4",
+      "name": "Types that validate",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 10,
+      "definition": "`fn largest<T: PartialOrd>(list: &[T]) -> &T`; extracting duplicated code into a function first.",
+      "id": "gen.fn",
+      "lesson": "L10.1",
+      "name": "Generic functions",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 10,
+      "definition": "`struct Point<T> { x: T, y: T }`, `Point<T, U>`.",
+      "id": "gen.struct",
+      "lesson": "L10.2",
+      "name": "Generic structs",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 10,
+      "definition": "`Option<T>` and `Result<T, E>` are generic enums; defining your own.",
+      "id": "gen.enum",
+      "lesson": "L10.2",
+      "name": "Generic enums",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 10,
+      "definition": "`impl<T> Point<T>`, `impl Point<f32>`, methods with their own generic parameters.",
+      "id": "gen.method",
+      "lesson": "L10.2",
+      "name": "Generic methods and specialised `impl`s",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 10,
+      "definition": "Generic code is copied for each concrete type at compile time, so it has no run-time cost.",
+      "id": "gen.mono",
+      "lesson": "L10.2",
+      "name": "Monomorphization",
+      "tested_by": "quiz"
+    },
+    {
+      "chapter": 10,
+      "definition": "`trait Summary { fn summarize(&self) -> String; }`.",
+      "id": "trait.define",
+      "lesson": "L10.3",
+      "name": "Defining traits",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 10,
+      "definition": "`impl Summary for Tweet { }`; calling trait methods needs the trait in scope.",
+      "id": "trait.impl",
+      "lesson": "L10.3",
+      "name": "Implementing traits",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 10,
+      "definition": "You can implement a trait for a type only if the trait or the type is local to your crate (E0117).",
+      "id": "trait.orphan",
+      "lesson": "L10.3",
+      "name": "The orphan rule",
+      "tested_by": "quiz"
+    },
+    {
+      "chapter": 10,
+      "definition": "Methods with a body in the trait; implementors can override; defaults can call required methods.",
+      "id": "trait.default",
+      "lesson": "L10.4",
+      "name": "Default method implementations",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 10,
+      "definition": "`fn notify(item: &impl Summary)`.",
+      "id": "trait.param",
+      "lesson": "L10.4",
+      "name": "`impl Trait` parameters",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 10,
+      "definition": "`fn f<T: Summary + Display>(x: &T)`; `where` clauses; multiple bounds.",
+      "id": "trait.bound",
+      "lesson": "L10.4",
+      "name": "Trait bounds and `where`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 10,
+      "definition": "`fn make() -> impl Summary`; only one concrete type can be returned.",
+      "id": "trait.return_impl",
+      "lesson": "L10.5",
+      "name": "Returning `impl Trait`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 10,
+      "definition": "`impl<T: Display + PartialOrd> Pair<T> { fn cmp_display(&self) }`; `impl<T: Display> ToString for T`.",
+      "id": "trait.cond_impl",
+      "lesson": "L10.5",
+      "name": "Conditional and blanket impls",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 10,
+      "definition": "`impl fmt::Display` (so `{}` and `to_string` work), `PartialOrd`/`Ord` with `derive` or by hand, `From` for conversions. *(course addition)*",
+      "id": "trait.std",
+      "lesson": "L10.5",
+      "name": "Implementing common std traits",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 10,
+      "definition": "The borrow checker compares scopes so a reference never outlives its data (E0597).",
+      "id": "life.dangling",
+      "lesson": "L10.6",
+      "name": "Why lifetimes exist",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 10,
+      "definition": "`fn longest<'a>(x: &'a str, y: &'a str) -> &'a str`; the result lives as long as the shorter input. Error E0106 without one.",
+      "id": "life.fn",
+      "lesson": "L10.7",
+      "name": "Lifetime annotations in functions",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 10,
+      "definition": "`struct Excerpt<'a> { part: &'a str }`; the struct can't outlive the borrowed data.",
+      "id": "life.struct",
+      "lesson": "L10.8",
+      "name": "Lifetimes in structs",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 10,
+      "definition": "The three rules that let you omit annotations, including `&self` methods.",
+      "id": "life.elision",
+      "lesson": "L10.8",
+      "name": "Lifetime elision",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 10,
+      "definition": "`impl<'a> Excerpt<'a>`; returning references tied to `self`.",
+      "id": "life.method",
+      "lesson": "L10.8",
+      "name": "Lifetimes in methods",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 10,
+      "definition": "String literals are `&'static str`; `'static` bounds; why \"add `'static`\" is rarely the right fix.",
+      "id": "life.static",
+      "lesson": "L10.8",
+      "name": "`'static`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 10,
+      "definition": "`fn f<'a, T>(x: &'a str, y: &'a str, ann: T) -> &'a str where T: Display`.",
+      "id": "gen.together",
+      "lesson": "L10.8",
+      "name": "Generics, bounds and lifetimes together",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 11,
+      "definition": "`#[test]`, `#[cfg(test)] mod tests { use super::*; }`; a test fails when it panics.",
+      "id": "test.attr",
+      "lesson": "L11.1",
+      "name": "Test functions and the test module",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 11,
+      "definition": "The values compared must implement `PartialEq` and `Debug`; left/right in failure output.",
+      "id": "test.assert",
+      "lesson": "L11.2",
+      "name": "`assert!`, `assert_eq!`, `assert_ne!`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 11,
+      "definition": "Extra `format!`-style arguments after the assertion.",
+      "id": "test.message",
+      "lesson": "L11.2",
+      "name": "Custom failure messages",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 11,
+      "definition": "Normal cases, edges (empty, one item), boundaries (0, max, off-by-one), Unicode, error paths; one behaviour per test; descriptive names. *(course addition)*",
+      "id": "test.design",
+      "lesson": "L11.2",
+      "name": "Choosing test cases",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 11,
+      "definition": "Test that code panics; `expected = \"substring\"` makes it precise.",
+      "id": "test.should_panic",
+      "lesson": "L11.3",
+      "name": "`#[should_panic]`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 11,
+      "definition": "`fn t() -> Result<(), String>` so `?` can be used; can't combine with `should_panic`.",
+      "id": "test.result",
+      "lesson": "L11.3",
+      "name": "Tests returning `Result`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 11,
+      "definition": "`cargo test name_filter`, `-- --test-threads=1`, `-- --show-output`, `#[ignore]`, `-- --ignored`.",
+      "id": "test.run_control",
+      "lesson": "L11.4",
+      "name": "Controlling test runs",
+      "tested_by": "quiz"
+    },
+    {
+      "chapter": 11,
+      "definition": "Unit tests live with the code and can test private functions.",
+      "id": "test.unit",
+      "lesson": "L11.5",
+      "name": "Unit tests and private functions",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 11,
+      "definition": "The `tests/` directory; each file is a separate crate using only the public API; shared helpers in `tests/common/mod.rs`; binary-only crates can't be integration-tested.",
+      "id": "test.integration",
+      "lesson": "L11.5",
+      "name": "Integration tests",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 12,
+      "definition": "`std::env::args()` yields `String`s, the first being the program name; `.collect::<Vec<String>>()` (collect explained in L13.4).",
+      "id": "io.args",
+      "lesson": "L12.1",
+      "name": "Command-line arguments",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 12,
+      "definition": "`fs::read_to_string(path)` returns `Result<String, io::Error>`.",
+      "id": "io.read_file",
+      "lesson": "L12.2",
+      "name": "Reading a file",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 12,
+      "definition": "Grouping settings in a struct; `Config::build(args) -> Result<Config, &'static str>` instead of panicking.",
+      "id": "io.config",
+      "lesson": "L12.3",
+      "name": "Parsing into a `Config`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 12,
+      "definition": "`main.rs` handles arguments and exit codes; `lib.rs` holds testable logic; a `run` function returning `Result<(), Box<dyn Error>>`.",
+      "id": "io.lib_split",
+      "lesson": "L12.3",
+      "name": "Splitting into a library crate",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 12,
+      "definition": "`process::exit(1)`; `unwrap_or_else(|err| { ... })` (closures are previewed here, taught in L13.1).",
+      "id": "io.exit",
+      "lesson": "L12.3",
+      "name": "Exiting with an error code",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 12,
+      "definition": "Write a failing test, make it pass, refactor; `search` returning `Vec<&'a str>` tied to the contents' lifetime.",
+      "id": "io.tdd",
+      "lesson": "L12.4",
+      "name": "Test-driven development",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 12,
+      "definition": "`env::var(\"IGNORE_CASE\").is_ok()`; case-insensitive search with `to_lowercase`.",
+      "id": "io.env_var",
+      "lesson": "L12.5",
+      "name": "Environment variables",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 12,
+      "definition": "`eprintln!` writes to stderr so error messages don't mix with output redirected to a file.",
+      "id": "io.stderr",
+      "lesson": "L12.6",
+      "name": "Standard error",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 13,
+      "definition": "`|x| x + 1`, `|x: i32| -> i32 { x + 1 }`, `|| ...`; storing a closure in a variable.",
+      "id": "clo.define",
+      "lesson": "L13.1",
+      "name": "Closure syntax",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 13,
+      "definition": "Closures capture by shared reference, mutable reference, or by value, depending on the body.",
+      "id": "clo.capture",
+      "lesson": "L13.1",
+      "name": "Capturing the environment",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 13,
+      "definition": "A closure's parameter types are fixed by its first use (E0308 if used with two types).",
+      "id": "clo.infer",
+      "lesson": "L13.2",
+      "name": "Closure type inference",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 13,
+      "definition": "Which trait a closure implements depends on what it does with captured values; e.g. `unwrap_or_else` takes `FnOnce`, `sort_by_key` takes `FnMut`.",
+      "id": "clo.fn_traits",
+      "lesson": "L13.2",
+      "name": "`FnOnce`, `FnMut`, `Fn`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 13,
+      "definition": "`fn apply<F: Fn(i32) -> i32>(f: F, x: i32)`, `impl Fn(i32) -> i32`.",
+      "id": "clo.param",
+      "lesson": "L13.2",
+      "name": "Taking closures as parameters",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 13,
+      "definition": "`move` forces capture by value.",
+      "id": "clo.move",
+      "lesson": "L13.2",
+      "name": "`move` closures",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 13,
+      "definition": "`next()` returns `Option<Self::Item>`; iterators are lazy until consumed.",
+      "id": "iter.trait",
+      "lesson": "L13.3",
+      "name": "The `Iterator` trait",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 13,
+      "definition": "Yield `&T`, `&mut T`, or `T`.",
+      "id": "iter.kinds",
+      "lesson": "L13.3",
+      "name": "`iter`, `iter_mut`, `into_iter`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 13,
+      "definition": "`impl Iterator for Counter { type Item = u32; fn next(&mut self) -> Option<u32> }`; then all adapters work on it.",
+      "id": "iter.custom",
+      "lesson": "L13.3",
+      "name": "Implementing `Iterator`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 13,
+      "definition": "`sum`, `product`, `count`, `min`, `max`, `min_by_key`, `max_by_key`, `last`, `nth`, `any`, `all`, `find`, `position`, `fold`.",
+      "id": "iter.consume",
+      "lesson": "L13.4",
+      "name": "Consuming adapters",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 13,
+      "definition": "Into `Vec`, `String`, `HashMap`, `HashSet`, and `Result<Vec<_>, E>`; needs a type annotation or turbofish.",
+      "id": "iter.collect",
+      "lesson": "L13.4",
+      "name": "`collect`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 13,
+      "definition": "`map`, `filter`, `filter_map`, `enumerate`, `zip`, `rev`, `skip`, `take`, `skip_while`, `take_while`, `chain`, `flat_map`, `peekable`, `windows` and `chunks` (on slices), `step_by`, `cloned`/`copied`.",
+      "id": "iter.adapter",
+      "lesson": "L13.5",
+      "name": "Iterator adapters",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 13,
+      "definition": "`filter(|s| s.size == shoe_size)` capturing a variable.",
+      "id": "iter.closure_env",
+      "lesson": "L13.5",
+      "name": "Adapters with captured values",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 13,
+      "definition": "`map`, `and_then`, `filter`, `unwrap_or_else`, `map_err`, `ok_or_else`, `map_or`. *(course addition)*",
+      "id": "clo.option_result",
+      "lesson": "L13.5",
+      "name": "Closures on `Option` and `Result`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 13,
+      "definition": "`sort_by`, `sort_by_key`, `retain`, `dedup_by_key`, `binary_search_by`; `cmp` and `then_with` for multi-key sorts. *(course addition)*",
+      "id": "clo.collection_methods",
+      "lesson": "L13.5",
+      "name": "Collection methods that take closures",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 13,
+      "definition": "Iterators compile to code as fast as hand-written loops (zero-cost abstraction); when each reads better.",
+      "id": "iter.vs_loop",
+      "lesson": "L13.6",
+      "name": "Loops vs iterators",
+      "tested_by": "quiz"
+    },
+    {
+      "chapter": 14,
+      "definition": "`dev` and `release` profiles; `opt-level`; `cargo build --release`.",
+      "id": "cargo.profiles",
+      "lesson": "L14.1",
+      "name": "Release profiles",
+      "tested_by": "quiz"
+    },
+    {
+      "chapter": 14,
+      "definition": "`///` for items, `//!` for the crate or module; Markdown; `# Examples`, `# Panics`, `# Errors`, `# Safety` sections; `cargo doc`.",
+      "id": "doc.comments",
+      "lesson": "L14.2",
+      "name": "Documentation comments",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 14,
+      "definition": "Code blocks in doc comments run as tests with `cargo test`; they use the crate's public API.",
+      "id": "doc.tests",
+      "lesson": "L14.2",
+      "name": "Doc tests",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 14,
+      "definition": "Re-exporting deep items at the crate root so users don't need to know the internal structure. Builds on `mod.reexport`.",
+      "id": "api.reexport",
+      "lesson": "L14.3",
+      "name": "Designing a public API with `pub use`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 14,
+      "definition": "Metadata (`license`, `description`), semantic versions, `cargo publish`, `cargo yank`. Not done in the app.",
+      "id": "cargo.publish",
+      "lesson": "L14.3",
+      "name": "Publishing",
+      "tested_by": "quiz"
+    },
+    {
+      "chapter": 14,
+      "definition": "A `[workspace]` with `members`; a shared `Cargo.lock` and `target/`; path dependencies between members; `cargo test -p name`.",
+      "id": "cargo.workspace",
+      "lesson": "L14.4",
+      "name": "Workspaces",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 14,
+      "definition": "Installing binaries; `cargo-something` binaries become `cargo something`.",
+      "id": "cargo.install",
+      "lesson": "L14.5",
+      "name": "`cargo install` and custom commands",
+      "tested_by": "quiz"
+    },
+    {
+      "chapter": 15,
+      "definition": "Puts a value on the heap; use for large values, trait objects, and types of unknown size.",
+      "id": "ptr.box",
+      "lesson": "L15.1",
+      "name": "`Box<T>`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 15,
+      "definition": "`enum List { Cons(i32, Box<List>), Nil }`; without `Box` the size is infinite (E0072).",
+      "id": "ptr.recursive",
+      "lesson": "L15.1",
+      "name": "Recursive types",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 15,
+      "definition": "`*` follows a pointer; implementing `Deref` for your own type.",
+      "id": "ptr.deref",
+      "lesson": "L15.2",
+      "name": "The `Deref` trait",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 15,
+      "definition": "`&Box<String>` → `&String` → `&str` automatically when passed to functions; `DerefMut`.",
+      "id": "ptr.deref_coercion",
+      "lesson": "L15.2",
+      "name": "Deref coercion",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 15,
+      "definition": "`impl Drop` runs code when a value goes out of scope; values drop in reverse order of creation; `std::mem::drop(x)` drops early (calling `x.drop()` is E0040).",
+      "id": "ptr.drop",
+      "lesson": "L15.3",
+      "name": "`Drop`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 15,
+      "definition": "Several owners of read-only data in one thread; `Rc::clone(&a)` increments the count; `Rc::strong_count`.",
+      "id": "ptr.rc",
+      "lesson": "L15.4",
+      "name": "`Rc<T>`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 15,
+      "definition": "Borrow rules checked at run time: `borrow()`, `borrow_mut()`; breaking them panics (`already borrowed`).",
+      "id": "ptr.refcell",
+      "lesson": "L15.5",
+      "name": "`RefCell<T>`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 15,
+      "definition": "Changing data behind a `&` reference, e.g. a mock object recording messages.",
+      "id": "ptr.interior_mut",
+      "lesson": "L15.5",
+      "name": "Interior mutability",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 15,
+      "definition": "Shared data that several owners can change.",
+      "id": "ptr.rc_refcell",
+      "lesson": "L15.6",
+      "name": "`Rc<RefCell<T>>`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 15,
+      "definition": "Two `Rc`s pointing at each other never reach a count of 0, so they leak.",
+      "id": "ptr.cycle",
+      "lesson": "L15.7",
+      "name": "Reference cycles",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 15,
+      "definition": "`Rc::downgrade` makes a non-owning pointer; `upgrade()` returns `Option<Rc<T>>`; `Rc::weak_count`; parent links in trees.",
+      "id": "ptr.weak",
+      "lesson": "L15.7",
+      "name": "`Weak<T>`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 16,
+      "definition": "`thread::spawn(closure)` returns a `JoinHandle`; `join()` waits and returns the closure's result (`Result` because the thread may panic); output order between threads is not fixed.",
+      "id": "conc.spawn",
+      "lesson": "L16.1",
+      "name": "Spawning threads",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 16,
+      "definition": "A spawned thread may outlive the caller, so it must own what it uses (E0373).",
+      "id": "conc.move",
+      "lesson": "L16.2",
+      "name": "`move` closures with threads",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 16,
+      "definition": "`thread::scope(|s| { s.spawn(...); })` lets threads borrow local data because they are joined before the scope ends. *(course addition)*",
+      "id": "conc.scope",
+      "lesson": "L16.2",
+      "name": "Scoped threads",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 16,
+      "definition": "`mpsc::channel()`; `send` moves the value; `recv` blocks; iterating the receiver ends when every sender is dropped.",
+      "id": "conc.channel",
+      "lesson": "L16.3",
+      "name": "Channels",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 16,
+      "definition": "`tx.clone()` for each producer thread.",
+      "id": "conc.multi_producer",
+      "lesson": "L16.3",
+      "name": "Multiple producers",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 16,
+      "definition": "`lock()` returns a guard; the lock is released when the guard drops; deadlocks; poisoning (`lock()` returns `Result`).",
+      "id": "conc.mutex",
+      "lesson": "L16.4",
+      "name": "`Mutex<T>`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 16,
+      "definition": "Atomic reference counting so several threads can own the same value; `Arc<Mutex<T>>`. `Rc` can't be sent (E0277).",
+      "id": "conc.arc",
+      "lesson": "L16.5",
+      "name": "`Arc<T>`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 16,
+      "definition": "`Send`: can move to another thread; `Sync`: can be shared by reference between threads; most types get them automatically; `Rc` and `RefCell` don't.",
+      "id": "conc.send_sync",
+      "lesson": "L16.6",
+      "name": "`Send` and `Sync`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 17,
+      "definition": "An `async fn` returns a future; futures are lazy and do nothing until awaited; `.await` is a postfix keyword.",
+      "id": "async.future",
+      "lesson": "L17.1",
+      "name": "Futures, `async` and `.await`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 17,
+      "definition": "`main` can't be `async`; a runtime drives futures: `trpl::block_on(async { ... })` (`trpl::run` in older editions of the book).",
+      "id": "async.runtime",
+      "lesson": "L17.2",
+      "name": "Runtimes",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 17,
+      "definition": "`trpl::spawn_task(fut)` returns a handle to await; tasks stop when the runtime ends.",
+      "id": "async.spawn_task",
+      "lesson": "L17.3",
+      "name": "Spawning tasks",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 17,
+      "definition": "`trpl::join(a, b)`, `trpl::join!`, `trpl::join_all(vec)`; joined futures make progress concurrently in one task.",
+      "id": "async.join",
+      "lesson": "L17.3",
+      "name": "Joining futures",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 17,
+      "definition": "`trpl::channel()`; `tx.send(v)`, `rx.recv().await` returns `Option`; dropping all senders ends the loop (use `async move`).",
+      "id": "async.channel",
+      "lesson": "L17.4",
+      "name": "Async channels",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 17,
+      "definition": "Move ownership into an async block, e.g. so the sender is dropped when the block finishes.",
+      "id": "async.move",
+      "lesson": "L17.4",
+      "name": "`async move` blocks",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 17,
+      "definition": "`trpl::select(a, b)` returns `Either::Left`/`Either::Right` with the first future to finish.",
+      "id": "async.race",
+      "lesson": "L17.5",
+      "name": "Racing futures",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 17,
+      "definition": "`trpl::yield_now().await` and `trpl::sleep(dur).await`; async is cooperative, so a long loop without awaits starves others.",
+      "id": "async.yield",
+      "lesson": "L17.5",
+      "name": "Yielding and sleeping",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 17,
+      "definition": "Composing `select` and `sleep` into `timeout(future, max_time) -> Result<T, Duration>`.",
+      "id": "async.timeout",
+      "lesson": "L17.5",
+      "name": "Building a timeout",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 17,
+      "definition": "`trpl::stream_from_iter`, `StreamExt::next`, `while let Some(x) = stream.next().await`, stream adapters (`map`, `filter`, `timeout`, `throttle`, `merge`).",
+      "id": "async.stream",
+      "lesson": "L17.6",
+      "name": "Streams",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 17,
+      "definition": "`Future::poll` returns `Poll::Ready` or `Poll::Pending`; `Pin` and `Unpin` keep self-referencing futures in place; `Pin<Box<dyn Future<Output = T>>>` for collections of different futures.",
+      "id": "async.traits",
+      "lesson": "L17.7",
+      "name": "`Future`, `Poll` and `Pin`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 17,
+      "definition": "Threads for CPU-heavy parallel work, async for many waiting operations; mixing them with channels.",
+      "id": "async.vs_threads",
+      "lesson": "L17.7",
+      "name": "Tasks vs threads",
+      "tested_by": "quiz"
+    },
+    {
+      "chapter": 18,
+      "definition": "Private fields with public methods keep invariants (e.g. an `AveragedCollection` keeping its average up to date).",
+      "id": "oop.encapsulation",
+      "lesson": "L18.1",
+      "name": "Encapsulation",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 18,
+      "definition": "Reuse through default trait methods; polymorphism through generics and trait objects.",
+      "id": "oop.no_inheritance",
+      "lesson": "L18.1",
+      "name": "Traits instead of inheritance",
+      "tested_by": "quiz"
+    },
+    {
+      "chapter": 18,
+      "definition": "`Box<dyn Draw>`, `Vec<Box<dyn Draw>>`, `&dyn Draw`: values of different types used through one trait.",
+      "id": "dyn.object",
+      "lesson": "L18.2",
+      "name": "Trait objects",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 18,
+      "definition": "Generics are monomorphized (static); trait objects use a vtable at run time (dynamic).",
+      "id": "dyn.dispatch",
+      "lesson": "L18.3",
+      "name": "Static vs dynamic dispatch",
+      "tested_by": "quiz"
+    },
+    {
+      "chapter": 18,
+      "definition": "A trait can be used as `dyn` only if its methods don't return `Self` and have no generic type parameters (E0038).",
+      "id": "dyn.compat",
+      "lesson": "L18.3",
+      "name": "Dyn compatibility",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 18,
+      "definition": "`Box<dyn State>` with methods taking `self: Box<Self>` that return the next state; `Option::take()` to move the state out.",
+      "id": "pattern.state",
+      "lesson": "L18.4",
+      "name": "The state pattern",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 18,
+      "definition": "Each state is its own type; transitions consume `self` and return the next type, so invalid transitions don't compile.",
+      "id": "pattern.typestate",
+      "lesson": "L18.5",
+      "name": "Encoding states as types",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 19,
+      "definition": "`match`, `if let`, `while let`, `for`, `let`, function parameters; `let (x, y, z) = ...`.",
+      "id": "pat.places",
+      "lesson": "L19.1",
+      "name": "Where patterns are used",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 19,
+      "definition": "Loop while a pattern matches, e.g. `while let Some(top) = stack.pop()`.",
+      "id": "pat.while_let",
+      "lesson": "L19.1",
+      "name": "`while let`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 19,
+      "definition": "Irrefutable patterns (`let`, parameters, `for`) vs refutable ones (`if let`, `match` arms); E0005.",
+      "id": "pat.refutable",
+      "lesson": "L19.2",
+      "name": "Refutability",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 19,
+      "definition": "Matching literal values; a named variable in a pattern shadows an outer one.",
+      "id": "pat.literal_named",
+      "lesson": "L19.3",
+      "name": "Literals and named variables",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 19,
+      "definition": "Builds on `match.or_range`; char and numeric ranges.",
+      "id": "pat.or_range",
+      "lesson": "L19.3",
+      "name": "`|` and `..=`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 19,
+      "definition": "Structs (`Point { x, y: 0 }`), enums, nested enums, tuples, and references in patterns.",
+      "id": "pat.destructure",
+      "lesson": "L19.4",
+      "name": "Destructuring",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 19,
+      "definition": "`[first, .., last]`, `[x]`, `[]`, `[head, rest @ ..]`. *(course addition)*",
+      "id": "pat.slice",
+      "lesson": "L19.4",
+      "name": "Slice patterns",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 19,
+      "definition": "`_`, `_x` (still binds), `..` for the rest.",
+      "id": "pat.ignore",
+      "lesson": "L19.5",
+      "name": "Ignoring values",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 19,
+      "definition": "`Some(x) if x % 2 == 0 =>`; guards with `|`.",
+      "id": "pat.guard",
+      "lesson": "L19.6",
+      "name": "Match guards",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 19,
+      "definition": "`id @ 3..=7 =>` tests and binds at once.",
+      "id": "pat.at",
+      "lesson": "L19.6",
+      "name": "`@` bindings",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 20,
+      "definition": "`*const T`, `*mut T` via `&raw const x` / `&raw mut x`; creating is safe, dereferencing needs `unsafe`.",
+      "id": "unsafe.raw_ptr",
+      "lesson": "L20.1",
+      "name": "Raw pointers",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 20,
+      "definition": "`unsafe fn`, `unsafe { }` blocks, `// SAFETY:` comments; wrapping unsafe code in a safe API like `split_at_mut`.",
+      "id": "unsafe.fn",
+      "lesson": "L20.1",
+      "name": "Unsafe functions and safe abstractions",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 20,
+      "definition": "Calling C functions declared in `unsafe extern \"C\" { }`; exporting with `#[unsafe(no_mangle)]`.",
+      "id": "unsafe.extern",
+      "lesson": "L20.2",
+      "name": "`extern` functions",
+      "tested_by": "quiz"
+    },
+    {
+      "chapter": 20,
+      "definition": "`static` items have a fixed address; `static mut` is unsafe to access; prefer atomics or `Mutex`.",
+      "id": "unsafe.static_mut",
+      "lesson": "L20.2",
+      "name": "Static variables",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 20,
+      "definition": "`unsafe trait`, `unsafe impl`; e.g. `Send`/`Sync` by hand.",
+      "id": "unsafe.trait",
+      "lesson": "L20.2",
+      "name": "Unsafe traits",
+      "tested_by": "quiz"
+    },
+    {
+      "chapter": 20,
+      "definition": "`type Item;` in a trait; one implementation per type, unlike generic parameters.",
+      "id": "adv.assoc_type",
+      "lesson": "L20.3",
+      "name": "Associated types",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 20,
+      "definition": "`impl Add for Point`, `Add<Rhs = Self>`, `impl Add<Meters> for Millimeters`, other `std::ops` traits (`Sub`, `Mul`, `Neg`, `Index`, `AddAssign`).",
+      "id": "adv.operator",
+      "lesson": "L20.3",
+      "name": "Default type parameters and operator overloading",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 20,
+      "definition": "`<Dog as Animal>::baby_name()`, `Pilot::fly(&person)` when names clash.",
+      "id": "adv.fq_syntax",
+      "lesson": "L20.4",
+      "name": "Fully qualified syntax",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 20,
+      "definition": "`trait OutlinePrint: fmt::Display`.",
+      "id": "adv.supertrait",
+      "lesson": "L20.4",
+      "name": "Supertraits",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 20,
+      "definition": "`struct Wrapper(Vec<String>)` to implement external traits on external types, or to add type safety.",
+      "id": "adv.newtype",
+      "lesson": "L20.4",
+      "name": "The newtype pattern",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 20,
+      "definition": "`type Thunk = Box<dyn Fn() + Send + 'static>;`, `type Result<T> = std::result::Result<T, MyError>;`.",
+      "id": "adv.type_alias",
+      "lesson": "L20.5",
+      "name": "Type aliases",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 20,
+      "definition": "`continue`, `panic!`, `loop` without `break` have type `!`, which fits anywhere.",
+      "id": "adv.never",
+      "lesson": "L20.5",
+      "name": "The never type `!`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 20,
+      "definition": "`str`, `[T]` and `dyn Trait` have no fixed size and live behind pointers; `?Sized`.",
+      "id": "adv.dst",
+      "lesson": "L20.5",
+      "name": "Dynamically sized types and `Sized`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 20,
+      "definition": "`fn(i32) -> i32` type; passing named functions, tuple-struct and enum constructors to `map`.",
+      "id": "adv.fn_ptr",
+      "lesson": "L20.6",
+      "name": "Function pointers",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 20,
+      "definition": "`-> impl Fn(i32) -> i32` or `-> Box<dyn Fn(i32) -> i32>` when there are several closure types.",
+      "id": "adv.return_closure",
+      "lesson": "L20.6",
+      "name": "Returning closures",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 20,
+      "definition": "Arms with matchers and transcribers; fragment specifiers `expr`, `ident`, `ty`, `tt`, `literal`; `#[macro_export]`.",
+      "id": "macro.decl",
+      "lesson": "L20.7",
+      "name": "`macro_rules!`",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 20,
+      "definition": "`$( $x:expr ),*`, `$(...)+`, `$(...)?`, trailing commas.",
+      "id": "macro.repeat",
+      "lesson": "L20.7",
+      "name": "Repetitions in macros",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 20,
+      "definition": "Custom `derive`, attribute-like and function-like macros operate on token streams, in their own `proc-macro` crate.",
+      "id": "macro.proc",
+      "lesson": "L20.8",
+      "name": "Procedural macros",
+      "tested_by": "quiz"
+    },
+    {
+      "chapter": 21,
+      "definition": "`TcpListener::bind(addr)`, `incoming()`, `TcpStream`; ports and why bind can fail.",
+      "id": "net.tcp_listen",
+      "lesson": "L21.1",
+      "name": "TCP listening",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 21,
+      "definition": "`BufReader::new(&stream).lines()` until a blank line; the request line `GET / HTTP/1.1`.",
+      "id": "net.read_request",
+      "lesson": "L21.2",
+      "name": "Reading an HTTP request",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 21,
+      "definition": "`HTTP/1.1 200 OK\\r\\nContent-Length: N\\r\\n\\r\\nbody`; `write_all`; `fs::read_to_string` for the HTML file.",
+      "id": "net.write_response",
+      "lesson": "L21.2",
+      "name": "Writing an HTTP response",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 21,
+      "definition": "Matching the request line to choose the status and file; 404 for everything else.",
+      "id": "net.routing",
+      "lesson": "L21.3",
+      "name": "Routing requests",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 21,
+      "definition": "`/sleep` with `thread::sleep` shows why one thread isn't enough.",
+      "id": "net.slow",
+      "lesson": "L21.3",
+      "name": "A slow request blocks a single thread",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 21,
+      "definition": "`ThreadPool::new(size)` (panicking or returning `Result` on 0) and `execute<F: FnOnce() + Send + 'static>`; compiler-driven development.",
+      "id": "pool.design",
+      "lesson": "L21.4",
+      "name": "Designing a thread pool",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 21,
+      "definition": "Each `Worker` has an id and a `JoinHandle`; workers share the receiver as `Arc<Mutex<mpsc::Receiver<Job>>>`.",
+      "id": "pool.worker",
+      "lesson": "L21.5",
+      "name": "Workers",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 21,
+      "definition": "`type Job = Box<dyn FnOnce() + Send + 'static>;` sent through the channel.",
+      "id": "pool.job",
+      "lesson": "L21.5",
+      "name": "The `Job` type",
+      "tested_by": "code"
+    },
+    {
+      "chapter": 21,
+      "definition": "`impl Drop for ThreadPool`: drop the sender (`Option::take`), then join every worker; workers exit when `recv` returns `Err`.",
+      "id": "pool.shutdown",
+      "lesson": "L21.6",
+      "name": "Graceful shutdown",
+      "tested_by": "code"
+    }
+  ],
+  "parts": [
+    {
+      "chapters": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "id": "I",
+      "title": "Foundations"
+    },
+    {
+      "chapters": [
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "id": "II",
+      "title": "Building real programs"
+    },
+    {
+      "chapters": [
+        12,
+        13,
+        14,
+        15,
+        16
+      ],
+      "id": "III",
+      "title": "Idiomatic and systems Rust"
+    },
+    {
+      "chapters": [
+        17,
+        18,
+        19,
+        20,
+        21
+      ],
+      "id": "IV",
+      "title": "Advanced Rust"
+    }
+  ]
+}

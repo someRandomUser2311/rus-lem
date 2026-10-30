@@ -1,0 +1,87 @@
+checkpoints = true
+
+[[tests]]
+key = "t29"
+part = 1
+run = { kind = "suite", script = "t29" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t30"
+part = 2
+run = { kind = "suite", script = "t30" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t31"
+part = 3
+run = { kind = "suite", script = "t31" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t32"
+part = 4
+run = { kind = "suite", script = "t32" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t33"
+part = 1
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["op:%", "op:/"], within = "digit_sum", inside = "while", message = "Use a `while` loop in `digit_sum` that takes digits off with `% 10` and `/ 10`." },
+  { check = "forbids", what = ["recursion"], within = "digit_sum", message = "`digit_sum` must use iteration; functions here must not call themselves, directly or through another function." },
+]
+
+[[tests]]
+key = "t34"
+part = 2
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["op:%"], within = "gcd", inside = "while", message = "Use a `while` loop in `gcd` that replaces the pair with `(b, a % b)` until `b` is zero." },
+  { check = "forbids", what = ["recursion"], within = "gcd", message = "`gcd` must use iteration; functions here must not call themselves, directly or through another function." },
+]
+
+[[tests]]
+key = "t35"
+part = 3
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["op:%"], within = "is_prime", inside = "for_range", message = "Test the candidate divisors with a `for` loop over a range in `is_prime`." },
+  { check = "forbids", what = ["recursion"], within = "is_prime", message = "`is_prime` must use iteration; functions here must not call themselves, directly or through another function." },
+]
+
+[[tests]]
+key = "t36"
+part = 4
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["op:+"], within = "fibonacci", inside = "for_range", message = "Advance the pair inside a `for` loop over a range in `fibonacci`." },
+  { check = "forbids", what = ["recursion"], within = "fibonacci", message = "`fibonacci` must use iteration; functions here must not call themselves, directly or through another function." },
+]
+
+[[wrong]]
+name = "digits-for"
+part = 1
+fails = ["t33"]
+
+[[wrong]]
+name = "returns-b"
+part = 2
+fails = ["t09", "t10", "t12", "t13", "t14", "t30"]
+
+[[wrong]]
+name = "while-prime"
+part = 3
+fails = ["t35"]
+
+[[wrong]]
+name = "strict-root"
+part = 3
+fails = ["t21"]
+
+[[wrong]]
+name = "recursive-fib"
+part = 4
+fails = ["t36"]
+
