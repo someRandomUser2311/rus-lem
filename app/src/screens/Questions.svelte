@@ -65,14 +65,12 @@
     }
   }
 
-  // The next open item on the path after this set.
+  // The next unlocked item on the path after this set, finished or not.
   const nextItem = $derived.by(() => {
-    const c = app.path.find(c => c.id === chapter)
-    if (!c) return null
-    const i = c.nodes.findIndex(n => n.id === id)
-    const n = c.nodes.slice(i + 1).find(n => n.state.state === 'open')
-    if (!n) return null
-    const href = n.kind === 'lesson' ? `#/lesson/${chapter}/${n.id}` : n.kind === 'questions' || n.kind === 'practice' ? `#/questions/${chapter}/${n.id}` : n.kind === 'review' ? `#/review/${chapter}` : `#/problem/${chapter}/${n.id}`
+    const next = app.nextAfter(id)
+    if (!next) return null
+    const { ch, n } = next
+    const href = n.kind === 'lesson' ? `#/lesson/${ch.id}/${n.id}` : n.kind === 'questions' || n.kind === 'practice' ? `#/questions/${ch.id}/${n.id}` : n.kind === 'review' ? `#/review/${ch.id}` : `#/problem/${ch.id}/${n.id}`
     return { href, label: `Next: ${plain(n.title)}` }
   })
 </script>

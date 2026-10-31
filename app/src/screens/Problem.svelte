@@ -202,14 +202,12 @@
   const verdictGood = $derived(outcome && (outcome.result.verdict === 'accepted' || outcome.result.verdict === 'passed'))
   const show = (s: string) => s.replace(/\t/g, '→').replace(/ /g, '·')
 
-  const nextNode = $derived.by(() => {
-    const ch = app.path.find(c => c.id === chapter)
-    if (!ch) return null
-    const i = ch.nodes.findIndex(n => n.id === id)
-    return ch.nodes.slice(i + 1).find(n => n.state.state !== 'locked' && n.state.state !== 'done') ?? null
-  })
-  const nodeHref = (n: { kind: string; id: string }) =>
-    n.kind === 'lesson' ? `#/lesson/${chapter}/${n.id}` : n.kind === 'questions' || n.kind === 'practice' ? `#/questions/${chapter}/${n.id}` : n.kind === 'review' ? `#/review/${chapter}` : `#/problem/${chapter}/${n.id}`
+  const next = $derived(app.nextAfter(id))
+  const nextNode = $derived(next?.n ?? null)
+  const nodeHref = (n: { kind: string; id: string }) => {
+    const c = next?.ch.id ?? chapter
+    return n.kind === 'lesson' ? `#/lesson/${c}/${n.id}` : n.kind === 'questions' || n.kind === 'practice' ? `#/questions/${c}/${n.id}` : n.kind === 'review' ? `#/review/${c}` : `#/problem/${c}/${n.id}`
+  }
 
   function onkey(e: KeyboardEvent) {
     if ((e.metaKey || e.ctrlKey) && e.key === "'") {

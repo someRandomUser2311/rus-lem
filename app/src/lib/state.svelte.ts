@@ -4,6 +4,7 @@ import { api, errorText } from './api'
 import type { AppInfo } from './bindings/AppInfo'
 import type { ChapterState } from './bindings/ChapterState'
 import type { ChapterView } from './bindings/ChapterView'
+import type { PathNode } from './bindings/PathNode'
 
 export type Route =
   | { name: 'home' }
@@ -33,6 +34,11 @@ export const defaultSettings: Settings = {
   assistDiagnostics: false,
   assistSignature: false,
   assistDefinition: false,
+}
+
+const LAST_ITEM_KEY = 'rusticoder.lastItem'
+function readLastItem(): string | null {
+  try { return localStorage.getItem(LAST_ITEM_KEY) } catch { return null }
 }
 
 function parseHash(): Route {
@@ -77,8 +83,53 @@ class App {
   loadError = $state<string | null>(null)
   private toastId = 0
 
+  /** The path item the learner opened last, so Home can pick up from there. */
+  lastItem = $state<string | null>(readLastItem())
+
   constructor() {
-    window.addEventListener('hashchange', () => (this.route = parseHash()))
+    this.noteItem()
+    window.addEventListener('hashchange', () => {
+      this.route = parseHash()
+      this.noteItem()
+    })
+  }
+
+  private noteItem() {
+    const r = this.route
+    if ((r.name === 'lesson' || r.name === 'questions' || (r.name === 'problem' && !r.review)) && r.id) {
+      this.lastItem = r.id
+      try { localStorage.setItem(LAST_ITEM_KEY, r.id) } catch { /* per-device convenience only */ }
+    }
+  }
+
+  /** The next unlocked item after `id` in path order, finished or not, so a learner
+   *  going through the course again isn't sent past the items they already did. */
+  nextAfter(id: string): { ch: ChapterState; n: PathNode } | null {
+    let seen = false
+    for (const ch of this.path) {
+      for (const n of ch.nodes) {
+        if (seen && n.state.state !== 'locked') return { ch, n }
+        if (n.id === id) seen = true
+      }
+    }
+    return null
+  }
+
+  /** Where the learner should go next: the item they last opened if it's unfinished,
+   *  else the one after it, else the first unfinished item in the course. */
+  resumeNode(): { ch: ChapterState; n: PathNode } | null {
+    for (const ch of this.path) {
+      const n = ch.nodes.find(n => n.id === this.lastItem)
+      if (!n) continue
+      if (n.state.state === 'open') return { ch, n }
+      if (n.state.state === 'done') {
+        const next = this.nextAfter(n.id)
+        if (next) return next
+      }
+      break
+    }
+    for (const ch of this.path) for (const n of ch.nodes) if (n.state.state === 'open') return { ch, n }
+    return null
   }
 
   go(r: Route) {

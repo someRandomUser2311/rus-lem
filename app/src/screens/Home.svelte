@@ -21,10 +21,7 @@
   }
 
   const stats = $derived(app.info?.stats)
-  const firstOpen = $derived.by(() => {
-    for (const ch of app.path) for (const n of ch.nodes) if (n.state.state === 'open') return { ch, n }
-    return null
-  })
+  const firstOpen = $derived(app.resumeNode())
   const current = $derived(app.path.find(c => c.state.state === 'open') ?? app.path[0])
   const offsets = [0, 45, 70, 45, 0, -45, -70, -45]
   // Labels sit in a column to the right of the widest zigzag, so they never cover a node.
