@@ -38,7 +38,7 @@
   }
 
   async function reset() {
-    if (!confirm('Delete all your progress (XP, streaks, solved problems, drafts and badges)? Settings are kept. This cannot be undone.')) return
+    if (!(await app.ask({ title: 'Reset all progress?', body: 'This deletes your XP, streaks, answers, solved problems, drafts and badges. Settings are kept. This cannot be undone.', yes: 'Reset all progress', danger: true }))) return
     try {
       await api.resetProgress()
       await app.load()

@@ -169,8 +169,8 @@
     if (lsp) void connectLsp()
   }
 
-  function removeFile(path: string) {
-    if (!confirm(`Delete ${path}? Its code will be lost.`)) return
+  async function removeFile(path: string) {
+    if (!(await app.ask({ title: `Delete ${path}?`, body: 'Its code will be lost.', yes: 'Delete file', danger: true }))) return
     files = files.filter(f => f.path !== path)
     if (active === path) active = files[0]?.path ?? ''
     editor?.load(files)
@@ -178,8 +178,8 @@
     if (lsp) void connectLsp()
   }
 
-  function resetCode() {
-    if (!p || !confirm('Replace your code with the starter code? Your current code will be lost.')) return
+  async function resetCode() {
+    if (!p || !(await app.ask({ title: 'Start over?', body: 'Your code will be replaced with the starter code. Your current code will be lost.', yes: 'Replace my code', danger: true }))) return
     files = p.starter.map(f => ({ ...f }))
     editor?.load(files)
     void api.saveDraft(id, files)

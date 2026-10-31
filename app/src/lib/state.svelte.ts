@@ -63,6 +63,8 @@ export function href(r: Route): string {
 }
 
 export type Toast = { id: number; title: string; body?: string; kind: 'xp' | 'badge' | 'error' | 'info' }
+/** An in-app yes/no question. The webview ignores `window.confirm`, so this replaces it. */
+export type Ask = { title: string; body?: string; yes: string; danger?: boolean; answer: (yes: boolean) => void }
 
 class App {
   info = $state<AppInfo | null>(null)
@@ -70,6 +72,7 @@ class App {
   route = $state<Route>(parseHash())
   settings = $state<Settings>({ ...defaultSettings })
   toasts = $state<Toast[]>([])
+  asking = $state<Ask | null>(null)
   chapters = new Map<string, ChapterView>()
   loadError = $state<string | null>(null)
   private toastId = 0
@@ -125,6 +128,14 @@ class App {
     const id = ++this.toastId
     this.toasts.push({ ...t, id })
     setTimeout(() => (this.toasts = this.toasts.filter(x => x.id !== id)), t.kind === 'error' ? 7000 : 3500)
+  }
+
+  /** Asks a yes/no question in a dialog; resolves to true when the learner confirms. */
+  ask(q: Omit<Ask, 'answer'>): Promise<boolean> {
+    this.asking?.answer(false)
+    return new Promise(resolve => {
+      this.asking = { ...q, answer: yes => { this.asking = null; resolve(yes) } }
+    })
   }
 
   /** Shows XP and new badges from an award. */

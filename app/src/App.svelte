@@ -27,7 +27,7 @@
   const reviewChapter = $derived(app.path.find(c => c.state.state === 'open' && c.num > 1)?.id)
 </script>
 
-<svelte:window onclick={guardLinks} />
+<svelte:window onclick={guardLinks} onkeydown={e => { if (app.asking && e.key === 'Escape') app.asking.answer(false) }} />
 
 {#if app.loadError}
   <div class="fatal">
@@ -61,6 +61,22 @@
   </div>
 {/if}
 
+{#if app.asking}
+  {@const q = app.asking}
+  <div class="ask-backdrop" role="presentation" onclick={() => q.answer(false)}></div>
+  <div class="ask" role="alertdialog" aria-modal="true" aria-labelledby="ask-title">
+    <h2 id="ask-title">{q.title}</h2>
+    {#if q.body}<p>{q.body}</p>{/if}
+    <div class="ask-actions">
+      <!-- Focus Cancel for destructive questions, so Enter never deletes anything. -->
+      <!-- svelte-ignore a11y_autofocus -->
+      <button class="btn ghost" autofocus={q.danger} onclick={() => q.answer(false)}>Cancel</button>
+      <!-- svelte-ignore a11y_autofocus -->
+      <button class="btn {q.danger ? 'stop' : 'primary'}" autofocus={!q.danger} onclick={() => q.answer(true)}>{q.yes}</button>
+    </div>
+  </div>
+{/if}
+
 <div class="toasts" aria-live="polite">
   {#each app.toasts as t (t.id)}
     <div class="toast {t.kind}">
@@ -87,6 +103,11 @@
   .toast.xp { border-color: var(--gold); }
   .toast.badge { border-color: var(--purple); }
   .toast.error { border-color: var(--red); }
+  .ask-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, .35); z-index: 90; }
+  .ask { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(460px, calc(100vw - 32px)); background: var(--surface); border: 2px solid var(--line); border-radius: 18px; padding: 24px; z-index: 91; box-shadow: 0 20px 50px rgba(0, 0, 0, .25); animation: pop .2s ease; }
+  .ask h2 { margin: 0 0 8px; font-size: 20px; font-weight: 800; }
+  .ask p { margin: 0; color: var(--ink-3); line-height: 1.5; }
+  .ask-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 22px; }
   .tt { font-weight: 800; }
   .tb { font-size: 14px; color: var(--ink-3); margin-top: 2px; white-space: pre-wrap; }
 </style>
