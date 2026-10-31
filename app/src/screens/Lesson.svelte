@@ -53,6 +53,8 @@
   const cur = $derived(positions[pos])
   const screen = $derived(cur?.kind === 'screen' && lesson ? lesson.screens[cur.screen] : null)
   const step = $derived(cur?.kind === 'screen' ? cur.step : 0)
+  // Remount (and animate in) only when the screen changes, not on every stepper step.
+  const screenKey = $derived(cur?.kind === 'screen' ? `s${cur.screen}` : (cur?.kind ?? ''))
   const stepData = $derived(screen && step ? screen.steps[step - 1] : null)
   const panels = $derived(screen ? panelStates(screen, screen.kind === 'stepper' ? step : 0) : [])
   const progress = $derived(positions.length ? (pos / (positions.length - 1)) * 100 : 0)
@@ -128,7 +130,7 @@
     </header>
 
     <main class="stage scroll">
-      {#key pos}
+      {#key screenKey}
         <section class="screen" class:narrow={isCheck || cur.kind !== 'screen'}>
           {#if cur.kind === 'screen' && screen}
             {#if screen.kind === 'check' && screen.question}
