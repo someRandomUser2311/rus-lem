@@ -1,0 +1,37 @@
+[[tests]]
+key = "t21"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["closure", "call:map", "call:map_err", "call:and_then", "call:or_else", "call:unwrap_or_else", "call:ok_or_else", "call:map_or", "call:map_or_else", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:sum", "call:product", "call:sort_by", "call:sort_by_key", "call:retain", "call:any", "call:all", "type:BTreeMap", "type:BTreeSet", "type:VecDeque", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "call:leak", "call:forget", "macro:include", "attr:path"], message = "Use only what Chapters 1–9 teach: `Result`, `?`, `ok_or` and `match` are welcome, but no closures or the methods that take one (map, map_err, and_then, unwrap_or_else, ok_or_else, filter, collect, sum, sort_by, retain), no BTreeMap or VecDeque, no traits or trait implementations (`impl Display`, `impl From` wait for Chapter 10), no explicit lifetimes and no unsafe code." },
+  { check = "uses", what = ["call:token_value", "call:checked_mul", "call:ok_or", "try"], within = "product", message = "`product` calls `token_value`, multiplies with `checked_mul`, turns `None` into an error with `ok_or` and passes errors on with `?`." },
+]
+
+[[tests]]
+key = "t22"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["closure", "call:map", "call:map_err", "call:and_then", "call:or_else", "call:unwrap_or_else", "call:ok_or_else", "call:map_or", "call:map_or_else", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:sum", "call:product", "call:sort_by", "call:sort_by_key", "call:retain", "call:any", "call:all", "type:BTreeMap", "type:BTreeSet", "type:VecDeque", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "call:leak", "call:forget", "macro:include", "attr:path"], message = "Use only what Chapters 1–9 teach: `Result`, `?`, `ok_or` and `match` are welcome, but no closures or the methods that take one (map, map_err, and_then, unwrap_or_else, ok_or_else, filter, collect, sum, sort_by, retain), no BTreeMap or VecDeque, no traits or trait implementations (`impl Display`, `impl From` wait for Chapter 10), no explicit lifetimes and no unsafe code." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't call `unwrap()`: handle the `Err` or `None` case yourself, or pass it on with `?`." },
+]
+
+[[tests]]
+key = "t20"
+run = { kind = "suite", script = "t20" }
+asserts = [{ check = "returns" }]
+
+[[wrong]]
+name = "parse-all-first"
+fails = ["t10", "t20"]
+
+[[wrong]]
+name = "saturating"
+fails = ["t06", "t07", "t10", "t20", "t21"]
+
+[[wrong]]
+name = "zero-shortcut"
+fails = ["t07", "t20"]
+
+[[wrong]]
+name = "big-token-is-overflow"
+fails = ["t09", "t20"]
+

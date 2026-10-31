@@ -1,0 +1,109 @@
+checkpoints = true
+
+[[tests]]
+key = "t49"
+part = 4
+
+[[tests]]
+key = "t50"
+part = 4
+
+[[tests]]
+key = "t51"
+part = 4
+
+[[tests]]
+key = "t52"
+part = 4
+
+[[tests]]
+key = "t53"
+part = 4
+
+[[tests]]
+key = "t47"
+part = 1
+run = { kind = "suite", script = "t47" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t48"
+part = 4
+run = { kind = "suite", script = "t48" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t51"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["closure", "call:map", "call:map_err", "call:and_then", "call:or_else", "call:unwrap_or_else", "call:ok_or_else", "call:map_or", "call:map_or_else", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:sum", "call:product", "call:sort_by", "call:sort_by_key", "call:retain", "call:any", "call:all", "type:BTreeMap", "type:BTreeSet", "type:VecDeque", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "call:leak", "call:forget", "macro:include", "attr:path"], message = "Use only what Chapters 1–9 teach: `Result`, `?`, `ok_or` and `match` are welcome, but no closures or the methods that take one (map, map_err, and_then, unwrap_or_else, ok_or_else, filter, collect, sum, sort_by, retain), no BTreeMap or VecDeque, no traits or trait implementations (`impl Display`, `impl From` wait for Chapter 10), no explicit lifetimes and no unsafe code." },
+  { check = "rust_files", files = ["src/lib.rs", "src/fees.rs", "src/text.rs", "src/book.rs", "src/member.rs", "src/library.rs", "src/error.rs", "src/command.rs", "src/main.rs"] },
+  { check = "uses", what = ["mod_file:fees", "mod_file:text", "mod_file:book", "mod_file:member", "mod_file:library", "mod_file:error", "mod_file:command", "pub:fees", "pub:text", "pub:book", "pub:member", "pub:library", "pub:error", "pub:command"], file = "src/lib.rs", message = "`src/lib.rs` declares the seven modules with `pub mod name;`, each without a body." },
+  { check = "uses", what = ["pub_use:book::Book", "pub_use:book::Status", "pub_use:member::Member", "pub_use:library::Library", "pub_use:error::LibraryError", "pub_use:command::Command", "pub_use:command::parse_command"], file = "src/lib.rs", message = "Re-export at the root: `Book`, `Status`, `Member`, `Library`, `LibraryError`, `Command` and `parse_command`." },
+  { check = "count", what = "item:fn", eq = 0, file = "src/lib.rs", message = "`src/lib.rs` holds only module declarations and re-exports." },
+]
+
+[[tests]]
+key = "t52"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["closure", "call:map", "call:map_err", "call:and_then", "call:or_else", "call:unwrap_or_else", "call:ok_or_else", "call:map_or", "call:map_or_else", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:sum", "call:product", "call:sort_by", "call:sort_by_key", "call:retain", "call:any", "call:all", "type:BTreeMap", "type:BTreeSet", "type:VecDeque", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "call:leak", "call:forget", "macro:include", "attr:path"], message = "Use only what Chapters 1–9 teach: `Result`, `?`, `ok_or` and `match` are welcome, but no closures or the methods that take one (map, map_err, and_then, unwrap_or_else, ok_or_else, filter, collect, sum, sort_by, retain), no BTreeMap or VecDeque, no traits or trait implementations (`impl Display`, `impl From` wait for Chapter 10), no explicit lifetimes and no unsafe code." },
+  { check = "uses", what = ["derive:Debug", "derive:Clone", "derive:PartialEq"], inside = "enum:LibraryError", file = "src/error.rs", message = "`src/error.rs` defines `LibraryError` with `#[derive(Debug, Clone, PartialEq)]`." },
+  { check = "uses", what = ["derive:Debug", "derive:Clone", "derive:PartialEq"], inside = "enum:Command", file = "src/command.rs", message = "`src/command.rs` defines `Command` with `#[derive(Debug, Clone, PartialEq)]`." },
+  { check = "uses", what = ["field:books:Vec<Book>", "field:members:HashMap<u32,Member>", "field:next_book_id:u32"], inside = "struct:Library", file = "src/library.rs", message = "`Library` keeps its three private fields `books`, `members` and `next_book_id`." },
+  { check = "forbids", what = ["pub_field:books", "pub_field:members", "pub_field:next_book_id"], file = "src/library.rs", message = "Keep `Library`'s fields private; callers use its methods." },
+]
+
+[[tests]]
+key = "t53"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["closure", "call:map", "call:map_err", "call:and_then", "call:or_else", "call:unwrap_or_else", "call:ok_or_else", "call:map_or", "call:map_or_else", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:sum", "call:product", "call:sort_by", "call:sort_by_key", "call:retain", "call:any", "call:all", "type:BTreeMap", "type:BTreeSet", "type:VecDeque", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "call:leak", "call:forget", "macro:include", "attr:path"], message = "Use only what Chapters 1–9 teach: `Result`, `?`, `ok_or` and `match` are welcome, but no closures or the methods that take one (map, map_err, and_then, unwrap_or_else, ok_or_else, filter, collect, sum, sort_by, retain), no BTreeMap or VecDeque, no traits or trait implementations (`impl Display`, `impl From` wait for Chapter 10), no explicit lifetimes and no unsafe code." },
+  { check = "forbids", what = ["call:unwrap"], message = "No `unwrap()` anywhere in the package: every failure is a `LibraryError`." },
+]
+
+[[wrong]]
+name = "limit-before-available"
+part = 4
+fails = ["t48"]
+
+[[wrong]]
+name = "day-limit-14"
+part = 2
+fails = ["t17"]
+
+[[wrong]]
+name = "no-interior-newline-check"
+part = 4
+fails = ["t48"]
+
+[[wrong]]
+name = "trimmed-line-in-error"
+part = 4
+fails = ["t48"]
+
+[[wrong]]
+name = "add-member-overwrites"
+part = 4
+fails = ["t48"]
+
+[[wrong]]
+name = "find-collapses-spaces"
+part = 4
+fails = ["t48"]
+
+[[wrong]]
+name = "report-trailing-newline"
+part = 4
+fails = ["t42", "t45", "t48"]
+
+[[wrong]]
+name = "keyword-case-insensitive"
+part = 4
+fails = ["t48"]
+
+[[wrong]]
+name = "no-day-check-in-parser"
+part = 4
+fails = ["t48"]
+

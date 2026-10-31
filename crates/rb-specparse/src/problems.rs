@@ -710,6 +710,25 @@ fn rust_row(
     }
     let code = only_span(input)?;
     let t = expected.trim();
+    let call = if code.starts_with('{') && code.ends_with('}') {
+        code.clone()
+    } else {
+        format!("{{ {code} }}")
+    };
+    // `panics with "…"`: the call panics, and its message contains the text.
+    if let Some(text) = md::quoted_after(t, "panics with") {
+        return Some((
+            Run::Call {
+                call: bind(&call),
+                expect: None,
+                typed: false,
+            },
+            vec![
+                Assertion::StderrContains { text },
+                Assertion::ExitCode { code: 101 },
+            ],
+        ));
+    }
     let value = t.strip_prefix('`')?;
     let (value, rest) = value.split_once('`')?;
     let rest = rest.trim();
@@ -717,11 +736,6 @@ fn rust_row(
         Some(t) => Some(t.trim_end_matches(')').trim().parse::<f64>().ok()?),
         None if rest.is_empty() => None,
         None => return None,
-    };
-    let call = if code.starts_with('{') && code.ends_with('}') {
-        code
-    } else {
-        format!("{{ {code} }}")
     };
     Some((
         Run::Call {
@@ -1190,6 +1204,10 @@ fn asserts_of(expected: &str, earlier: &[TestCase]) -> Vec<Assertion> {
     if let Some(text) = md::quoted_after(expected, "stdout:") {
         return vec![Assertion::StdoutEq { text }];
     }
+    // `stdout: "…"; stderr contains "…"; exit code N`: an expected failure.
+    if let Some(asserts) = failure_asserts(expected) {
+        return asserts;
+    }
     let e = expected.trim();
     if let Some(rest) = e.strip_prefix("stdout line ")
         && let Some((n, tail)) = rest.split_once(" is ")
@@ -1210,6 +1228,25 @@ fn asserts_of(expected: &str, earlier: &[TestCase]) -> Vec<Assertion> {
     vec![Assertion::Todo {
         note: expected.to_string(),
     }]
+}
+
+fn failure_asserts(expected: &str) -> Option<Vec<Assertion>> {
+    let mut asserts = Vec::new();
+    for part in expected.split("; ") {
+        let part = part.trim();
+        if let Some(text) = md::quoted_after(part, "stdout:") {
+            asserts.push(Assertion::StdoutEq { text });
+        } else if let Some(text) = md::quoted_after(part, "stderr contains") {
+            asserts.push(Assertion::StderrContains { text });
+        } else {
+            let code = part.strip_prefix("exit code ")?.trim().parse().ok()?;
+            asserts.push(Assertion::ExitCode { code });
+        }
+    }
+    asserts
+        .iter()
+        .any(|a| matches!(a, Assertion::ExitCode { .. }))
+        .then_some(asserts)
 }
 
 #[cfg(test)]
@@ -1281,6 +1318,30 @@ mod tests {
             None
         );
         assert_eq!(plain_number("4_294_967_295"), "4294967295");
+    }
+
+    #[test]
+    fn panic_and_failure_rows() {
+        let (run, asserts) = rust_row(
+            "`crate::positive(0)`",
+            "panics with \"count must be positive\"",
+            &[],
+        )
+        .unwrap();
+        assert!(matches!(run, Run::Call { expect: None, .. }));
+        assert!(matches!(&asserts[..], [
+            Assertion::StderrContains { text },
+            Assertion::ExitCode { code: 101 }
+        ] if text == "count must be positive"));
+        let asserts = asserts_of(
+            "`stdout: \"\"`; stderr contains `\"Error: Empty\"`; exit code 1",
+            &[],
+        );
+        assert!(matches!(&asserts[..], [
+            Assertion::StdoutEq { text },
+            Assertion::StderrContains { .. },
+            Assertion::ExitCode { code: 1 }
+        ] if text.is_empty()));
     }
 
     #[test]

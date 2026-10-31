@@ -1,0 +1,43 @@
+[[tests]]
+key = "t18"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["closure", "call:map", "call:map_err", "call:and_then", "call:or_else", "call:unwrap_or_else", "call:ok_or_else", "call:map_or", "call:map_or_else", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:sum", "call:product", "call:sort_by", "call:sort_by_key", "call:retain", "call:any", "call:all", "type:BTreeMap", "type:BTreeSet", "type:VecDeque", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "call:leak", "call:forget", "macro:include", "attr:path"], message = "Use only what Chapters 1–9 teach: `Result`, `?`, `ok_or` and `match` are welcome, but no closures or the methods that take one (map, map_err, and_then, unwrap_or_else, ok_or_else, filter, collect, sum, sort_by, retain), no BTreeMap or VecDeque, no traits or trait implementations (`impl Display`, `impl From` wait for Chapter 10), no explicit lifetimes and no unsafe code." },
+  { check = "uses", what = ["call:ok_or", "try"], within = "deposit", message = "`deposit` uses `ok_or` and `?`." },
+  { check = "uses", what = ["call:ok_or", "try"], within = "withdraw", message = "`withdraw` uses `ok_or` and `?`." },
+  { check = "uses", what = ["call:ok_or", "try"], within = "transfer", message = "`transfer` uses `ok_or` and `?`." },
+]
+
+[[tests]]
+key = "t19"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["closure", "call:map", "call:map_err", "call:and_then", "call:or_else", "call:unwrap_or_else", "call:ok_or_else", "call:map_or", "call:map_or_else", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:sum", "call:product", "call:sort_by", "call:sort_by_key", "call:retain", "call:any", "call:all", "type:BTreeMap", "type:BTreeSet", "type:VecDeque", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "call:leak", "call:forget", "macro:include", "attr:path"], message = "Use only what Chapters 1–9 teach: `Result`, `?`, `ok_or` and `match` are welcome, but no closures or the methods that take one (map, map_err, and_then, unwrap_or_else, ok_or_else, filter, collect, sum, sort_by, retain), no BTreeMap or VecDeque, no traits or trait implementations (`impl Display`, `impl From` wait for Chapter 10), no explicit lifetimes and no unsafe code." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't call `unwrap()`: handle the `Err` or `None` case yourself, or pass it on with `?`." },
+]
+
+[[tests]]
+key = "t17"
+run = { kind = "suite", script = "t17" }
+asserts = [{ check = "returns" }]
+
+[[wrong]]
+name = "transfer-writes-sender-first"
+fails = ["t10", "t17"]
+
+[[wrong]]
+name = "wrapping-deposit"
+fails = ["t03", "t17", "t18"]
+
+[[wrong]]
+name = "receiver-checked-first"
+fails = ["t11", "t17"]
+
+[[wrong]]
+name = "withdraw"
+fails = ["t06", "t17", "t18"]
+
+[[wrong]]
+name = "pub-field"
+fails = ["t15", "t16"]
+

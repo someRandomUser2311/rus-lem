@@ -5468,8 +5468,16 @@
           },
           "asserts": [
             {
-              "check": "todo",
-              "note": "`stdout: \"Type a whole number:\\n\"`; stderr contains `\"Please type a number!\"`; exit code 101"
+              "check": "stdout_eq",
+              "text": "Type a whole number:\n"
+            },
+            {
+              "check": "stderr_contains",
+              "text": "Please type a number!"
+            },
+            {
+              "check": "exit_code",
+              "code": 101
             }
           ]
         },
@@ -5618,8 +5626,16 @@
           },
           "asserts": [
             {
-              "check": "todo",
-              "note": "`stdout: \"Type a whole number:\\n\"`; stderr contains `\"Please type a number!\"`; exit code 101"
+              "check": "stdout_eq",
+              "text": "Type a whole number:\n"
+            },
+            {
+              "check": "stderr_contains",
+              "text": "Please type a number!"
+            },
+            {
+              "check": "exit_code",
+              "code": 101
             }
           ]
         },
@@ -5643,8 +5659,16 @@
           },
           "asserts": [
             {
-              "check": "todo",
-              "note": "`stdout: \"Type a whole number:\\n\"`; stderr contains `\"Please type a number!\"`; exit code 101"
+              "check": "stdout_eq",
+              "text": "Type a whole number:\n"
+            },
+            {
+              "check": "stderr_contains",
+              "text": "Please type a number!"
+            },
+            {
+              "check": "exit_code",
+              "code": 101
             }
           ]
         },
@@ -5668,8 +5692,16 @@
           },
           "asserts": [
             {
-              "check": "todo",
-              "note": "`stdout: \"Type a whole number:\\n\"`; stderr contains `\"Please type a number!\"`; exit code 101"
+              "check": "stdout_eq",
+              "text": "Type a whole number:\n"
+            },
+            {
+              "check": "stderr_contains",
+              "text": "Please type a number!"
+            },
+            {
+              "check": "exit_code",
+              "code": 101
             }
           ]
         },
@@ -5768,8 +5800,16 @@
           },
           "asserts": [
             {
-              "check": "todo",
-              "note": "`stdout: \"Type a whole number:\\n\"`; stderr contains `\"Please type a number!\"`; exit code 101"
+              "check": "stdout_eq",
+              "text": "Type a whole number:\n"
+            },
+            {
+              "check": "stderr_contains",
+              "text": "Please type a number!"
+            },
+            {
+              "check": "exit_code",
+              "code": 101
             }
           ]
         },
@@ -5793,8 +5833,16 @@
           },
           "asserts": [
             {
-              "check": "todo",
-              "note": "`stdout: \"Type a whole number:\\n\"`; stderr contains `\"Please type a number!\"`; exit code 101"
+              "check": "stdout_eq",
+              "text": "Type a whole number:\n"
+            },
+            {
+              "check": "stderr_contains",
+              "text": "Please type a number!"
+            },
+            {
+              "check": "exit_code",
+              "code": 101
             }
           ]
         },

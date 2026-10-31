@@ -159,6 +159,10 @@ pub fn run(ch: &Chapter, vendor: Option<&Path>) -> Result<bool> {
                 (ScreenKind::Error, Some(diag)) if diag.contains("panicked at") => {
                     verify_panic(&tc, &qdir, &id, &code.text, diag)
                 }
+                // A warning screen: it compiles, with the shown warning.
+                (ScreenKind::Error, Some(diag)) if diag.starts_with("warning:") => {
+                    verify_warning(&tc, &qdir, &id, &code.text, diag)
+                }
                 (ScreenKind::Error, Some(diag)) => {
                     let first = diag.lines().next().unwrap_or("").to_string();
                     let code_id = first
@@ -215,6 +219,35 @@ pub fn run(ch: &Chapter, vendor: Option<&Path>) -> Result<bool> {
 
 /// Compiles `code`, runs it, and checks it panics with the message in `diag` (the line
 /// after "panicked at …").
+fn verify_warning(
+    tc: &Toolchain,
+    work: &Path,
+    id: &str,
+    code: &str,
+    diag: &str,
+) -> std::result::Result<(), String> {
+    let dir = work.join(id);
+    std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    let src = dir.join("main.rs");
+    std::fs::write(&src, code).map_err(|e| e.to_string())?;
+    let c = tc
+        .compile_rustc(&src, &dir.join("main"), "2024", &[])
+        .map_err(|e| e.to_string())?;
+    let rendered = strip_ansi(&c.rendered);
+    let want = diag.lines().next().unwrap_or("");
+    if !c.ok {
+        return Err(format!(
+            "should compile with a warning, but doesn't:\n{rendered}"
+        ));
+    }
+    if !rendered.contains(want) {
+        return Err(format!(
+            "should warn {want:?}, but rustc printed {rendered:?}"
+        ));
+    }
+    Ok(())
+}
+
 fn verify_panic(
     tc: &Toolchain,
     work: &Path,

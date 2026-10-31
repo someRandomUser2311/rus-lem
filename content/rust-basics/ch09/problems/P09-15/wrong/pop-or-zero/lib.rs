@@ -1,0 +1,15 @@
+pub fn must_pop(stack: &mut Vec<i32>) -> i32 {
+    stack.pop().unwrap_or(0)
+}
+
+pub fn sum_top(stack: &mut Vec<i32>, count: usize) -> Result<i64, String> {
+    let len = stack.len();
+    if count > len {
+        return Err(format!("wanted {count}, have {len}"));
+    }
+    let mut total: i64 = 0;
+    for _ in 0..count {
+        total += must_pop(stack) as i64;
+    }
+    Ok(total)
+}

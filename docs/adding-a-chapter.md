@@ -21,7 +21,8 @@ The importer converts what it can read reliably:
 | Lesson fields, screen text, code, captions, Coming-from cards, error output and annotations, compare panels, summary, completion | Lesson screens (visual panels are authored, below) |
 | Every question, option, answer, accepted answer and explanation | Questions, with `verify` facts for compile/output questions |
 | Problem fields, description, examples, constraints, hints, approach, starter files | Problem |
-| Test rows `stdin: "…"` → `stdout: "…"`, `stdout line N is "…"`, `stderr is empty; exit code 0`, `the same stdout as test N` | Runs and assertions |
+| Test rows `stdin: "…"` → `stdout: "…"`, `stdout line N is "…"`, `stderr is empty; exit code 0`, `the same stdout as test N`, and an expected failure `stdout: "…"; stderr contains "…"; exit code N` | Runs and assertions |
+| Function rows `crate::f(…)` → a Rust value, or `panics with "…"` (the call must panic with that text) | Calls and assertions |
 | Any other row | A `todo` assertion that blocks bundling |
 
 ## 3. Author the overlay
@@ -60,7 +61,7 @@ fails = ["t09"]
 | Kind | What it does |
 |---|---|
 | `process` | Runs the program. `stdin`, plus `stdin_pieces` for large inputs (`{ text, times }`, or `{ text = "{n}\n", from, to }` for numbered lines); `times = 100` runs 100 fresh processes, all of which must pass; `fixture = { secret_number = "42" }` runs a build whose named `let` takes that value. |
-| `suite` | Many inputs, each a fresh process. Either `cases = [{ stdin, fixture, stdout }]` written out, or a seeded `generator` (the course's LCG: `seed`, `cases`, `lines`, `items`, optional `fixture` draw); with `reference = true` course-check fills in each case's expected output by running the reference solution. |
+| `suite` | Many inputs, each a fresh process. Either `cases = [{ stdin, fixture, stdout }]` written out, or a seeded `generator` (the course's LCG: `seed`, `cases`, `lines`, `items`, optional `fixture` draw); with `reference = true` course-check fills in each case's expected output by running the reference solution. When the reference's `main` returns `Err` on a program case (exit code 1), that case expects the same exit code and stderr. |
 | `build` | `command = "build" \| "check"`. |
 | `source`, `manifest` | Look at the code or `Cargo.toml` only. |
 | `fixture` | A test program (`main`) built against the learner's code. In a Cargo package it's an outside crate that uses the library by its crate name (`module_lab::text::normalize("x")`), so privacy applies; with `compile_error` it's a compiler probe (`E0603`). `remove = ["src/fees/rate.rs"]` deletes files from a copy first; an empty `main` just builds the library. |
@@ -142,5 +143,6 @@ A new kind of run, assertion or visual is a small, one-time engine change in `rb
 | 2 | Done: generated suites, fixtures, checker programs, checkpoint parts, vendored `rand` (`content/<course>/vendor/`, from `cargo vendor`) |
 | 3 | `unit` runs (hidden `#[test]` functions) |
 | 4 | `compile_fail` runs (expected error codes) |
+| 9 | Done: panic rows, expected-failure program rows and suite cases, warning screens in lessons |
 | 11 | `mutants` (the learner's tests must catch buggy versions) |
 | 17 | vendored `trpl` |

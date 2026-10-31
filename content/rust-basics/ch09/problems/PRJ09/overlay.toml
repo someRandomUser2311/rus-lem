@@ -1,0 +1,73 @@
+checkpoints = true
+
+[[tests]]
+key = "t33"
+part = 4
+
+[[tests]]
+key = "t34"
+part = 4
+
+[[tests]]
+key = "t25"
+run = { kind = "suite", script = "t25" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t33"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["closure", "call:map", "call:map_err", "call:and_then", "call:or_else", "call:unwrap_or_else", "call:ok_or_else", "call:map_or", "call:map_or_else", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:sum", "call:product", "call:sort_by", "call:sort_by_key", "call:retain", "call:any", "call:all", "type:BTreeMap", "type:BTreeSet", "type:VecDeque", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "call:leak", "call:forget", "macro:include", "attr:path"], message = "Use only what Chapters 1–9 teach: `Result`, `?`, `ok_or` and `match` are welcome, but no closures or the methods that take one (map, map_err, and_then, unwrap_or_else, ok_or_else, filter, collect, sum, sort_by, retain), no BTreeMap or VecDeque, no traits or trait implementations (`impl Display`, `impl From` wait for Chapter 10), no explicit lifetimes and no unsafe code." },
+  { check = "uses", what = ["call:read_to_string", "call:kind"], within = "load_config", message = "`load_config` reads the file with `fs::read_to_string` and classifies a failure by its `kind()`." },
+  { check = "uses", what = ["call:parse_config"], within = "load_config", message = "`load_config` parses the text it read by calling `parse_config`." },
+]
+
+[[tests]]
+key = "t34"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["closure", "call:map", "call:map_err", "call:and_then", "call:or_else", "call:unwrap_or_else", "call:ok_or_else", "call:map_or", "call:map_or_else", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:sum", "call:product", "call:sort_by", "call:sort_by_key", "call:retain", "call:any", "call:all", "type:BTreeMap", "type:BTreeSet", "type:VecDeque", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "call:leak", "call:forget", "macro:include", "attr:path"], message = "Use only what Chapters 1–9 teach: `Result`, `?`, `ok_or` and `match` are welcome, but no closures or the methods that take one (map, map_err, and_then, unwrap_or_else, ok_or_else, filter, collect, sum, sort_by, retain), no BTreeMap or VecDeque, no traits or trait implementations (`impl Display`, `impl From` wait for Chapter 10), no explicit lifetimes and no unsafe code." },
+  { check = "uses", what = ["try"], message = "Pass errors on with `?` at least once." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't call `unwrap()`: every failure here is a typed error." },
+]
+
+[[wrong]]
+name = "value-before-duplicate"
+part = 2
+fails = ["t17"]
+
+[[wrong]]
+name = "count-only-settings"
+part = 2
+fails = ["t20", "t21"]
+
+[[wrong]]
+name = "port-zero-ok"
+part = 4
+fails = ["t29"]
+
+[[wrong]]
+name = "port-before-host"
+part = 4
+fails = ["t30"]
+
+[[wrong]]
+name = "extra-equals-in-value"
+part = 2
+fails = ["t15", "t18"]
+
+[[wrong]]
+name = "untrimmed-key"
+part = 4
+fails = ["t32"]
+
+[[wrong]]
+name = "io-other"
+part = 4
+fails = ["t27", "t28", "t33"]
+
+[[wrong]]
+name = "workers-limit-255"
+part = 2
+fails = ["t13"]
+

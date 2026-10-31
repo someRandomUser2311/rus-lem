@@ -1,0 +1,42 @@
+[[tests]]
+key = "t17"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["closure", "call:map", "call:map_err", "call:and_then", "call:or_else", "call:unwrap_or_else", "call:ok_or_else", "call:map_or", "call:map_or_else", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:sum", "call:product", "call:sort_by", "call:sort_by_key", "call:retain", "call:any", "call:all", "type:BTreeMap", "type:BTreeSet", "type:VecDeque", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "call:leak", "call:forget", "macro:include", "attr:path"], message = "Use only what Chapters 1–9 teach: `Result`, `?`, `ok_or` and `match` are welcome, but no closures or the methods that take one (map, map_err, and_then, unwrap_or_else, ok_or_else, filter, collect, sum, sort_by, retain), no BTreeMap or VecDeque, no traits or trait implementations (`impl Display`, `impl From` wait for Chapter 10), no explicit lifetimes and no unsafe code." },
+  { check = "uses", what = ["ret:Result<(),Box<dynError>>|ret:Result<(),Box<dynstd::error::Error>>"], within = "main", message = "`main` returns `Result<(), Box<dyn Error>>`." },
+  { check = "uses", what = ["try"], within = "main", message = "Use `?` in `main` for the line read and for `line_total`." },
+]
+
+[[tests]]
+key = "t18"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["closure", "call:map", "call:map_err", "call:and_then", "call:or_else", "call:unwrap_or_else", "call:ok_or_else", "call:map_or", "call:map_or_else", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:sum", "call:product", "call:sort_by", "call:sort_by_key", "call:retain", "call:any", "call:all", "type:BTreeMap", "type:BTreeSet", "type:VecDeque", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "call:leak", "call:forget", "macro:include", "attr:path"], message = "Use only what Chapters 1–9 teach: `Result`, `?`, `ok_or` and `match` are welcome, but no closures or the methods that take one (map, map_err, and_then, unwrap_or_else, ok_or_else, filter, collect, sum, sort_by, retain), no BTreeMap or VecDeque, no traits or trait implementations (`impl Display`, `impl From` wait for Chapter 10), no explicit lifetimes and no unsafe code." },
+  { check = "forbids", what = ["call:unwrap", "call:expect"], message = "Don't call `unwrap()` or `expect(...)`: a bad input must end `main` with an `Err` (exit code 1), not a panic." },
+]
+
+[[tests]]
+key = "t16"
+run = { kind = "suite", script = "t16" }
+asserts = [{ check = "same_as_reference" }]
+
+[[wrong]]
+name = "prints-as-it-goes"
+fails = ["t02", "t08", "t16"]
+
+[[wrong]]
+name = "numbers-non-blank-lines"
+fails = ["t01", "t10", "t11", "t14", "t16"]
+
+[[wrong]]
+name = "u32-line-total"
+fails = ["t06", "t16"]
+
+[[wrong]]
+name = "skips-bad-amounts"
+fails = ["t02", "t07", "t08", "t09", "t11", "t15", "t16"]
+
+[[wrong]]
+name = "reports-blank-lines"
+fails = ["t01", "t04", "t10", "t14", "t16"]
+

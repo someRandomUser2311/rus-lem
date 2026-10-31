@@ -119,6 +119,15 @@ pub(crate) struct RunItem {
     /// then holds only what the function printed.
     pub value: Option<String>,
     pub out: Output,
+    /// Program suite cases whose reference failed: its exit code and stderr.
+    pub failure: Option<(i32, String)>,
+}
+
+/// A suite case's reference outcome: its stdout (or returned value), and for a program
+/// whose `main` returned `Err`, the exit code and stderr.
+pub struct CaseOutput {
+    pub stdout: String,
+    pub failure: Option<(i32, String)>,
 }
 
 /// Sets the modification time of every file under `dir` (except build output) to now.
@@ -518,7 +527,7 @@ impl Grader<'_> {
         problem: &Problem,
         files: &[SourceFile],
         cases: &[Case],
-    ) -> Result<Vec<String>> {
+    ) -> Result<Vec<CaseOutput>> {
         let dir = self.fresh_dir(&format!("{}-ref", problem.id))?;
         write_files(&dir, files)?;
         if cases.iter().any(|c| c.call.is_some()) {
@@ -538,7 +547,10 @@ impl Grader<'_> {
             {
                 match r {
                     (Some(v), o) if o.success() && o.stdout.is_empty() && o.stderr.is_empty() => {
-                        out.push(v)
+                        out.push(CaseOutput {
+                            stdout: v,
+                            failure: None,
+                        })
                     }
                     (_, o) => anyhow::bail!(
                         "the reference solution fails on {call}: {}{}",
@@ -573,14 +585,19 @@ impl Grader<'_> {
                 _ => c.executable.clone().unwrap_or_default(),
             };
             let o = self.execute(problem, &exe, &dir, &case.stdin, &[], &case.fixture)?;
-            if !o.success() || !o.stderr.is_empty() {
+            // `main` returning `Err` (exit code 1) is an expected outcome; a panic isn't.
+            let failed = o.code == Some(1) && !o.timed_out;
+            if !failed && (!o.success() || !o.stderr.is_empty()) {
                 anyhow::bail!(
                     "the reference solution fails on input {:?}: {}",
                     case.stdin,
                     o.stderr_str()
                 );
             }
-            out.push(o.stdout_str());
+            out.push(CaseOutput {
+                stdout: o.stdout_str(),
+                failure: failed.then(|| (1, o.stderr_str())),
+            });
         }
         let _ = std::fs::remove_dir_all(&dir);
         Ok(out)
@@ -977,6 +994,7 @@ impl Grader<'_> {
                         expected: None,
                         value: None,
                         out,
+                        failure: None,
                     });
                     if stop {
                         break;
@@ -1014,6 +1032,7 @@ impl Grader<'_> {
                         expected,
                         value,
                         out,
+                        failure: None,
                     }],
                     suite: false,
                 }
@@ -1032,6 +1051,7 @@ impl Grader<'_> {
                         expected: case.stdout.clone(),
                         value,
                         out,
+                        failure: None,
                     });
                     if stop {
                         break;
@@ -1058,6 +1078,9 @@ impl Grader<'_> {
                         expected: case.stdout.clone(),
                         value: None,
                         out,
+                        failure: case
+                            .exit_code
+                            .map(|c| (c, case.stderr.clone().unwrap_or_default())),
                     });
                     if stop {
                         break;
@@ -1077,6 +1100,7 @@ impl Grader<'_> {
                                 expected: None,
                                 value: None,
                                 out,
+                                failure: None,
                             }],
                             suite: false,
                         }
@@ -1292,8 +1316,18 @@ fn check(
                     | Assertion::StderrEmpty
             )
         });
-        let implicit = [Assertion::StderrEmpty, Assertion::ExitCode { code: 0 }];
+        // A suite case whose reference failed expects that same failure instead.
+        let implicit = match &item.failure {
+            Some((code, stderr)) => vec![
+                Assertion::ExitCode { code: *code },
+                Assertion::StderrContains {
+                    text: stderr.clone(),
+                },
+            ],
+            None => vec![Assertion::StderrEmpty, Assertion::ExitCode { code: 0 }],
+        };
         let implicit: &[Assertion] = if states_exit { &[] } else { &implicit };
+        let expects_failure = item.failure.is_some();
         for a in t.asserts.iter().chain(implicit) {
             if let Err(f) = assert::check_run(a, item, ctx) {
                 let expects_exit = t.asserts.iter().any(|a| {
@@ -1302,7 +1336,7 @@ fn check(
                         Assertion::ExitCode { .. } | Assertion::StderrContains { .. }
                     )
                 });
-                let status = if o.code != Some(0) && !expects_exit {
+                let status = if o.code != Some(0) && !expects_exit && !expects_failure {
                     TestStatus::RuntimeError
                 } else {
                     TestStatus::Failed

@@ -824,6 +824,12 @@ pub struct Case {
     pub fixture: BTreeMap<String, String>,
     #[serde(default)]
     pub stdout: Option<String>,
+    /// Program suites: the reference ended with `main` returning `Err`, so the case
+    /// expects this exit code and exactly this stderr.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub exit_code: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub stderr: Option<String>,
 }
 
 /// A seeded input generator (the course's LCG: state = 1664525 × state + 1013904223 mod 2³²;

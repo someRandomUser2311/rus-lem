@@ -1,0 +1,44 @@
+[[tests]]
+key = "t21"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["closure", "call:map", "call:map_err", "call:and_then", "call:or_else", "call:unwrap_or_else", "call:ok_or_else", "call:map_or", "call:map_or_else", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:sum", "call:product", "call:sort_by", "call:sort_by_key", "call:retain", "call:any", "call:all", "type:BTreeMap", "type:BTreeSet", "type:VecDeque", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "call:leak", "call:forget", "macro:include", "attr:path"], message = "Use only what Chapters 1–9 teach: `Result`, `?`, `ok_or` and `match` are welcome, but no closures or the methods that take one (map, map_err, and_then, unwrap_or_else, ok_or_else, filter, collect, sum, sort_by, retain), no BTreeMap or VecDeque, no traits or trait implementations (`impl Display`, `impl From` wait for Chapter 10), no explicit lifetimes and no unsafe code." },
+  { check = "uses", what = ["try", "call:ok"], within = "optional_parse", message = "`optional_parse` uses `.ok()` and `?`." },
+  { check = "uses", what = ["call:optional_parse", "call:checked_add", "try"], within = "capped_total", message = "`capped_total` calls `optional_parse`, adds with `checked_add` and uses `?`." },
+  { check = "forbids", what = ["match", "if_let"], within = "optional_parse", message = "No `match` or `if let` in `optional_parse`: `?` and `.ok()` do the work." },
+  { check = "forbids", what = ["match", "if_let"], within = "capped_total", message = "No `match` or `if let` in `capped_total`: `?` does the work." },
+]
+
+[[tests]]
+key = "t22"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["closure", "call:map", "call:map_err", "call:and_then", "call:or_else", "call:unwrap_or_else", "call:ok_or_else", "call:map_or", "call:map_or_else", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:sum", "call:product", "call:sort_by", "call:sort_by_key", "call:retain", "call:any", "call:all", "type:BTreeMap", "type:BTreeSet", "type:VecDeque", "item:trait", "trait_impl", "item:type", "item:static", "lifetime", "unsafe", "call:leak", "call:forget", "macro:include", "attr:path"], message = "Use only what Chapters 1–9 teach: `Result`, `?`, `ok_or` and `match` are welcome, but no closures or the methods that take one (map, map_err, and_then, unwrap_or_else, ok_or_else, filter, collect, sum, sort_by, retain), no BTreeMap or VecDeque, no traits or trait implementations (`impl Display`, `impl From` wait for Chapter 10), no explicit lifetimes and no unsafe code." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't call `unwrap()`: handle the `Err` or `None` case yourself, or pass it on with `?`." },
+]
+
+[[tests]]
+key = "t20"
+run = { kind = "suite", script = "t20" }
+asserts = [{ check = "returns" }]
+
+[[wrong]]
+name = "cap-exclusive"
+fails = ["t04", "t08", "t10", "t16", "t18", "t20"]
+
+[[wrong]]
+name = "cap-on-total"
+fails = ["t16", "t20"]
+
+[[wrong]]
+name = "plain"
+fails = ["t17", "t20", "t21"]
+
+[[wrong]]
+name = "no-trim"
+fails = ["t01", "t11", "t20"]
+
+[[wrong]]
+name = "missing-is-0"
+fails = ["t03", "t14", "t20"]
+

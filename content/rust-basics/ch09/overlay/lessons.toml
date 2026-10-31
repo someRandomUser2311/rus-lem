@@ -1,0 +1,517 @@
+# Chapter 9 lesson visuals, authored from the "Visual state" columns of lessons.md.
+# Merged onto chapter.gen.json: lessons by `id`, screens by `key`, steps by `n`.
+# A "stack" panel is the spec's Call stack: one node per active function frame (newest
+# first), `value` its locals; the frame that panics is styled red, and an unwound frame is
+# ghosted. A "vals" panel holds the spec's Value boxes: one node per Result/Option, `sub`
+# its type, `value` the variant and payload, green for Ok/Some and red for Err/None; the
+# spec's Match flow is the arm nodes in the same panel, the matching arm lit and the
+# others ghosted. stdout and stderr are two terminal panels; the exit status is a badge.
+# Output is printed at the step whose line produces it.
+
+# ---------------------------------------------------------------- L9.1
+[[lessons]]
+id = "L9.1"
+read_more = ["ch09-00-error-handling.md", "ch09-01-unrecoverable-errors-with-panic.md"]
+
+# Screen 1 · A panic stops the program
+[[lessons.screens]]
+key = "s1"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "stack"
+layout = "grid"
+nodes = [
+  { id = "main", label = "main", sub = "frame", state = { value = "no locals" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "stdout"
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "err"
+title = "stderr"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "stack", op = "node", id = "main", lit = true, badge = "running" },
+  { panel = "out", op = "print", text = "Starting up\n" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "stack", op = "node", id = "main", style = "red", badge = "panicking" },
+  { panel = "err", op = "print", text = "thread 'main' panicked at src/main.rs:3:5:\ncrash and burn\n" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "stack", op = "node", id = "main", lit = false, ghost = true, badge = "unwound" },
+  { panel = "err", op = "print", text = "note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n" },
+  { panel = "err", op = "badge", text = "exit code 101" },
+]
+
+# Screen 3 · Unwinding leaves each function in turn
+[[lessons.screens]]
+key = "s3"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "stack"
+layout = "grid"
+nodes = [
+  { id = "pick", label = "pick", sub = "frame", state = { hidden = true, value = "scores: &[u32] · index: 3" } },
+  { id = "report", label = "report", sub = "frame", state = { hidden = true, value = "scores: &[u32] → main's vector" } },
+  { id = "main", label = "main", sub = "frame", state = { value = "scores: Vec (len 3)" } },
+  { id = "heap", label = "heap", sub = "main's vector", state = { value = "[90, 75, 82]" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "stdout"
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "err"
+title = "stderr"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "stack", op = "node", id = "main", lit = true },
+  { panel = "stack", op = "node", id = "heap", lit = true },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "stack", op = "node", id = "main", lit = false },
+  { panel = "stack", op = "node", id = "heap", lit = false },
+  { panel = "stack", op = "node", id = "report", hidden = false, lit = true },
+  { panel = "out", op = "print", text = "Reporting 3 scores\n" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "stack", op = "node", id = "report", lit = false },
+  { panel = "stack", op = "node", id = "pick", hidden = false, style = "red", badge = "panics" },
+  { panel = "err", op = "print", text = "thread 'main' panicked at src/main.rs:2:5:\nindex out of bounds: the len is 3 but the index is 3\n" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "stack", op = "node", id = "pick", ghost = true, badge = "unwound" },
+  { panel = "stack", op = "node", id = "report", ghost = true, badge = "unwound" },
+  { panel = "stack", op = "node", id = "main", ghost = true, badge = "unwound" },
+  { panel = "stack", op = "node", id = "heap", ghost = true, note = "freed during unwinding" },
+  { panel = "err", op = "print", text = "note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n" },
+  { panel = "err", op = "badge", text = "exit code 101" },
+]
+
+# ---------------------------------------------------------------- L9.2
+[[lessons]]
+id = "L9.2"
+read_more = ["ch09-02-recoverable-errors-with-result.md"]
+
+# Screen 2 · Opening a file can fail
+[[lessons.screens]]
+key = "s2"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "vals"
+layout = "grid"
+nodes = [
+  { id = "r", label = "greeting_file_result", sub = "Result<File, io::Error>", state = { style = "red", value = "Err(io::Error · kind NotFound)" } },
+  { id = "ok", label = "Ok(_)", sub = "arm", state = { hidden = true } },
+  { id = "err", label = "Err(error)", sub = "arm", state = { hidden = true } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "stdout"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "vals", op = "node", id = "r", lit = true },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "vals", op = "node", id = "r", lit = false },
+  { panel = "vals", op = "node", id = "ok", hidden = false, ghost = true },
+  { panel = "vals", op = "node", id = "err", hidden = false, lit = true, note = "error = io::Error" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "out", op = "print", text = "could not open it: NotFound\n" },
+  { panel = "out", op = "badge", text = "exit code 0" },
+]
+
+# Screen 3 · Create the file if it's missing
+[[lessons.screens]]
+key = "s3"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "vals"
+layout = "grid"
+nodes = [
+  { id = "open", label = "File::open(path)", sub = "Result<File, io::Error>", state = { style = "red", value = "Err(io::Error · kind NotFound)" } },
+  { id = "kind", label = "error.kind()", sub = "io::ErrorKind", state = { hidden = true, value = "NotFound" } },
+  { id = "nf", label = "ErrorKind::NotFound", sub = "arm", state = { hidden = true } },
+  { id = "other", label = "_", sub = "arm", state = { hidden = true } },
+  { id = "create", label = "File::create(path)", sub = "Result<File, io::Error>", state = { hidden = true, style = "green", value = "Ok(File)" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "stdout"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "vals", op = "node", id = "open", lit = true },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "vals", op = "node", id = "open", lit = false },
+  { panel = "vals", op = "node", id = "kind", hidden = false, lit = true },
+  { panel = "vals", op = "node", id = "nf", hidden = false, lit = true },
+  { panel = "vals", op = "node", id = "other", hidden = false, ghost = true },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "vals", op = "node", id = "kind", lit = false },
+  { panel = "vals", op = "node", id = "nf", lit = false },
+  { panel = "vals", op = "node", id = "create", hidden = false, lit = true, badge = "Ok(_) arm" },
+  { panel = "out", op = "print", text = "created l9_2_hello.txt\n" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "vals", op = "node", id = "create", lit = false, badge = "" },
+  { panel = "vals", op = "node", id = "other", ghost = false, style = "rust", lit = true, note = "PermissionDenied and every other kind" },
+]
+
+# Screen 5 · Parse errors have kinds too
+[[lessons.screens]]
+key = "s5"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "vals"
+layout = "grid"
+nodes = [
+  { id = "r", label = "\"200\".parse::<u8>()", sub = "Result<u8, ParseIntError>", state = { style = "green", value = "Ok(200)" } },
+  { id = "arm", label = "Ok(n)", sub = "arm" },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "stdout"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "vals", op = "node", id = "r", lit = true },
+  { panel = "vals", op = "node", id = "arm", lit = true },
+  { panel = "out", op = "print", text = "200 fits in a u8\n" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "vals", op = "node", id = "r", style = "red", value = "Err(ParseIntError)", badge = "kind: Empty" },
+  { panel = "vals", op = "node", id = "arm", value = "IntErrorKind::Empty" },
+  { panel = "out", op = "print", text = "nothing to parse\n" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "vals", op = "node", id = "r", badge = "kind: InvalidDigit" },
+  { panel = "vals", op = "node", id = "arm", value = "IntErrorKind::InvalidDigit" },
+  { panel = "out", op = "print", text = "'2x' contains a non-digit\n" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "vals", op = "node", id = "r", badge = "kind: PosOverflow" },
+  { panel = "vals", op = "node", id = "arm", value = "IntErrorKind::PosOverflow" },
+  { panel = "out", op = "print", text = "300 is too big for a u8\n" },
+]
+
+# ---------------------------------------------------------------- L9.3
+[[lessons]]
+id = "L9.3"
+read_more = ["ch09-02-recoverable-errors-with-result.md"]
+
+# Screen 1 · `unwrap`: the value, or a panic
+[[lessons.screens]]
+key = "s1"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "vals"
+layout = "grid"
+nodes = [
+  { id = "r", label = "parse result", sub = "Result<u16, ParseIntError>", state = { style = "green", value = "Ok(8080)", note = "\"8080\".parse()" } },
+  { id = "port", label = "port", sub = "u16", state = { hidden = true, value = "8080" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "stdout"
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "err"
+title = "stderr"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "vals", op = "node", id = "r", lit = true, badge = "unwrap" },
+  { panel = "vals", op = "node", id = "port", hidden = false, lit = true },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "vals", op = "node", id = "r", lit = false, badge = "" },
+  { panel = "out", op = "print", text = "port 8080\n" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "vals", op = "node", id = "port", lit = false },
+  { panel = "vals", op = "node", id = "r", note = "\"three\".parse()", lit = true, style = "red", value = "Err(ParseIntError { kind: InvalidDigit })", badge = "panic" },
+  { panel = "err", op = "print", text = "thread 'main' panicked at src/main.rs:4:40:\ncalled `Result::unwrap()` on an `Err` value: ParseIntError { kind: InvalidDigit }\n" },
+  { panel = "err", op = "badge", text = "exit code 101" },
+]
+
+# Screen 3 · Passing an error up by hand
+[[lessons.screens]]
+key = "s3"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "stack"
+layout = "grid"
+nodes = [
+  { id = "f", label = "add_strings", sub = "frame", state = { value = "a: \"2\" · b: \"3\" · x: 2" } },
+  { id = "main", label = "main", sub = "frame" },
+  { id = "r", label = "result", sub = "Result<u32, ParseIntError>", state = { style = "green", value = "Ok(2)", note = "a.parse::<u32>()" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "stdout"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "stack", op = "node", id = "f", lit = true },
+  { panel = "stack", op = "node", id = "r", lit = true },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "stack", op = "node", id = "f", value = "a: \"2\" · b: \"3\" · x: 2 · y: 3" },
+  { panel = "stack", op = "node", id = "r", note = "return value", value = "Ok(5)", badge = "→ main" },
+  { panel = "out", op = "print", text = "Ok(5)\n" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "stack", op = "node", id = "f", value = "a: \"2\" · b: \"three\" · x: 2" },
+  { panel = "stack", op = "node", id = "r", note = "b.parse::<u32>()", style = "red", value = "Err(ParseIntError { kind: InvalidDigit })", badge = "return Err(e)" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "stack", op = "node", id = "f", lit = false, ghost = true, badge = "returned" },
+  { panel = "stack", op = "node", id = "r", lit = false, badge = "" },
+  { panel = "stack", op = "node", id = "main", lit = true },
+  { panel = "out", op = "print", text = "Err(ParseIntError { kind: InvalidDigit })\n" },
+]
+
+# Screen 4 · The `?` operator does the same
+[[lessons.screens]]
+key = "s4"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "stack"
+layout = "grid"
+nodes = [
+  { id = "f", label = "add_strings", sub = "frame", state = { value = "a: \"2\" · b: \"3\"" } },
+  { id = "main", label = "main", sub = "frame" },
+  { id = "r", label = "result", sub = "Result<u32, ParseIntError>", state = { style = "green", value = "Ok(2)", note = "a.parse::<u32>()" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "stdout"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "stack", op = "node", id = "f", lit = true, value = "a: \"2\" · b: \"3\" · x: 2" },
+  { panel = "stack", op = "node", id = "r", lit = true, badge = "? → 2" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "stack", op = "node", id = "f", value = "a: \"2\" · b: \"3\" · x: 2 · y: 3" },
+  { panel = "stack", op = "node", id = "r", note = "return value", value = "Ok(5)", badge = "→ main" },
+  { panel = "out", op = "print", text = "Ok(5)\n" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "stack", op = "node", id = "f", value = "a: \"2\" · b: \"three\" · x: 2" },
+  { panel = "stack", op = "node", id = "r", note = "b.parse::<u32>()", style = "red", value = "Err(ParseIntError { kind: InvalidDigit })", badge = "? → return Err" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "stack", op = "node", id = "f", lit = false, ghost = true, badge = "returned" },
+  { panel = "stack", op = "node", id = "r", lit = false, badge = "" },
+  { panel = "stack", op = "node", id = "main", lit = true },
+  { panel = "out", op = "print", text = "Err(ParseIntError { kind: InvalidDigit })\n" },
+]
+
+# Screen 7 · `?` works on `Option` too
+[[lessons.screens]]
+key = "s7"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "vals"
+layout = "row"
+nodes = [
+  { id = "next", label = "lines().next()", sub = "Option<&str>", state = { style = "green", value = "Some(\"Hello, world\")" } },
+  { id = "q", label = "?", sub = "Option<&str> → &str", state = { value = "\"Hello, world\"", note = "passes the line on" } },
+  { id = "last", label = "chars().last()", sub = "Option<char>", state = { style = "green", value = "Some('d')" } },
+]
+edges = [
+  { id = "e1", from = "next", to = "q" },
+  { id = "e2", from = "q", to = "last" },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "stdout"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "vals", op = "node", id = "next", lit = true },
+  { panel = "vals", op = "node", id = "last", lit = true },
+  { panel = "out", op = "print", text = "Some('d')\n" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "vals", op = "node", id = "next", style = "red", value = "None" },
+  { panel = "vals", op = "node", id = "q", note = "returns None from the function", value = "", badge = "return None" },
+  { panel = "vals", op = "node", id = "last", lit = false, ghost = true },
+  { panel = "out", op = "print", text = "None\n" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "vals", op = "node", id = "next", style = "green", value = "Some(\"\")" },
+  { panel = "vals", op = "node", id = "q", value = "\"\"", badge = "", note = "passes the line on" },
+  { panel = "vals", op = "node", id = "last", ghost = false, lit = true, style = "red", value = "None" },
+  { panel = "out", op = "print", text = "None\n" },
+]
+
+# ---------------------------------------------------------------- L9.4
+[[lessons]]
+id = "L9.4"
+read_more = ["ch09-03-to-panic-or-not-to-panic.md"]
+
+# Screen 3 · Name your failures with an enum
+[[lessons.screens]]
+key = "s3"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "vals"
+layout = "grid"
+nodes = [
+  { id = "r", label = "result", sub = "Result<u32, AgeError>", state = { style = "green", value = "Ok(42)", note = "parse_age(\"42\")" } },
+  { id = "arm", label = "matching arm", sub = "arm", state = { value = "Ok(age)" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "stdout"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "vals", op = "node", id = "r", lit = true },
+  { panel = "vals", op = "node", id = "arm", lit = true },
+  { panel = "out", op = "print", text = "age 42\n" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "vals", op = "node", id = "r", note = "parse_age(\" \")", style = "red", value = "Err(AgeError::Empty)" },
+  { panel = "vals", op = "node", id = "arm", value = "Err(AgeError::Empty)" },
+  { panel = "out", op = "print", text = "please type an age\n" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "vals", op = "node", id = "r", note = "parse_age(\"forty\")", value = "Err(AgeError::NotANumber(\"forty\"))" },
+  { panel = "vals", op = "node", id = "arm", value = "Err(AgeError::NotANumber(t))", note = "t = \"forty\"" },
+  { panel = "out", op = "print", text = "'forty' is not a number\n" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "vals", op = "node", id = "r", note = "parse_age(\"200\")", value = "Err(AgeError::TooOld(200))" },
+  { panel = "vals", op = "node", id = "arm", value = "Err(AgeError::TooOld(n))", note = "n = 200" },
+  { panel = "out", op = "print", text = "200 is too old\n" },
+]
+[[lessons.screens.steps]]
+n = 5
+ops = [
+  { panel = "vals", op = "node", id = "r", note = "parse_age(\"\") == Err(AgeError::Empty)", style = "green", value = "true", badge = "PartialEq" },
+  { panel = "vals", op = "node", id = "arm", hidden = true },
+  { panel = "out", op = "print", text = "true\n" },
+]
+
+# Screen 4 · A `Guess` that is always 1 to 100
+[[lessons.screens]]
+key = "s4"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "stack"
+layout = "grid"
+nodes = [
+  { id = "new", label = "Guess::new", sub = "frame", state = { value = "value: 42" } },
+  { id = "main", label = "main", sub = "frame" },
+  { id = "guess", label = "Guess", sub = "struct", state = { hidden = true, value = "value: 42", note = "🔒 private field" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "stdout"
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "err"
+title = "stderr"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "stack", op = "node", id = "new", lit = true, badge = "out of range? false" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "stack", op = "node", id = "new", lit = false, badge = "" },
+  { panel = "stack", op = "node", id = "guess", hidden = false, lit = true, badge = "→ main as guess" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "stack", op = "node", id = "new", hidden = true },
+  { panel = "stack", op = "node", id = "guess", lit = false, badge = "guess.value() → 42" },
+  { panel = "stack", op = "node", id = "main", lit = true, value = "guess: Guess" },
+  { panel = "out", op = "print", text = "You guessed 42\n" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "stack", op = "node", id = "main", lit = false },
+  { panel = "stack", op = "node", id = "guess", badge = "" },
+  { panel = "stack", op = "node", id = "new", hidden = false, style = "red", value = "value: 200", badge = "out of range? true" },
+  { panel = "err", op = "print", text = "thread 'main' panicked at src/guessing_game.rs:8:13:\nGuess value must be between 1 and 100, got 200.\n" },
+  { panel = "err", op = "badge", text = "exit code 101" },
+]

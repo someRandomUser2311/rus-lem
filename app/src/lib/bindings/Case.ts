@@ -7,4 +7,9 @@ export type Case = { stdin: string,
 /**
  * Function suites: the call expression, run in the harness instead of the program.
  */
-call?: string | null, fixture: { [key in string]: string }, stdout: string | null, };
+call?: string | null, fixture: { [key in string]: string }, stdout: string | null, 
+/**
+ * Program suites: the reference ended with `main` returning `Err`, so the case
+ * expects this exit code and exactly this stderr.
+ */
+exit_code?: number | null, stderr?: string | null, };

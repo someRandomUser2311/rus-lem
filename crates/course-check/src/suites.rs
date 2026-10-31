@@ -58,6 +58,8 @@ pub fn generate(g: &Gen) -> Vec<Case> {
                 call: None,
                 fixture,
                 stdout: None,
+                exit_code: None,
+                stderr: None,
             }
         })
         .collect()
@@ -154,12 +156,16 @@ fn run_script(p: &Problem, name: &str, grader: &Grader) -> Result<Vec<Case>> {
                 call: Some(unescape(t)),
                 fixture: BTreeMap::new(),
                 stdout: None,
+                exit_code: None,
+                stderr: None,
             }),
             Some(("S ", t)) => Ok(Case {
                 stdin: unescape(t),
                 call: None,
                 fixture: BTreeMap::new(),
                 stdout: None,
+                exit_code: None,
+                stderr: None,
             }),
             _ => bail!(
                 "{}: generators/{file} printed `{l}`; use call() or stdin()",
@@ -196,7 +202,11 @@ pub fn fill(ch: &mut Chapter, grader: &Grader) -> Result<usize> {
                 .reference_outputs(p, solution, &made)
                 .with_context(|| format!("{} {}", p.id, p.tests[i].key))?;
             for (case, out) in made.iter_mut().zip(outs) {
-                case.stdout = Some(out);
+                case.stdout = Some(out.stdout);
+                if let Some((code, stderr)) = out.failure {
+                    case.exit_code = Some(code);
+                    case.stderr = Some(stderr);
+                }
             }
             p.tests[i].run = Run::Suite {
                 generator: None,
@@ -228,7 +238,7 @@ pub fn fill(ch: &mut Chapter, grader: &Grader) -> Result<usize> {
                             .reference_outputs(p, &p.solution, &c)
                             .with_context(|| format!("{} {}", p.id, p.tests[i].key))?;
                         for (case, out) in c.iter_mut().zip(outs) {
-                            case.stdout = Some(out);
+                            case.stdout = Some(out.stdout);
                         }
                     }
                     done.push((g.clone(), c.clone()));
