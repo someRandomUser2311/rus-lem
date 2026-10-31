@@ -166,6 +166,19 @@ fn screen(
     let coming_from = coming_from(lines);
     let visual_md = md::block_after(lines, "**Visual (static):**").map(|b| md::text(&b));
 
+    // An error screen's compiler or runtime output; a stepper's compiler output only (its
+    // runtime output is already in its terminal panels).
+    let output = |lines: &[&str]| {
+        let i = lines.iter().position(|l| {
+            l.starts_with("**Compiler output")
+                || (kind == ScreenKind::Error && l.starts_with("**Runtime output"))
+        })?;
+        md::fences(&lines[i..])
+            .into_iter()
+            .next()
+            .map(|f| f.text.trim_matches('\n').to_string())
+    };
+
     let mut steps = Vec::new();
     if kind == ScreenKind::Stepper {
         for row in md::table_with_header(lines, "Step") {
@@ -202,7 +215,8 @@ fn screen(
                 coming_from,
                 panels: Vec::new(),
                 steps,
-                diagnostic: None,
+                // A stepper may walk through a program the compiler rejects.
+                diagnostic: output(lines),
                 annotations: Vec::new(),
                 compare: None,
                 question: None,
@@ -213,17 +227,10 @@ fn screen(
 
     let mut diagnostic = None;
     let mut annotations = Vec::new();
-    if kind == ScreenKind::Error {
-        let out = lines
-            .iter()
-            .position(|l| l.starts_with("**Compiler output") || l.starts_with("**Runtime output"));
-        if let Some(i) = out {
-            diagnostic = md::fences(&lines[i..])
-                .into_iter()
-                .next()
-                .map(|f| f.text.trim_matches('\n').to_string());
-        }
-        if diagnostic.is_none() {
+    // A stepper may walk through a program the compiler rejects, ending on its diagnostic.
+    if kind == ScreenKind::Error || kind == ScreenKind::Stepper {
+        diagnostic = output(lines);
+        if diagnostic.is_none() && kind == ScreenKind::Error {
             report.error(format!(
                 "{lesson} {}: error screen without compiler or runtime output",
                 h[0]

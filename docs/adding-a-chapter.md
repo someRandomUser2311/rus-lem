@@ -81,7 +81,7 @@ Unless a test states otherwise (`exit_code`, `stderr_contains`, `stderr_empty`),
 | Group | Checks |
 |---|---|
 | Output | `stdout_eq`, `stdout_pieces`, `stdout_matches` (regex), `same_as_reference` (suites), `checker`, `line_eq`, `line_count`, `line_chars`, `ends_with`, `contains`, `not_contains`, `not_starts_with`, `no_trailing_whitespace`, `stderr_empty`, `stderr_contains`, `exit_code` |
-| Source (by fact) | `uses`, `forbids` and `count` (exactly n) over the facts in `crates/rb-srccheck/src/facts.rs`: modules (`mod:NAME`, `mod_file:NAME`), visibility (`pub:NAME`, `pub_field:NAME`), imports (`use:crate::a::b`, `pub_use:…`, `use_glob`, `use_group`), paths (`call_path:super::f`, `path:super::X`), literals (`lit:25`) and more; `file = "src/fees.rs"` limits a check to one file and `a\|b` accepts either fact. `rust_files` requires an exact set of Rust files. |
+| Source (by fact) | `uses`, `forbids` and `count` (exactly n) over the facts in `crates/rb-srccheck/src/facts.rs`: modules (`mod:NAME`, `mod_file:NAME`), visibility (`pub:NAME`, `pub_field:NAME`), imports (`use:crate::a::b`, `pub_use:…`, `use_glob`, `use_group`), paths (`call_path:super::f`, `path:super::X`), literals (`lit:25`), traits and bounds (`trait:NAME`, `default_fn:NAME`, `bound:Clone`, `where`, `ret:implGreet+use<>`) and more; `file = "src/fees.rs"` limits a check to one file and `a\|b` accepts either fact. `rust_files` requires an exact set of Rust files. |
 | Source | `macro_count`, `macro_sequence`, `fmt_literal_forbid`, `fmt_inline_placeholders`, `macro_mention_forbid`, `lets_unchanged`, `let_init`, `call_count`, `call_chain`, `call_in_loop`, `match_on`, `banned_keyword`, `required_keyword`, `banned_method`, `banned_arithmetic` |
 | Project | `manifest_eq`, `manifest_table_empty`, `manifest_forbid_keys`, `files_allowlist`, `build_ok`, `file_exists` |
 
@@ -144,5 +144,6 @@ A new kind of run, assertion or visual is a small, one-time engine change in `rb
 | 3 | `unit` runs (hidden `#[test]` functions) |
 | 4 | `compile_fail` runs (expected error codes) |
 | 9 | Done: panic rows, expected-failure program rows and suite cases, warning screens in lessons |
+| 10 | Done: source facts for traits and generics (`trait:NAME`, `required_fn:`/`default_fn:`, `bound:TRAIT`, `where`, `dyn`, `lifetime:NAME`, `impl_unbounded`, `borrow`, `deref`, `field_access:NAME`); steppers over a rejected program (their **Compiler output** is checked and shown on the last step); lib-plus-main lesson packages named by `main.rs`'s `use` |
 | 11 | `mutants` (the learner's tests must catch buggy versions) |
 | 17 | vendored `trpl` |

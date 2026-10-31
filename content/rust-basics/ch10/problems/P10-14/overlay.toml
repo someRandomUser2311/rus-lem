@@ -1,0 +1,21 @@
+[[tests]]
+key = "t15"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["closure", "call:map", "call:map_err", "call:and_then", "call:or_else", "call:unwrap_or_else", "call:ok_or_else", "call:map_or", "call:map_or_else", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:sum", "call:product", "call:sort_by", "call:sort_by_key", "call:max_by_key", "call:min_by_key", "call:retain", "call:any", "call:all", "call:position", "type:BTreeMap", "type:BTreeSet", "type:VecDeque", "dyn", "item:type", "item:static", "unsafe", "call:leak", "call:forget", "macro:include", "attr:path"], message = "Use only what Chapters 1–10 teach: generics, traits, bounds, `impl Trait` and lifetimes are new and welcome, but no closures or the methods that take one (map, filter, collect, sum, sort_by, retain, any, all, position), no `dyn` trait objects, no BTreeMap or VecDeque, no `type` aliases or statics, and no unsafe code." },
+  { check = "count", what = "bound", eq = 0, inside = "struct:Pair", message = "`struct Pair<T, U>` has no bounds: put `T: PartialOrd` on the `impl` that needs it." },
+  { check = "forbids", what = ["call:clone", "call:unwrap"], message = "Don't use `.clone()` or `unwrap()` anywhere in this problem." },
+]
+
+[[wrong]]
+name = "ties-go-to-y"
+fails = ["t08", "t09"]
+
+[[wrong]]
+name = "bound-on-struct"
+fails = ["t15"]
+
+[[wrong]]
+name = "copy-bound"
+fails = ["t01", "t02", "t03", "t04", "t05", "t06", "t07", "t08", "t09", "t10", "t11", "t12", "t13", "t14", "t15"]
+

@@ -119,7 +119,7 @@ pub fn run(ch: &Chapter, vendor: Option<&Path>) -> Result<bool> {
                 lesson_count += 1;
                 let id = format!("{}-{}", l.id, s.key);
                 let v = match (&s.kind, &s.diagnostic) {
-                    (ScreenKind::Error, Some(diag)) => {
+                    (ScreenKind::Error | ScreenKind::Stepper, Some(diag)) => {
                         let first = diag.lines().next().unwrap_or("").to_string();
                         Verify {
                             compiles: false,
@@ -156,14 +156,18 @@ pub fn run(ch: &Chapter, vendor: Option<&Path>) -> Result<bool> {
             let id = format!("{}-{}", l.id, s.key);
             let result = match (&s.kind, &s.diagnostic) {
                 // A runtime error screen: it compiles, then panics with the shown message.
-                (ScreenKind::Error, Some(diag)) if diag.contains("panicked at") => {
+                (ScreenKind::Error | ScreenKind::Stepper, Some(diag))
+                    if diag.contains("panicked at") =>
+                {
                     verify_panic(&tc, &qdir, &id, &code.text, diag)
                 }
                 // A warning screen: it compiles, with the shown warning.
-                (ScreenKind::Error, Some(diag)) if diag.starts_with("warning:") => {
+                (ScreenKind::Error | ScreenKind::Stepper, Some(diag))
+                    if diag.starts_with("warning:") =>
+                {
                     verify_warning(&tc, &qdir, &id, &code.text, diag)
                 }
-                (ScreenKind::Error, Some(diag)) => {
+                (ScreenKind::Error | ScreenKind::Stepper, Some(diag)) => {
                     let first = diag.lines().next().unwrap_or("").to_string();
                     let code_id = first
                         .split(['[', ']'])
@@ -334,7 +338,8 @@ fn verify_program(
 }
 
 /// A multi-file program: a Cargo package from these files (a `Cargo.toml` among them, or
-/// the package `module-lab`). Its output is the package's own binary's.
+/// the package `module-lab`, or for a library and a binary the crate `src/main.rs` uses,
+/// as `use aggregator::Summary;` names `aggregator`). Its output is the package's own binary's.
 fn verify_package(
     tc: &Toolchain,
     vendor: Option<&Path>,
@@ -346,7 +351,10 @@ fn verify_package(
     let dir = dir.join(id.replace('.', "_"));
     let _ = std::fs::remove_dir_all(dir.join("src"));
     std::fs::create_dir_all(dir.join("src")).map_err(|e| e.to_string())?;
-    let mut manifest = "[package]\nname = \"module-lab\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\n".to_string();
+    let package = lib_crate_name(files).unwrap_or_else(|| "module-lab".into());
+    let mut manifest = format!(
+        "[package]\nname = \"{package}\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\n"
+    );
     for f in files {
         let Some(path) = f.file.as_deref() else {
             return Err("a file of this package has no path".into());
@@ -373,6 +381,17 @@ fn verify_package(
         .map_err(|e| e.to_string())?;
     let exe = target.join("debug").join(v.bin.as_deref().unwrap_or(&name));
     check_build(tc, &c, &exe, &dir, v)
+}
+
+/// The library crate a package's `src/main.rs` imports from, when it has a `src/lib.rs`.
+fn lib_crate_name(files: &[CodeBlock]) -> Option<String> {
+    let file = |p: &str| files.iter().find(|f| f.file.as_deref() == Some(p));
+    file("src/lib.rs")?;
+    file("src/main.rs")?.text.lines().find_map(|l| {
+        let root = l.trim().strip_prefix("use ")?.split("::").next()?;
+        let taken = ["std", "core", "alloc", "crate", "self", "super"].contains(&root);
+        (!taken && root.chars().all(|c| c.is_alphanumeric() || c == '_')).then(|| root.to_string())
+    })
 }
 
 /// Checks a build against the expected facts, running the program for its output.

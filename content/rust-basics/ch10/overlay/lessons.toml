@@ -1,0 +1,685 @@
+# Chapter 10 lesson visuals, authored from the "Visual state" columns of lessons.md.
+# Merged onto chapter.gen.json: lessons by `id`, screens by `key`, steps by `n`.
+# A "types" panel is the spec's Type slots, Trait card or Signature: one node per generic
+# box, trait method or signature, `value` the filled-in slots (orange for the first concrete
+# type, purple for the second), green for a default body. A "stack" panel is the spec's Call
+# stack: one node per frame, newest first, `value` its locals; a finished frame is hidden or
+# ghosted. A "bars" panel is the spec's Lifetime bars: one node per variable, `value` the
+# lines it is valid for; a borrow that outlives its owner turns red, one inside it green.
+# The terminal is stdout; output is printed at the step whose line produces it.
+
+# ---------------------------------------------------------------- L10.1
+[[lessons]]
+id = "L10.1"
+read_more = ["ch10-00-generics.md", "ch10-01-syntax.md"]
+
+# Screen 5 · One function, many types
+[[lessons.screens]]
+key = "s5"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "types"
+layout = "row"
+nodes = [
+  { id = "fn", label = "largest<T: PartialOrd>", sub = "one generic function", state = { value = "T = ?" } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "stack"
+layout = "grid"
+nodes = [
+  { id = "largest", label = "largest", sub = "frame", state = { hidden = true } },
+  { id = "main", label = "main", sub = "frame", state = { value = "number_list: [34, 50, 25, 100, 65]" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "stdout"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "types", op = "node", id = "fn", value = "T = i32", style = "rust", lit = true },
+  { panel = "stack", op = "node", id = "largest", hidden = false, lit = true, value = "list: &[i32] → 34 50 25 100 65" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "types", op = "node", id = "fn", lit = false },
+  { panel = "stack", op = "node", id = "largest", value = "list: &[i32] · largest → 34" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "stack", op = "node", id = "largest", value = "list: &[i32] · largest → 50 → 100", note = "25 and 65 are passed over" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "stack", op = "node", id = "largest", hidden = true, lit = false },
+  { panel = "stack", op = "node", id = "main", lit = true, value = "number_list · result → 100 (inside number_list)" },
+  { panel = "out", op = "print", text = "The largest number is 100\n" },
+]
+[[lessons.screens.steps]]
+n = 5
+ops = [
+  { panel = "types", op = "node", id = "fn", value = "T = char", style = "blue", lit = true },
+  { panel = "stack", op = "node", id = "main", lit = false, value = "char_list: ['y', 'm', 'a', 'q']" },
+  { panel = "stack", op = "node", id = "largest", hidden = false, lit = true, note = "", value = "list: &[char] → 'y' 'm' 'a' 'q'" },
+]
+[[lessons.screens.steps]]
+n = 6
+ops = [
+  { panel = "types", op = "node", id = "fn", lit = false, badge = "2 types, 1 definition" },
+  { panel = "stack", op = "node", id = "largest", hidden = true, lit = false },
+  { panel = "stack", op = "node", id = "main", lit = true, value = "char_list · result → 'y'" },
+  { panel = "out", op = "print", text = "The largest char is y\n" },
+]
+
+# ---------------------------------------------------------------- L10.2
+[[lessons]]
+id = "L10.2"
+read_more = ["ch10-01-syntax.md"]
+
+# Screen 1 · One type parameter, two fields
+[[lessons.screens]]
+key = "s1"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "types"
+layout = "row"
+nodes = [
+  { id = "def", label = "Point<T>", sub = "x: T · y: T", state = { value = "T = ?" } },
+  { id = "integer", label = "integer", sub = "Point<i32>", state = { hidden = true, value = "T = i32 · x = 5 · y = 10" } },
+  { id = "float", label = "float", sub = "Point<f64>", state = { hidden = true, value = "T = f64 · x = 1.0 · y = 4.0" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "stdout"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "types", op = "node", id = "def", lit = true },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "types", op = "node", id = "def", lit = false },
+  { panel = "types", op = "node", id = "integer", hidden = false, lit = true, style = "rust" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "types", op = "node", id = "integer", lit = false },
+  { panel = "types", op = "node", id = "float", hidden = false, lit = true, style = "blue" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "types", op = "node", id = "float", lit = false },
+  { panel = "out", op = "print", text = "integer: (5, 10)\nfloat: (1, 4)\n" },
+]
+
+# Screen 6 · A method with its own type parameters
+[[lessons.screens]]
+key = "s6"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "types"
+layout = "row"
+nodes = [
+  { id = "p1", label = "p1", sub = "Point<i32, f64>", state = { value = "X1 = i32 · Y1 = f64 · (5, 10.4)" } },
+  { id = "p2", label = "p2", sub = "Point<&str, char>", state = { hidden = true, value = "(\"Hello\", 'c')" } },
+  { id = "mixup", label = "mixup<X2, Y2>", sub = "-> Point<X1, Y2>", state = { hidden = true, value = "X1 = i32, Y1 = f64 (from the impl, via self) · X2 = &str, Y2 = char (declared on mixup, via other)" } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "stack"
+layout = "grid"
+nodes = [
+  { id = "mixup", label = "mixup", sub = "frame", state = { hidden = true, value = "self: (5, 10.4) · other: (\"Hello\", 'c')" } },
+  { id = "main", label = "main", sub = "frame", state = { value = "p1" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "stdout"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "types", op = "node", id = "p1", lit = true, style = "rust" },
+  { panel = "stack", op = "node", id = "main", lit = true },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "types", op = "node", id = "p1", lit = false },
+  { panel = "types", op = "node", id = "p2", hidden = false, lit = true, style = "blue" },
+  { panel = "stack", op = "node", id = "main", value = "p1 · p2" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "types", op = "node", id = "p2", lit = false },
+  { panel = "types", op = "node", id = "mixup", hidden = false, lit = true },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "types", op = "node", id = "mixup", lit = false },
+  { panel = "stack", op = "node", id = "main", lit = false },
+  { panel = "stack", op = "node", id = "mixup", hidden = false, lit = true, note = "5 and 'c' go into a new Point<i32, char>" },
+]
+[[lessons.screens.steps]]
+n = 5
+ops = [
+  { panel = "stack", op = "node", id = "mixup", hidden = true },
+  { panel = "stack", op = "node", id = "main", lit = true, value = "p3: (5, 'c')", note = "p1 and p2 moved into mixup" },
+  { panel = "types", op = "node", id = "p1", ghost = true, badge = "moved" },
+  { panel = "types", op = "node", id = "p2", ghost = true, badge = "moved" },
+  { panel = "out", op = "print", text = "p3.x = 5, p3.y = c\n" },
+]
+
+# Screen 7 · Monomorphization: one version per type
+[[lessons.screens]]
+key = "s7"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "types"
+layout = "row"
+nodes = [
+  { id = "generic", label = "Option<T>", sub = "generic definition", state = { value = "T = ?" } },
+  { id = "oi32", label = "Option_i32", sub = "written by the compiler", state = { hidden = true, value = "Some(i32) · None" } },
+  { id = "of64", label = "Option_f64", sub = "written by the compiler", state = { hidden = true, value = "Some(f64) · None" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "stdout"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "types", op = "node", id = "generic", lit = true, style = "rust", value = "T = i32 for integer" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "types", op = "node", id = "generic", style = "blue", value = "T = i32 for integer · T = f64 for float" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "types", op = "node", id = "generic", lit = false, ghost = true },
+  { panel = "types", op = "node", id = "oi32", hidden = false, lit = true, style = "rust" },
+  { panel = "types", op = "node", id = "of64", hidden = false, lit = true, style = "blue" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "types", op = "node", id = "oi32", lit = false },
+  { panel = "types", op = "node", id = "of64", lit = false },
+  { panel = "out", op = "print", text = "Some(5) Some(5.0)\n" },
+]
+
+# ---------------------------------------------------------------- L10.3
+[[lessons]]
+id = "L10.3"
+read_more = ["ch10-02-traits.md"]
+
+# Screen 1 · A trait names shared behavior
+[[lessons.screens]]
+key = "s1"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "types"
+layout = "row"
+nodes = [
+  { id = "trait", label = "trait Summary", sub = "fn summarize(&self) -> String;", state = { value = "required: no body" } },
+  { id = "news", label = "NewsArticle", sub = "impl Summary", state = { hidden = true, value = "summarize: own body" } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "stack"
+layout = "grid"
+nodes = [
+  { id = "sum", label = "NewsArticle::summarize", sub = "frame", state = { hidden = true, value = "self: &NewsArticle → article" } },
+  { id = "main", label = "main", sub = "frame", state = { value = "article" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "stdout"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "types", op = "node", id = "trait", lit = true },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "types", op = "node", id = "trait", lit = false },
+  { panel = "types", op = "node", id = "news", hidden = false, lit = true, style = "rust" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "types", op = "node", id = "news", lit = false },
+  { panel = "stack", op = "node", id = "sum", hidden = false, lit = true },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "stack", op = "node", id = "sum", hidden = true },
+  { panel = "stack", op = "node", id = "main", lit = true },
+  { panel = "out", op = "print", text = "New article available! Penguins win the Stanley Cup Championship!, by Iceburgh (Pittsburgh, PA, USA)\n" },
+]
+
+# ---------------------------------------------------------------- L10.4
+[[lessons]]
+id = "L10.4"
+read_more = ["ch10-02-traits.md"]
+
+# Screen 1 · A default body
+[[lessons.screens]]
+key = "s1"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "types"
+layout = "row"
+nodes = [
+  { id = "trait", label = "trait Summary", sub = "fn summarize(&self) -> String", state = { value = "default body: (Read more...)", style = "green" } },
+  { id = "news", label = "NewsArticle", sub = "impl Summary {}", state = { hidden = true, value = "summarize: uses default" } },
+  { id = "post", label = "SocialPost", sub = "impl Summary", state = { hidden = true, value = "summarize: own body" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "stdout"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "types", op = "node", id = "trait", lit = true },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "types", op = "node", id = "trait", lit = false },
+  { panel = "types", op = "node", id = "news", hidden = false, lit = true, style = "green" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "types", op = "node", id = "news", lit = false },
+  { panel = "types", op = "node", id = "post", hidden = false, lit = true, style = "rust" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "types", op = "node", id = "post", lit = false },
+  { panel = "types", op = "node", id = "news", lit = true },
+  { panel = "out", op = "print", text = "New article available! (Read more...)\n" },
+]
+[[lessons.screens.steps]]
+n = 5
+ops = [
+  { panel = "types", op = "node", id = "news", lit = false },
+  { panel = "types", op = "node", id = "post", lit = true },
+  { panel = "out", op = "print", text = "1 new post: horse_ebooks: of course, as you probably already know, people\n" },
+]
+
+# Screen 2 · A default can call a required method
+[[lessons.screens]]
+key = "s2"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "types"
+layout = "row"
+nodes = [
+  { id = "author", label = "summarize_author", sub = "trait Summary", state = { value = "required: no body" } },
+  { id = "summarize", label = "summarize", sub = "trait Summary", state = { value = "default body, calls summarize_author", style = "green" } },
+  { id = "post", label = "SocialPost", sub = "impl Summary", state = { hidden = true, value = "summarize_author: own body · summarize: uses default" } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "stack"
+layout = "grid"
+nodes = [
+  { id = "author", label = "SocialPost::summarize_author", sub = "frame", state = { hidden = true, value = "self: &SocialPost" } },
+  { id = "sum", label = "Summary::summarize", sub = "frame (default body)", state = { hidden = true, value = "self: &SocialPost → post" } },
+  { id = "main", label = "main", sub = "frame", state = { value = "post" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "stdout"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "types", op = "node", id = "author", lit = true },
+  { panel = "types", op = "node", id = "summarize", lit = true },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "types", op = "node", id = "author", lit = false },
+  { panel = "types", op = "node", id = "summarize", lit = false },
+  { panel = "types", op = "node", id = "post", hidden = false, lit = true, style = "rust" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "types", op = "node", id = "post", lit = false },
+  { panel = "stack", op = "node", id = "sum", hidden = false, lit = true },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "stack", op = "node", id = "sum", lit = false },
+  { panel = "stack", op = "node", id = "author", hidden = false, lit = true, badge = "returns \"@horse_ebooks\"" },
+]
+[[lessons.screens.steps]]
+n = 5
+ops = [
+  { panel = "stack", op = "node", id = "author", hidden = true },
+  { panel = "stack", op = "node", id = "sum", hidden = true },
+  { panel = "stack", op = "node", id = "main", lit = true },
+  { panel = "out", op = "print", text = "1 new post: (Read more from @horse_ebooks...)\n" },
+]
+
+# ---------------------------------------------------------------- L10.5
+[[lessons]]
+id = "L10.5"
+read_more = ["ch10-02-traits.md"]
+
+# Screen 1 · Return "some type that implements Summary"
+[[lessons.screens]]
+key = "s1"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "types"
+layout = "row"
+nodes = [
+  { id = "ret", label = "impl Summary", sub = "some type that implements Summary", state = { value = "hidden: SocialPost", ghost = true } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "stack"
+layout = "grid"
+nodes = [
+  { id = "fn", label = "returns_summarizable", sub = "frame", state = { hidden = true, value = "builds SocialPost { username, content }" } },
+  { id = "main", label = "main", sub = "frame", state = { value = "no locals yet" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "stdout"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "types", op = "node", id = "ret", lit = true },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "types", op = "node", id = "ret", lit = false },
+  { panel = "stack", op = "node", id = "fn", hidden = false, lit = true },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "stack", op = "node", id = "fn", hidden = true },
+  { panel = "stack", op = "node", id = "main", lit = true, value = "item: impl Summary (owns the post)" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "stack", op = "node", id = "main", lit = false },
+  { panel = "out", op = "print", text = "1 new post: horse_ebooks: of course, as you probably already know, people\n" },
+]
+
+# ---------------------------------------------------------------- L10.6
+[[lessons]]
+id = "L10.6"
+read_more = ["ch10-03-lifetime-syntax.md"]
+
+# Screen 2 · The borrow checker compares lifetimes
+[[lessons.screens]]
+key = "s2"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "bars"
+layout = "row"
+nodes = [
+  { id = "r", label = "r", sub = "'a", state = { value = "lines 2–10", style = "blue" } },
+  { id = "x", label = "x", sub = "'b", state = { hidden = true, value = "lines 5–7", style = "rust" } },
+]
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "bars", op = "node", id = "r", lit = true },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "bars", op = "node", id = "r", lit = false },
+  { panel = "bars", op = "node", id = "x", hidden = false, lit = true },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "bars", op = "node", id = "x", lit = false },
+  { panel = "bars", op = "node", id = "r", lit = true, note = "r = &x: r borrows x" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "bars", op = "node", id = "x", ghost = true, badge = "x dropped" },
+  { panel = "bars", op = "node", id = "r", style = "red", note = "r still points at x" },
+]
+[[lessons.screens.steps]]
+n = 5
+ops = [
+  { panel = "bars", op = "node", id = "r", badge = "use of r at line 9, outside 'b" },
+]
+
+# ---------------------------------------------------------------- L10.7
+[[lessons]]
+id = "L10.7"
+read_more = ["ch10-03-lifetime-syntax.md"]
+
+# Screen 2 · Annotate the relationship
+[[lessons.screens]]
+key = "s2"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "types"
+layout = "row"
+nodes = [
+  { id = "sig", label = "fn longest<'a>", sub = "(x: &'a str, y: &'a str) -> &'a str", state = { value = "declares the lifetime 'a" } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "bars"
+layout = "row"
+nodes = [
+  { id = "s1", label = "string1", sub = "String", state = { hidden = true, value = "lines 2–7", style = "rust" } },
+  { id = "s2", label = "string2", sub = "string literal", state = { hidden = true, value = "the whole program", style = "blue" } },
+  { id = "a", label = "'a", sub = "where both are valid", state = { hidden = true, value = "lines 5–7" } },
+  { id = "result", label = "result", sub = "&'a str", state = { hidden = true, value = "lines 5–6" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "stdout"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "types", op = "node", id = "sig", lit = true, style = "rust" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "types", op = "node", id = "sig", value = "x and y → return value", note = "valid while x and y are both valid" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "types", op = "node", id = "sig", lit = false },
+  { panel = "bars", op = "node", id = "s1", hidden = false },
+  { panel = "bars", op = "node", id = "s2", hidden = false },
+  { panel = "bars", op = "node", id = "a", hidden = false, lit = true },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "bars", op = "node", id = "a", lit = false },
+  { panel = "bars", op = "node", id = "result", hidden = false, lit = true, style = "green", badge = "inside 'a" },
+  { panel = "out", op = "print", text = "The longest string is abcd\n" },
+]
+
+# Screen 3 · The shorter lifetime wins
+[[lessons.screens]]
+key = "s3"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "bars"
+layout = "row"
+nodes = [
+  { id = "s1", label = "string1", sub = "String", state = { value = "lines 2–9", style = "rust" } },
+  { id = "s2", label = "string2", sub = "String", state = { hidden = true, value = "lines 5–8", style = "blue" } },
+  { id = "a", label = "'a", sub = "the shorter of the two", state = { hidden = true, value = "lines 6–8" } },
+  { id = "result", label = "result", sub = "&'a str", state = { hidden = true, value = "from line 6" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "stdout"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "bars", op = "node", id = "s1", lit = true },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "bars", op = "node", id = "s1", lit = false },
+  { panel = "bars", op = "node", id = "s2", hidden = false, lit = true, note = "inside string1's bar" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "bars", op = "node", id = "s2", lit = false },
+  { panel = "bars", op = "node", id = "a", hidden = false, lit = true, note = "as long as string2" },
+  { panel = "bars", op = "node", id = "result", hidden = false },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "bars", op = "node", id = "a", lit = false },
+  { panel = "bars", op = "node", id = "result", lit = true, style = "green", badge = "used at line 7, inside 'a" },
+  { panel = "out", op = "print", text = "The longest string is long string is long\n" },
+]
+
+# ---------------------------------------------------------------- L10.8
+[[lessons]]
+id = "L10.8"
+read_more = ["ch10-03-lifetime-syntax.md"]
+
+# Screen 1 · A struct that holds a reference
+[[lessons.screens]]
+key = "s1"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "types"
+layout = "row"
+nodes = [
+  { id = "def", label = "ImportantExcerpt<'a>", sub = "part: &'a str", state = { value = "'a = ?" } },
+]
+[[lessons.screens.panels]]
+kind = "scene"
+id = "bars"
+layout = "row"
+nodes = [
+  { id = "novel", label = "novel", sub = "String", state = { hidden = true, value = "lines 6–12 · \"Call me Ishmael. Some years ago...\"", style = "rust" } },
+  { id = "first", label = "first_sentence", sub = "&str into novel", state = { hidden = true, value = "from line 7 · \"Call me Ishmael\"" } },
+  { id = "i", label = "i", sub = "ImportantExcerpt", state = { hidden = true, value = "lines 8–11 · i.part → novel", style = "blue" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "stdout"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "types", op = "node", id = "def", lit = true },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "types", op = "node", id = "def", lit = false },
+  { panel = "bars", op = "node", id = "novel", hidden = false, lit = true },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "bars", op = "node", id = "novel", lit = false },
+  { panel = "bars", op = "node", id = "first", hidden = false, lit = true },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "bars", op = "node", id = "first", lit = false },
+  { panel = "bars", op = "node", id = "i", hidden = false, lit = true, badge = "inside novel's bar" },
+  { panel = "types", op = "node", id = "def", value = "'a = the borrow of novel", style = "green" },
+]
+[[lessons.screens.steps]]
+n = 5
+ops = [
+  { panel = "bars", op = "node", id = "i", lit = false },
+  { panel = "out", op = "print", text = "Excerpt: Call me Ishmael\n" },
+]
+
+# Screen 4 · Methods and the third rule
+[[lessons.screens]]
+key = "s4"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "types"
+layout = "grid"
+nodes = [
+  { id = "impl", label = "impl<'a> ImportantExcerpt<'a>", sub = "first 'a declared, second used", state = { value = "" } },
+  { id = "level", label = "fn level(&self) -> i32", sub = "rule 1", state = { hidden = true, value = "fn level<'b>(&'b self) -> i32 · no reference returned" } },
+  { id = "announce", label = "fn announce_and_return_part(&self, announcement: &str) -> &str", sub = "rules 1 and 3", state = { hidden = true, value = "rule 1: <'b, 'c>(&'b self, announcement: &'c str)" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "stdout"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "types", op = "node", id = "impl", lit = true },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "types", op = "node", id = "impl", lit = false },
+  { panel = "types", op = "node", id = "level", hidden = false, lit = true },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "types", op = "node", id = "level", lit = false },
+  { panel = "types", op = "node", id = "announce", hidden = false, lit = true, note = "rule 3: the output gets self's lifetime, -> &'b str", style = "green" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "types", op = "node", id = "announce", lit = false },
+  { panel = "out", op = "print", text = "level 3\n" },
+]
+[[lessons.screens.steps]]
+n = 5
+ops = [
+  { panel = "out", op = "print", text = "Attention please: here is the excerpt\nExcerpt: Call me Ishmael\n" },
+]

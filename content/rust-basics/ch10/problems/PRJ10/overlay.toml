@@ -1,0 +1,107 @@
+checkpoints = true
+
+[[tests]]
+key = "t33"
+part = 4
+
+[[tests]]
+key = "t34"
+part = 4
+
+[[tests]]
+key = "t35"
+part = 4
+
+[[tests]]
+key = "t36"
+part = 4
+
+[[tests]]
+key = "t37"
+part = 4
+
+[[tests]]
+key = "t38"
+part = 4
+
+[[tests]]
+key = "t32"
+part = 4
+run = { kind = "suite", script = "t32" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t37"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["closure", "call:map", "call:map_err", "call:and_then", "call:or_else", "call:unwrap_or_else", "call:ok_or_else", "call:map_or", "call:map_or_else", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:sum", "call:product", "call:sort_by", "call:sort_by_key", "call:max_by_key", "call:min_by_key", "call:retain", "call:any", "call:all", "call:position", "type:BTreeMap", "type:BTreeSet", "type:VecDeque", "dyn", "item:type", "item:static", "unsafe", "call:leak", "call:forget", "macro:include", "attr:path"], message = "Use only what Chapters 1–10 teach: generics, traits, bounds, `impl Trait` and lifetimes are new and welcome, but no closures or the methods that take one (map, filter, collect, sum, sort_by, retain, any, all, position), no `dyn` trait objects, no BTreeMap or VecDeque, no `type` aliases or statics, and no unsafe code." },
+  { check = "uses", what = ["field:entries:Vec<T>"], inside = "struct:Leaderboard", message = "`Leaderboard<T>` stores its entries in the field `entries: Vec<T>`." },
+  { check = "count", what = "pub_field:entries", eq = 0, inside = "struct:Leaderboard", message = "Keep `entries` private: callers go through the methods." },
+  { check = "count", what = "bound:Clone|bound:Copy", eq = 0, message = "No bound may ask for `Clone` or `Copy`: the board only lends its entries out." },
+  { check = "uses", what = ["fn:new", "fn:add", "fn:len"], inside = "impl_unbounded", message = "`new`, `add` and `len` sit in an `impl<T> Leaderboard<T>` block with no bounds: any type can be stored and counted." },
+  { check = "count", what = "bound", eq = 0, inside = "struct:Leaderboard", message = "`struct Leaderboard<T>` has no bounds: only the ranking methods need `T: Ranked`." },
+]
+
+[[tests]]
+key = "t38"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["closure", "call:map", "call:map_err", "call:and_then", "call:or_else", "call:unwrap_or_else", "call:ok_or_else", "call:map_or", "call:map_or_else", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:sum", "call:product", "call:sort_by", "call:sort_by_key", "call:max_by_key", "call:min_by_key", "call:retain", "call:any", "call:all", "call:position", "type:BTreeMap", "type:BTreeSet", "type:VecDeque", "dyn", "item:type", "item:static", "unsafe", "call:leak", "call:forget", "macro:include", "attr:path"], message = "Use only what Chapters 1–10 teach: generics, traits, bounds, `impl Trait` and lifetimes are new and welcome, but no closures or the methods that take one (map, filter, collect, sum, sort_by, retain, any, all, position), no `dyn` trait objects, no BTreeMap or VecDeque, no `type` aliases or statics, and no unsafe code." },
+  { check = "forbids", what = ["closure", "call:sort_by", "call:sort_by_key", "call:map", "call:filter", "call:collect", "call:max_by_key", "call:retain", "call:any", "call:all", "call:position", "call:clone", "call:unwrap", "dyn", "unsafe"], message = "Use Chapter 10's tools only: no closures, no `sort_by`/`sort_by_key`/`map`/`filter`/`collect`/`max_by_key`/`retain`, no `.clone()` or `unwrap()`, no `dyn` and no `unsafe`." },
+]
+
+[[wrong]]
+name = "unstable-ties"
+part = 4
+fails = ["t32"]
+
+[[wrong]]
+name = "best-keeps-last"
+part = 4
+fails = ["t32"]
+
+[[wrong]]
+name = "ascending"
+part = 4
+fails = ["t24", "t25", "t27", "t29", "t30", "t31", "t32"]
+
+[[wrong]]
+name = "negated-scores"
+part = 4
+fails = ["t29", "t32"]
+
+[[wrong]]
+name = "report-final-lf"
+part = 4
+fails = ["t24", "t25", "t26", "t27", "t28", "t29", "t30", "t31", "t32"]
+
+[[wrong]]
+name = "summary-rebuilt"
+part = 4
+fails = ["t27"]
+
+[[wrong]]
+name = "storage-needs-ranked"
+part = 4
+fails = ["t37"]
+
+[[wrong]]
+name = "top-one-extra"
+part = 4
+fails = ["t25", "t26", "t32"]
+
+[[wrong]]
+name = "summary-format"
+part = 4
+fails = ["t24", "t25", "t26", "t28", "t29", "t30", "t31", "t32"]
+
+[[wrong]]
+name = "view-ignores-limit"
+part = 4
+fails = ["t25", "t26", "t32"]
+
+[[wrong]]
+name = "first-is-last"
+part = 4
+fails = ["t32"]
+

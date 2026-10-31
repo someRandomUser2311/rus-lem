@@ -1,0 +1,131 @@
+checkpoints = true
+
+[[tests]]
+key = "t35"
+part = 4
+
+[[tests]]
+key = "t36"
+part = 4
+
+[[tests]]
+key = "t37"
+part = 4
+
+[[tests]]
+key = "t38"
+part = 4
+
+[[tests]]
+key = "t39"
+part = 4
+
+[[tests]]
+key = "t40"
+part = 4
+
+[[tests]]
+key = "t41"
+part = 4
+
+[[tests]]
+key = "t31"
+part = 4
+run = { kind = "suite", script = "t31" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t34"
+part = 1
+run = { kind = "suite", script = "t34" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t39"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["closure", "call:map", "call:map_err", "call:and_then", "call:or_else", "call:unwrap_or_else", "call:ok_or_else", "call:map_or", "call:map_or_else", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:sum", "call:product", "call:sort_by", "call:sort_by_key", "call:max_by_key", "call:min_by_key", "call:retain", "call:any", "call:all", "call:position", "type:BTreeMap", "type:BTreeSet", "type:VecDeque", "dyn", "item:type", "item:static", "unsafe", "call:leak", "call:forget", "macro:include", "attr:path"], message = "Use only what Chapters 1–10 teach: generics, traits, bounds, `impl Trait` and lifetimes are new and welcome, but no closures or the methods that take one (map, filter, collect, sum, sort_by, retain, any, all, position), no `dyn` trait objects, no BTreeMap or VecDeque, no `type` aliases or statics, and no unsafe code." },
+  { check = "rust_files", files = ["src/lib.rs", "src/fees.rs", "src/text.rs", "src/book.rs", "src/member.rs", "src/library.rs", "src/error.rs", "src/command.rs", "src/search.rs", "src/main.rs"] },
+  { check = "uses", what = ["mod_file:fees", "mod_file:text", "mod_file:book", "mod_file:member", "mod_file:library", "mod_file:error", "mod_file:command", "mod_file:search", "pub:fees", "pub:text", "pub:book", "pub:member", "pub:library", "pub:error", "pub:command", "pub:search"], file = "src/lib.rs", message = "`src/lib.rs` declares the eight modules with `pub mod name;`, each without a body." },
+  { check = "uses", what = ["pub_use:book::Book", "pub_use:book::Status", "pub_use:member::Member", "pub_use:library::Library", "pub_use:error::LibraryError", "pub_use:command::Command", "pub_use:command::parse_command", "pub_use:search::Searchable", "pub_use:search::search"], file = "src/lib.rs", message = "Keep LM9's re-exports and add `pub use search::{Searchable, search};`." },
+  { check = "count", what = "item:fn", eq = 0, file = "src/lib.rs", message = "`src/lib.rs` holds only module declarations and re-exports." },
+]
+
+[[tests]]
+key = "t40"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["closure", "call:map", "call:map_err", "call:and_then", "call:or_else", "call:unwrap_or_else", "call:ok_or_else", "call:map_or", "call:map_or_else", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:sum", "call:product", "call:sort_by", "call:sort_by_key", "call:max_by_key", "call:min_by_key", "call:retain", "call:any", "call:all", "call:position", "type:BTreeMap", "type:BTreeSet", "type:VecDeque", "dyn", "item:type", "item:static", "unsafe", "call:leak", "call:forget", "macro:include", "attr:path"], message = "Use only what Chapters 1–10 teach: generics, traits, bounds, `impl Trait` and lifetimes are new and welcome, but no closures or the methods that take one (map, filter, collect, sum, sort_by, retain, any, all, position), no `dyn` trait objects, no BTreeMap or VecDeque, no `type` aliases or statics, and no unsafe code." },
+  { check = "uses", what = ["trait:Searchable"], file = "src/search.rs", message = "`src/search.rs` defines the `Searchable` trait." },
+  { check = "uses", what = ["required_fn:search_text", "default_fn:matches"], inside = "trait:Searchable", file = "src/search.rs", message = "`Searchable` declares `search_text` without a body and gives `matches` a default body." },
+  { check = "uses", what = ["impl:Book", "impl:Member", "impl:&T"], file = "src/search.rs", message = "`src/search.rs` implements `Searchable` for `Book`, `Member` and `&T`." },
+  { check = "count", what = "fn:matches", eq = 2, file = "src/search.rs", message = "Only the trait's default and the `&T` impl define `matches`; `Book` and `Member` keep the default." },
+  { check = "uses", what = ["ret:Vec<&'aT>", "lifetime:a", "bound:Searchable"], within = "search", file = "src/search.rs", message = "`search` is `pub fn search<'a, T: Searchable>(items: &'a [T], query: &str) -> Vec<&'a T>`." },
+  { check = "count", what = "bound:Clone|bound:Copy", eq = 0, message = "No bound may ask for `Clone` or `Copy`: search lends out the items it was given." },
+  { check = "uses", what = ["trait_impl:Display"], file = "src/book.rs", message = "`src/book.rs` implements `fmt::Display` for `Book`." },
+  { check = "uses", what = ["fn:members_sorted", "fn:find"], file = "src/library.rs", message = "`Library::members_sorted` and `Library::find` live in `src/library.rs`, next to the private fields." },
+]
+
+[[tests]]
+key = "t41"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["closure", "call:map", "call:map_err", "call:and_then", "call:or_else", "call:unwrap_or_else", "call:ok_or_else", "call:map_or", "call:map_or_else", "call:filter", "call:filter_map", "call:flat_map", "call:collect", "call:fold", "call:reduce", "call:sum", "call:product", "call:sort_by", "call:sort_by_key", "call:max_by_key", "call:min_by_key", "call:retain", "call:any", "call:all", "call:position", "type:BTreeMap", "type:BTreeSet", "type:VecDeque", "dyn", "item:type", "item:static", "unsafe", "call:leak", "call:forget", "macro:include", "attr:path"], message = "Use only what Chapters 1–10 teach: generics, traits, bounds, `impl Trait` and lifetimes are new and welcome, but no closures or the methods that take one (map, filter, collect, sum, sort_by, retain, any, all, position), no `dyn` trait objects, no BTreeMap or VecDeque, no `type` aliases or statics, and no unsafe code." },
+  { check = "forbids", what = ["call:unwrap", "closure", "call:map", "call:filter", "call:collect", "call:sort_by", "call:sort_by_key", "call:retain", "call:any", "call:all", "call:position", "dyn", "unsafe", "trait_impl:Iterator", "trait_impl:From", "trait_impl:Add", "trait_impl:Sub", "trait_impl:Mul", "trait_impl:Index"], message = "Use Chapter 10's tools only: no `unwrap()`, closures, `map`/`filter`/`collect`/`sort_by`/`retain`/`any`/`all`/`position`, `dyn`, `unsafe`, or impls of `Iterator`, `From` or operator traits." },
+]
+
+[[wrong]]
+name = "any-word-matches"
+part = 4
+fails = ["t31"]
+
+[[wrong]]
+name = "blanket-loses-override"
+part = 4
+fails = ["t40"]
+
+[[wrong]]
+name = "case-sensitive-query"
+part = 4
+fails = ["t24", "t31"]
+
+[[wrong]]
+name = "no-space-title-author"
+part = 4
+fails = ["t31"]
+
+[[wrong]]
+name = "members-hash-order"
+part = 4
+fails = ["t25", "t26", "t31"]
+
+[[wrong]]
+name = "members-descending"
+part = 4
+fails = ["t25", "t26", "t31"]
+
+[[wrong]]
+name = "find-title-only"
+part = 4
+fails = ["t24", "t29", "t30", "t31"]
+
+[[wrong]]
+name = "display-newline"
+part = 4
+fails = ["t31"]
+
+[[wrong]]
+name = "execute-uses-find"
+part = 4
+fails = ["t29"]
+
+[[wrong]]
+name = "empty-query-no-match"
+part = 4
+fails = ["t28", "t31"]
+
+[[wrong]]
+name = "search-reversed"
+part = 4
+fails = ["t24", "t28", "t30", "t31"]
+

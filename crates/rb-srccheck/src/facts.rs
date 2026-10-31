@@ -59,9 +59,17 @@
 //! | `lit:N` | an integer literal with value N |
 //! | `attr:path` | a `#[path = "…"]` attribute |
 //! | `closure` | a closure expression (`\|x\| …`) |
+//! | `trait:NAME` | a trait definition |
+//! | `required_fn:NAME`, `default_fn:NAME` | inside `trait:NAME`: a method without a body; one with a default body (also `fn:NAME`) |
+//! | `bound`, `bound:TRAIT` | a trait bound, in generics, a `where` clause or an `impl TRAIT` type (`T: Clone + Display`: `bound:Clone`, `bound:Display`) |
+//! | `borrow`, `deref`, `field_access:NAME` | an expression `&x` (or `&mut x`), `*x`, `x.NAME` (`x.0`: `field_access:0`) |
+//! | `where` | a `where` clause |
+//! | `dyn` | a trait object type (`dyn Error`) |
+//! | `lifetime:NAME` | an explicit lifetime by name, alongside `lifetime` (`'static`: `lifetime:static`) |
 //!
 //! Contexts are `fn:NAME`, `mod:NAME`, the loop facts, `if`, `block_expr`, `let:NAME` (its
-//! initialiser), `const:NAME`, `struct:NAME`, `enum:NAME`, `impl:TYPE`, `struct_lit:NAME`,
+//! initialiser), `const:NAME`, `struct:NAME`, `enum:NAME`, `trait:NAME`, `impl:TYPE` (and
+//! `impl_unbounded` for one whose type parameters have no bounds), `struct_lit:NAME`,
 //! `match`, `if_let` (its pattern and `then` block), `while_let` and `let_else` (its
 //! pattern and `else` block).
 
@@ -502,7 +510,19 @@ impl<'ast> Visit<'ast> for Facts {
         } else if !self.impls.insert(ty.clone()) {
             self.fact(format!("multi_impl:{ty}"));
         }
-        self.within(format!("impl:{ty}"), |v| syn::visit::visit_item_impl(v, i));
+        // Methods of an `impl` without bounds sit inside `impl_unbounded` too.
+        let bounded = i.generics.where_clause.is_some()
+            || i.generics.params.iter().any(|p| match p {
+                syn::GenericParam::Type(t) => !t.bounds.is_empty(),
+                _ => false,
+            });
+        self.within(format!("impl:{ty}"), |v| {
+            if bounded {
+                syn::visit::visit_item_impl(v, i)
+            } else {
+                v.within("impl_unbounded", |v| syn::visit::visit_item_impl(v, i))
+            }
+        });
     }
 
     fn visit_expr_struct(&mut self, e: &'ast syn::ExprStruct) {
@@ -716,7 +736,24 @@ impl<'ast> Visit<'ast> for Facts {
         }
     }
 
+    fn visit_expr_unary(&mut self, u: &'ast syn::ExprUnary) {
+        if let syn::UnOp::Deref(_) = u.op {
+            self.fact("deref");
+        }
+        syn::visit::visit_expr_unary(self, u);
+    }
+
+    fn visit_expr_field(&mut self, f: &'ast syn::ExprField) {
+        let name = match &f.member {
+            syn::Member::Named(id) => id.to_string(),
+            syn::Member::Unnamed(i) => i.index.to_string(),
+        };
+        self.fact(format!("field_access:{name}"));
+        syn::visit::visit_expr_field(self, f);
+    }
+
     fn visit_expr_reference(&mut self, r: &'ast syn::ExprReference) {
+        self.fact("borrow");
         if let Expr::Unary(u) = unparen(&r.expr)
             && let syn::UnOp::Deref(_) = u.op
         {
@@ -784,8 +821,51 @@ impl<'ast> Visit<'ast> for Facts {
         syn::visit::visit_expr_unsafe(self, u);
     }
 
-    fn visit_lifetime(&mut self, _: &'ast syn::Lifetime) {
+    fn visit_lifetime(&mut self, l: &'ast syn::Lifetime) {
         self.fact("lifetime");
+        self.fact(format!("lifetime:{}", l.ident));
+    }
+
+    fn visit_item_trait(&mut self, t: &'ast syn::ItemTrait) {
+        let name = t.ident.to_string();
+        self.visibility(&name, &t.vis);
+        self.fact(format!("trait:{name}"));
+        self.within(format!("trait:{name}"), |v| {
+            syn::visit::visit_item_trait(v, t)
+        });
+    }
+
+    fn visit_trait_item_fn(&mut self, f: &'ast syn::TraitItemFn) {
+        let name = f.sig.ident.to_string();
+        match &f.default {
+            None => {
+                self.fact(format!("required_fn:{name}"));
+                syn::visit::visit_trait_item_fn(self, f);
+            }
+            Some(block) => {
+                self.fact("item:fn");
+                self.fact(format!("default_fn:{name}"));
+                self.function(&f.sig, block, |v| syn::visit::visit_trait_item_fn(v, f));
+            }
+        }
+    }
+
+    fn visit_trait_bound(&mut self, b: &'ast syn::TraitBound) {
+        if let Some(last) = b.path.segments.last() {
+            self.fact("bound");
+            self.fact(format!("bound:{}", last.ident));
+        }
+        syn::visit::visit_trait_bound(self, b);
+    }
+
+    fn visit_where_clause(&mut self, w: &'ast syn::WhereClause) {
+        self.fact("where");
+        syn::visit::visit_where_clause(self, w);
+    }
+
+    fn visit_type_trait_object(&mut self, t: &'ast syn::TypeTraitObject) {
+        self.fact("dyn");
+        syn::visit::visit_type_trait_object(self, t);
     }
 
     // Loop labels (`'outer:`, `break 'outer`) are lifetimes in syn, but not annotations.
@@ -873,6 +953,41 @@ mod tests {
         assert!(has(&f, "const:CAP", &[]));
         assert!(has(&f, "const_ty:u8", &[]));
         assert!(!has(&f, "recursion", &["fn:d"]));
+    }
+
+    #[test]
+    fn traits_bounds_and_lifetimes() {
+        let f = facts(
+            "pub trait Greet { fn name(&self) -> String; fn greeting(&self) -> String { format!(\"Hi {}\", self.name()) } }
+             struct Pair<T> { a: T }
+             impl<T: Clone + std::fmt::Display> Pair<T> { fn show(&self) -> String where T: PartialOrd { self.a.to_string() } }
+             fn pick<'a>(x: &'a str, y: &'static str, d: impl Greet) -> Box<dyn std::error::Error> { todo!() }",
+        );
+        assert!(has(&f, "trait:Greet", &[]));
+        assert!(has(&f, "required_fn:name", &["trait:Greet"]));
+        assert!(has(&f, "default_fn:greeting", &["trait:Greet"]));
+        assert!(has(&f, "call:name", &["trait:Greet", "fn:greeting"]));
+        assert!(has(&f, "bound:Clone", &["impl:Pair<T>"]));
+        assert!(has(&f, "bound:Display", &[]));
+        assert!(has(&f, "bound:PartialOrd", &["fn:show"]));
+        assert!(has(&f, "where", &["fn:show"]));
+        assert!(!has(&f, "bound:Clone", &["struct:Pair"]));
+        assert!(has(&f, "bound:Greet", &["fn:pick"]));
+        assert!(has(&f, "lifetime:static", &["fn:pick"]));
+        assert!(has(&f, "lifetime:a", &[]));
+        assert!(has(&f, "dyn", &[]));
+        assert!(has(&f, "field_access:a", &["fn:show"]));
+        assert!(!has(&f, "fn:show", &["impl_unbounded"]));
+        let h = facts("struct B<T> { e: Vec<T> } impl<T> B<T> { fn len(&self) -> usize { 0 } }");
+        assert!(has(&h, "fn:len", &["impl_unbounded"]));
+        let g = facts(
+            "fn o(t: &str) -> impl Greet + use<> { todo!() }
+             fn r<'a, T: Display>(a: &'a str, n: &T) -> impl View + use<'a, T> { let v = &a; *v; todo!() }",
+        );
+        assert!(has(&g, "ret:implGreet+use<>", &["fn:o"]));
+        assert!(has(&g, "ret:implView+use<'a,T>", &["fn:r"]));
+        assert!(has(&g, "borrow", &["fn:r", "let:v"]));
+        assert!(has(&g, "deref", &["fn:r"]));
     }
 
     #[test]
