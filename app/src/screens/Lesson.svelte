@@ -53,8 +53,9 @@
   const cur = $derived(positions[pos])
   const screen = $derived(cur?.kind === 'screen' && lesson ? lesson.screens[cur.screen] : null)
   const step = $derived(cur?.kind === 'screen' ? cur.step : 0)
-  // Remount (and animate in) only when the screen changes, not on every stepper step.
-  const screenKey = $derived(cur?.kind === 'screen' ? `s${cur.screen}` : (cur?.kind ?? ''))
+  // Teaching screens update in place so moving between them doesn't flash; a quick
+  // check, the summary and the done screen remount (and animate in) as fresh views.
+  const screenKey = $derived(cur?.kind === 'screen' ? (screen?.kind === 'check' ? `check${cur.screen}` : 'teach') : (cur?.kind ?? ''))
   const stepData = $derived(screen && step ? screen.steps[step - 1] : null)
   const panels = $derived(screen ? panelStates(screen, screen.kind === 'stepper' ? step : 0) : [])
   const progress = $derived(positions.length ? (pos / (positions.length - 1)) * 100 : 0)
