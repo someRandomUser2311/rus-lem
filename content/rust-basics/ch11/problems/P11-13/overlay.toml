@@ -1,0 +1,28 @@
+[[tests]]
+key = "t10"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["mod_file:common", "attr:test"], file = "tests/text_contract.rs", message = "`tests/text_contract.rs` needs `mod common;` and its tests." },
+  { check = "uses", what = ["mod_file:common", "attr:test"], file = "tests/query_contract.rs", message = "`tests/query_contract.rs` needs `mod common;` and its tests." },
+]
+
+[[tests]]
+key = "t11"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call_path:common::unicode_title"], message = "Use the shared fixture, `common::unicode_title()`, in your tests." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in these tests." },
+]
+
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [{ check = "rust_files", files = ["src/lib.rs", "tests/common/mod.rs", "tests/query_contract.rs", "tests/text_contract.rs"] }]
+
+[[wrong]]
+name = "single-word-queries"
+fails = ["t05"]
+
+[[wrong]]
+name = "helper-file-target"
+fails = ["t12"]

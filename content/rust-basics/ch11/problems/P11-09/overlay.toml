@@ -1,0 +1,22 @@
+[[tests]]
+key = "t10"
+run = { kind = "source" }
+asserts = [{ check = "uses", what = ["call:raw_fee"], inside = "cfg_test", message = "Call the private `raw_fee` from the test module: the cap in `fee` hides its mistakes." }]
+
+[[tests]]
+key = "t11"
+run = { kind = "source" }
+asserts = [{ check = "forbids", what = ["assert_bare"], message = "Give every assertion a custom message naming its case." }]
+
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [{ check = "forbids", what = ["stray_test"], file = "src/lib.rs", message = "Keep every `#[test]` function inside the `#[cfg(test)]` module." }, { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in these tests." }]
+
+[[wrong]]
+name = "public-only"
+fails = ["t02", "t05", "t08", "t10"]
+
+[[wrong]]
+name = "far-from-edges"
+fails = ["t04"]

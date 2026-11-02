@@ -1,0 +1,20 @@
+[[tests]]
+key = "t11"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["attr:test"], file = "tests/shelf.rs", message = "Write your tests in `tests/shelf.rs`." },
+  { check = "uses", what = ["use:test_lab::Shelf"], file = "tests/shelf.rs", message = "Use the library by its crate name: `use test_lab::{Item, Shelf};`." },
+]
+
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [{ check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in these tests." }]
+
+[[wrong]]
+name = "no-duplicate-key"
+fails = ["t04"]
+
+[[wrong]]
+name = "first-item-only"
+fails = ["t08", "t10"]

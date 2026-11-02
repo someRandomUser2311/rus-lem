@@ -60,7 +60,7 @@ export function panelStates(screen: Screen, step: number): PanelState[] {
 }
 
 function initial(p: Panel): PanelState {
-  if (p.kind === 'terminal') return { kind: 'terminal', id: p.id, title: p.title, cursor: p.cursor, text: '', fresh: '', badge: null }
+  if (p.kind === 'terminal') return { kind: 'terminal', id: p.id, title: p.title, cursor: p.cursor, text: p.text ?? '', fresh: '', badge: null }
   const depth = (n: SceneNode): number => {
     let d = 0
     let cur = n

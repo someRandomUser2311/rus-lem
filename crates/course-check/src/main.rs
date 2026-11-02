@@ -160,7 +160,53 @@ fn format_starters(ch: &mut rb_content::Chapter) {
         .map(|h| PathBuf::from(h).join(".cargo/bin/rustfmt"))
         .filter(|p| p.exists())
         .unwrap_or_else(|| PathBuf::from("rustfmt"));
+    let format = |text: &str| -> Option<String> {
+        let mut child = Command::new(&rustfmt)
+            .args(["--edition", "2024", "--emit", "stdout"])
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::null())
+            .spawn()
+            .ok()?;
+        if let Some(mut stdin) = child.stdin.take() {
+            let _ = stdin.write_all(text.as_bytes());
+        }
+        let o = child.wait_with_output().ok()?;
+        if !o.status.success() {
+            return None;
+        }
+        String::from_utf8(o.stdout).ok()
+    };
     for p in &mut ch.problems {
+        // Test-writing problems: the supplied code and the learner's part are laid out
+        // on their own, so the starter still begins with the supplied code exactly.
+        if !p.subject.is_empty() {
+            let (Ok(starter), Ok(solution)) =
+                (p.learner_parts(&p.starter), p.learner_parts(&p.solution))
+            else {
+                continue;
+            };
+            let supplied: Vec<String> = p.subject.iter().map(|s| s.path.clone()).collect();
+            let tidy = |files: Vec<rb_content::SourceFile>| -> Vec<rb_content::SourceFile> {
+                files
+                    .into_iter()
+                    .map(|mut f| {
+                        if f.path.ends_with(".rs")
+                            && !f.text.trim().is_empty()
+                            && let Some(t) = format(&f.text)
+                        {
+                            f.text = t;
+                        }
+                        f
+                    })
+                    .filter(|f| !(f.text.trim().is_empty() && supplied.contains(&f.path)))
+                    .collect()
+            };
+            p.subject = tidy(p.subject.clone());
+            p.starter = rb_content::with_subject(&p.subject, tidy(starter));
+            p.solution = rb_content::with_subject(&p.subject, tidy(solution));
+            continue;
+        }
         for f in p
             .starter
             .iter_mut()

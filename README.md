@@ -2,7 +2,7 @@
 
 A desktop app that teaches Rust from *The Rust Programming Language*: short visual lessons, quick questions, and coding problems graded by real tests with the learner's own Rust toolchain. Fully local and offline. Tauri 2, Svelte 5, Rust.
 
-The course content is specified in `../rust-basics-course-plan/` (the reviewed Markdown plan). Rusticoder turns it into data with `course-check`, validates it by compiling and running everything, and bundles it into the app. **Chapters 1–10 are bundled.** The other chapters show as "Coming soon" until they're added (see [docs/adding-a-chapter.md](docs/adding-a-chapter.md)); adding one needs no app code.
+The course content is specified in `../rust-basics-course-plan/` (the reviewed Markdown plan). Rusticoder turns it into data with `course-check`, validates it by compiling and running everything, and bundles it into the app. **Chapters 1–11 are bundled.** The other chapters show as "Coming soon" until they're added (see [docs/adding-a-chapter.md](docs/adding-a-chapter.md)); adding one needs no app code.
 
 ## Requirements
 
@@ -54,7 +54,7 @@ cd app && npx svelte-check --tsconfig ./tsconfig.app.json      # frontend types
 | `crates/rb-specparse` | Reads the Markdown course plan into the model. |
 | `crates/rb-runner` | Finds the learner's toolchain; runs rustc, Cargo and programs with timeouts, output caps and process-group kills. |
 | `crates/rb-srccheck` | Source rules on parsed Rust (macro counts, typed values in format strings, unchanged `let` lines, banned keywords). |
-| `crates/rb-grader` | Runs a problem's tests: each distinct run once, then every test's assertions. Run = visible tests, Submit = all. Also repeated runs, generated suites, fixture builds (a named `let` takes a test value) and checker programs. |
+| `crates/rb-grader` | Runs a problem's tests: each distinct run once, then every test's assertions. Run = visible tests, Submit = all. Also repeated runs, generated suites, fixture builds (a named `let` takes a test value), checker programs, and for test-writing problems the learner's own tests against the supplied code and each mutant. |
 | `crates/rb-quiz` | Checks answers to the nine question types. |
 | `crates/rb-progress` | SQLite progress store and the rules from `progress-and-unlocking.md`: unlocking, XP, streaks, hints, solutions, hidden-test reveal, mastery, review, badges. |
 | `crates/rb-lsp` | Runs rust-analyzer and frames LSP messages for the editor. |

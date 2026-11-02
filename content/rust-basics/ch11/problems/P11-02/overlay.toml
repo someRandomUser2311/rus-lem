@@ -1,0 +1,20 @@
+[[tests]]
+key = "t09"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["stray_test"], file = "src/lib.rs", message = "Keep every `#[test]` function inside the `#[cfg(test)]` module, so it's compiled only for `cargo test`." },
+  { check = "uses", what = ["macro:assert_eq"], message = "Compare each result with `assert_eq!(actual, expected)`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in these tests." },
+]
+
+[[wrong]]
+name = "word-and-emoji"
+fails = ["t02", "t04", "t06", "t07", "t08"]
+
+[[wrong]]
+name = "emoji-instead-of-accent"
+fails = ["t08"]
+
+[[wrong]]
+name = "expects-trimmed"
+fails = ["t01", "t04"]

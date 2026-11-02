@@ -99,7 +99,28 @@ pub fn run(ch: &Chapter, vendor: Option<&Path>) -> Result<bool> {
     let mut quiz_count = 0;
     for q in questions {
         let Some(v) = &q.verify else { continue };
+        let has_tests = |t: &str| t.contains("#[test]") && !t.contains("fn main");
         let r = match (&q.code, q.files.is_empty()) {
+            // Test code, as `cargo test` builds and runs it.
+            (Some(code), _) if has_tests(&code.text) => verify_tests(
+                &tc,
+                vendor,
+                &qdir,
+                &q.id,
+                &[CodeBlock {
+                    file: Some("src/lib.rs".into()),
+                    lang: "rust".into(),
+                    text: code.text.clone(),
+                }],
+                v,
+            ),
+            (None, false)
+                if q.files.iter().any(|f| {
+                    has_tests(&f.text) || f.file.as_deref().is_some_and(|p| p.starts_with("tests/"))
+                }) =>
+            {
+                verify_tests(&tc, vendor, &qdir, &q.id, &q.files, v)
+            }
             (Some(code), _) => verify_program(&tc, vendor, &qdir, &q.id, &code.text, v),
             (None, false) => verify_package(&tc, vendor, &qdir, &q.id, &q.files, v),
             (None, true) => continue,
@@ -114,6 +135,20 @@ pub fn run(ch: &Chapter, vendor: Option<&Path>) -> Result<bool> {
     let mut lesson_count = 0;
     for l in &ch.lessons {
         for s in &l.screens {
+            if !s.files.is_empty()
+                && s
+                    .files
+                    .iter()
+                    .any(|f| f.text.contains("#[test]") || f.file.as_deref().is_some_and(|p| p.starts_with("tests/")))
+            {
+                // A package with tests: `cargo test` passes, or fails as the screen shows.
+                lesson_count += 1;
+                let id = format!("{}-{}", l.id, s.key);
+                if let Err(e) = verify_package_tests(&tc, vendor, &qdir, &id, &s.files, s.diagnostic.as_deref()) {
+                    errors.push(format!("{id}: {e}"));
+                }
+                continue;
+            }
             if !s.files.is_empty() {
                 // A package: it builds, or fails with the error screen's first line.
                 lesson_count += 1;
@@ -149,6 +184,20 @@ pub fn run(ch: &Chapter, vendor: Option<&Path>) -> Result<bool> {
                 continue;
             }
             let Some(code) = &s.code else { continue };
+            if code.lang == "rust" && code.text.contains("#[test]") && !code.text.contains("fn main") {
+                // A library with tests, as `cargo test` runs it.
+                lesson_count += 1;
+                let id = format!("{}-{}", l.id, s.key);
+                let file = CodeBlock {
+                    file: Some("src/lib.rs".into()),
+                    lang: "rust".into(),
+                    text: code.text.clone(),
+                };
+                if let Err(e) = verify_package_tests(&tc, vendor, &qdir, &id, &[file], s.diagnostic.as_deref()) {
+                    errors.push(format!("{id}: {e}"));
+                }
+                continue;
+            }
             if code.lang != "rust" || !code.text.contains("fn main") {
                 continue;
             }
@@ -383,6 +432,173 @@ fn verify_package(
     check_build(tc, &c, &exe, &dir, v)
 }
 
+/// A lesson package with tests (or one library file of tests, as `src/lib.rs` of the
+/// package `adder`): `cargo test` builds it and every test passes. With `diag`, the screen
+/// shows a failure instead: a compiler error (its first line), or a failing test whose
+/// panic message (the line after `panicked at`) the test output must contain.
+fn verify_package_tests(
+    tc: &Toolchain,
+    vendor: Option<&Path>,
+    work: &Path,
+    id: &str,
+    files: &[CodeBlock],
+    diag: Option<&str>,
+) -> std::result::Result<(), String> {
+    let dir = work.join(id.replace('.', "_"));
+    let _ = std::fs::remove_dir_all(dir.join("src"));
+    let _ = std::fs::remove_dir_all(dir.join("tests"));
+    std::fs::create_dir_all(dir.join("src")).map_err(|e| e.to_string())?;
+    let package = lib_crate_name(files)
+        .or_else(|| {
+            // An integration test names the library: `use adder::add_two;`.
+            files.iter().filter(|f| f.file.as_deref().is_some_and(|p| p.starts_with("tests/"))).find_map(|f| {
+                f.text.lines().find_map(|l| {
+                    let root = l.trim().strip_prefix("use ")?.split("::").next()?;
+                    let taken = ["std", "core", "alloc", "crate", "self", "super"].contains(&root);
+                    (!taken && root.chars().all(|c| c.is_alphanumeric() || c == '_')).then(|| root.to_string())
+                })
+            })
+        })
+        .unwrap_or_else(|| "adder".into());
+    let mut manifest = format!(
+        "[package]\nname = \"{package}\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\n"
+    );
+    for f in files {
+        let Some(path) = f.file.as_deref() else {
+            return Err("a file of this package has no path".into());
+        };
+        if path == "Cargo.toml" {
+            manifest = f.text.clone();
+            continue;
+        }
+        let p = dir.join(path);
+        if let Some(parent) = p.parent() {
+            std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+        }
+        std::fs::write(&p, &f.text).map_err(|e| e.to_string())?;
+    }
+    std::fs::write(dir.join("Cargo.toml"), &manifest).map_err(|e| e.to_string())?;
+    let target = dir.parent().unwrap_or(&dir).join("target");
+    let c = tc
+        .cargo_args(&dir, &["test", "--no-run", "--tests"], Some(&target), vendor, None)
+        .map_err(|e| e.to_string())?;
+    let rendered = strip_ansi(&c.rendered);
+    let want_error = diag.filter(|d| d.trim_start().starts_with("error"));
+    if let Some(d) = want_error {
+        let want = d.trim_start().lines().next().unwrap_or("").trim();
+        if c.ok {
+            return Err(format!("should fail to compile with {want:?}, but it compiles"));
+        }
+        let got = rendered.lines().find(|l| l.starts_with("error")).unwrap_or("").trim();
+        if got != want && got.replace('`', "") != want {
+            return Err(format!("expected the message {want:?}, rustc says {got:?}"));
+        }
+        return Ok(());
+    }
+    if !c.ok {
+        return Err(format!("its tests don't compile:\n{rendered}{}", c.log));
+    }
+    let mut output = String::new();
+    let mut failed = false;
+    for (_, exe) in &c.tests {
+        let o = tc
+            .run_program(exe, &dir, b"", &[], &[], &Limits::default(), None)
+            .map_err(|e| e.to_string())?;
+        failed |= !o.success();
+        output.push_str(&o.stdout_str());
+        output.push_str(&o.stderr_str());
+    }
+    // A failing run: its panic message, a `should_panic` test that didn't panic, or the
+    // `Err` a `Result` test returned.
+    let failure = diag.filter(|d| d.contains("test result: FAILED") || d.contains("panicked at"));
+    match failure {
+        Some(d) => {
+            let want = d
+                .lines()
+                .skip_while(|l| !l.contains("panicked at"))
+                .nth(1)
+                .or_else(|| d.lines().find(|l| l.contains("did not panic as expected")))
+                .or_else(|| d.lines().find(|l| l.starts_with("Error: ")))
+                .map(|l| l.split(" at src/").next().unwrap_or(l))
+                .unwrap_or("")
+                .trim();
+            if !failed {
+                return Err("a test should fail, but every test passes".into());
+            }
+            if !output.contains(want) {
+                return Err(format!("a test should fail with {want:?}; the output is {output:?}"));
+            }
+            Ok(())
+        }
+        None if failed => Err(format!("a test fails:\n{output}")),
+        None => Ok(()),
+    }
+}
+
+/// A quiz about test code: the package (or one `src/lib.rs`) is built with `cargo test`,
+/// and must compile or fail as the answer says. A "predict the output" answer is the
+/// `test result:` summary line of each test binary, in order (unit tests first), without
+/// the `finished in` timing.
+fn verify_tests(
+    tc: &Toolchain,
+    vendor: Option<&Path>,
+    work: &Path,
+    id: &str,
+    files: &[CodeBlock],
+    v: &Verify,
+) -> std::result::Result<(), String> {
+    let dir = work.join(id.replace('.', "_"));
+    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::create_dir_all(dir.join("src")).map_err(|e| e.to_string())?;
+    let mut manifest = String::from(
+        "[package]\nname = \"adder\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\n",
+    );
+    for f in files {
+        let path = f.file.as_deref().unwrap_or("src/lib.rs");
+        if path == "Cargo.toml" {
+            manifest = f.text.clone();
+            continue;
+        }
+        let p = dir.join(path);
+        if let Some(parent) = p.parent() {
+            std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+        }
+        std::fs::write(&p, &f.text).map_err(|e| e.to_string())?;
+    }
+    std::fs::write(dir.join("Cargo.toml"), &manifest).map_err(|e| e.to_string())?;
+    let target = dir.parent().unwrap_or(&dir).join("target");
+    let c = tc
+        .cargo_args(&dir, &["test", "--no-run", "--tests"], Some(&target), vendor, None)
+        .map_err(|e| e.to_string())?;
+    if c.ok != v.compiles || !c.ok {
+        // Same checks as for programs: compiles or not, the error code and message.
+        return check_build(tc, &c, Path::new(""), &dir, v);
+    }
+    let Some(want) = &v.stdout else {
+        return Ok(());
+    };
+    let mut exes = c.tests.clone();
+    exes.sort_by_key(|(label, _)| (!label.starts_with("src/"), label.clone()));
+    let mut got = Vec::new();
+    for (_, exe) in &exes {
+        let o = tc
+            .run_program(exe, &dir, b"", &[], &[], &Limits::default(), None)
+            .map_err(|e| e.to_string())?;
+        for l in o.stdout_str().lines().filter(|l| l.starts_with("test result:")) {
+            got.push(l.split("; finished in").next().unwrap_or(l).to_string());
+        }
+    }
+    let want: Vec<String> = want
+        .lines()
+        .map(|l| l.split("; finished in").next().unwrap_or(l).trim_end().to_string())
+        .filter(|l| !l.is_empty())
+        .collect();
+    if got != want {
+        return Err(format!("expected the summary {want:?}, cargo test prints {got:?}"));
+    }
+    Ok(())
+}
+
 /// The library crate a package's `src/main.rs` imports from, when it has a `src/lib.rs`.
 fn lib_crate_name(files: &[CodeBlock]) -> Option<String> {
     let file = |p: &str| files.iter().find(|f| f.file.as_deref() == Some(p));
@@ -515,13 +731,21 @@ fn check_problem(grader: &Grader, p: &Problem) -> Result<ProblemReport> {
     }
     // The starter doesn't.
     let r = grader.grade(p, &p.starter, Mode::Submit, None, |_| {})?;
+    let starter_fails: Vec<String> = r
+        .tests
+        .iter()
+        .filter(|t| t.status != TestStatus::Passed)
+        .map(|t| t.n.to_string())
+        .collect();
     if r.verdict == Verdict::Accepted {
         errors.push(format!(
             "{}: the starter code already passes every test",
             p.id
         ));
     }
-    if r.verdict == Verdict::CompileError && p.kind != "fix-compile" && p.starter_stage == "Guided"
+    if r.verdict == Verdict::CompileError
+        && p.kind != "fix-compile"
+        && (p.starter_stage == "Guided" || !p.subject.is_empty())
     {
         errors.push(format!(
             "{}: Guided starter doesn't compile: {}",
@@ -558,10 +782,11 @@ fn check_problem(grader: &Grader, p: &Problem) -> Result<ProblemReport> {
         }
     }
     let line = format!(
-        "   {} ok-checked ({} tests, {} wrong variants)",
+        "   {} ok-checked ({} tests, {} wrong variants; the starter fails rows {})",
         p.id,
         p.tests.len(),
-        p.wrong.len()
+        p.wrong.len(),
+        starter_fails.join(", ")
     );
     Ok((errors, line))
 }

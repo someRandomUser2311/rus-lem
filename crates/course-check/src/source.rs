@@ -17,10 +17,13 @@
 //!     helpers.rs                    Rust items added to the call harness
 //!   ch02/Cargo.toml                 the manifest of the chapter's Cargo problems (`mode = "cargo"`)
 //!   ch07/problems/P07-01/Cargo.toml  a Cargo problem's own manifest (instead of the chapter's)
+//!   ch11/problems/P11-05/mutants/M06/<files>  a test-writing mutant given as whole files
 //!   vendor/                         vendored crates (`cargo vendor`) for offline builds
 //! ```
 //!
 //! Files a solution or wrong variant leaves out (`Cargo.toml`) come from the starter.
+//! In test-writing problems, solution and wrong-variant files hold only the learner's
+//! tests: each goes below the supplied code of the same path (see `with_subject`).
 
 use anyhow::{Context, Result, bail};
 use rb_content::{Chapter, Course, SourceFile, merge::merge};
@@ -129,10 +132,54 @@ impl Source {
                 if p["mode"] == "cargo" {
                     cargo_starter(p, &dir, &pd, &id)?;
                 }
-                let starter: Vec<SourceFile> = serde_json::from_value(p["starter"].clone())?;
+                let mut starter: Vec<SourceFile> = serde_json::from_value(p["starter"].clone())?;
+                // Test-writing problems: the manifest is supplied and read-only too.
+                let mut subject: Vec<SourceFile> =
+                    serde_json::from_value(p["subject"].clone()).unwrap_or_default();
+                // A milestone's provided code (the previous milestone's package) can't be
+                // repeated in the spec: it is `subject/`, and the spec's starter and
+                // reference files are only the learner's tests.
+                let sd = pd.join("subject");
+                if sd.exists() {
+                    subject = read_files(&sd)?;
+                    starter = rb_content::with_subject(&subject, starter);
+                    p["starter"] = serde_json::to_value(&starter)?;
+                    let given: Vec<SourceFile> = serde_json::from_value(p["solution"].clone())?;
+                    p["solution"] = serde_json::to_value(rb_content::with_subject(&subject, given))?;
+                }
+                if !subject.is_empty() {
+                    if let Some(m) = starter.iter().find(|f| f.path == "Cargo.toml")
+                        && !subject.iter().any(|f| f.path == "Cargo.toml")
+                    {
+                        subject.push(m.clone());
+                    }
+                    p["subject"] = serde_json::to_value(&subject)?;
+                    if let Some(mutants) = p.get_mut("mutants").and_then(Value::as_array_mut) {
+                        for m in mutants {
+                            let mid = m["id"].as_str().unwrap_or("").to_string();
+                            let md = pd.join("mutants").join(&mid);
+                            if md.exists() {
+                                m["files"] = serde_json::to_value(read_files(&md)?)?;
+                            } else if m["files"].as_array().is_none_or(|f| f.is_empty()) {
+                                let change = m["change_md"].as_str().unwrap_or("");
+                                let files = rb_content::apply_change(&subject, change)
+                                    .map_err(|e| anyhow::anyhow!("{id} {mid}: {e}"))?;
+                                m["files"] = serde_json::to_value(files)?;
+                            }
+                        }
+                    }
+                }
+                let learner = |files: Vec<SourceFile>| -> Vec<SourceFile> {
+                    if subject.is_empty() {
+                        files
+                    } else {
+                        rb_content::with_subject(&subject, files)
+                    }
+                };
                 let sol = pd.join("solution");
                 if sol.exists() {
-                    p["solution"] = serde_json::to_value(complete(read_files(&sol)?, &starter))?;
+                    p["solution"] =
+                        serde_json::to_value(complete(learner(read_files(&sol)?), &starter))?;
                 } else if p["mode"] == "cargo" {
                     // The spec's solution, with the starter's manifest.
                     let given: Vec<SourceFile> = serde_json::from_value(p["solution"].clone())?;
@@ -144,7 +191,7 @@ impl Source {
                     if pdir.exists() {
                         parts.insert(
                             n.to_string(),
-                            serde_json::to_value(complete(read_files(&pdir)?, &starter))?,
+                            serde_json::to_value(complete(learner(read_files(&pdir)?), &starter))?,
                         );
                     }
                 }
@@ -172,7 +219,7 @@ impl Source {
                                 wd.display()
                             );
                         }
-                        w["files"] = serde_json::to_value(read_files(&wd)?)?;
+                        w["files"] = serde_json::to_value(learner(read_files(&wd)?))?;
                     }
                 }
             }

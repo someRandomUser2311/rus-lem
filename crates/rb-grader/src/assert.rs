@@ -605,6 +605,7 @@ pub(crate) fn check(a: &Assertion, obs: &Observation, problem: &Problem) -> Resu
             };
             r.map_err(fail)
         }
+        Observation::Tests(obs) => check_tests(a, obs, problem),
         Observation::Manifest(m) => {
             let m = m
                 .as_ref()
@@ -804,5 +805,171 @@ mod tests {
             first_difference("a\n", "a"),
             "The last line should end with a newline (use `println!`)."
         );
+    }
+}
+
+/// "1 test", "3 tests"
+fn tests(n: u32) -> String {
+    if n == 1 { "1 test".into() } else { format!("{n} tests") }
+}
+
+/// "1 test was", "3 tests were"
+fn were(n: u32) -> String {
+    if n == 1 { "1 test was".into() } else { format!("{n} tests were") }
+}
+
+/// Assertions about a `cargo test` run of the learner's tests.
+fn check_tests(
+    a: &Assertion,
+    obs: &crate::tests_run::TestsObs,
+    problem: &Problem,
+) -> Result<(), Failure> {
+    use crate::tests_run::Outcome;
+    let rendered = || rb_runner::strip_ansi(&format!("{}{}", obs.build.rendered, obs.build.log));
+    let limit = format!("{:.1} s", problem.time_limit_ms.max(1000) as f64 / 1000.0);
+    let failures = |what: &str| -> Failure {
+        let mut report = String::new();
+        let mut names = Vec::new();
+        for t in obs.failing() {
+            if t.out.timed_out {
+                names.push(format!("the tests in `{}` ran longer than {limit} and were stopped", t.label));
+            }
+            for (n, o) in &t.tests {
+                if *o == Outcome::Failed {
+                    names.push(format!("`{n}`"));
+                }
+            }
+            if !report.is_empty() {
+                report.push_str("\n\n");
+            }
+            report.push_str(&format!("{}:\n{}", t.label, t.report()));
+        }
+        diff(
+            format!("{what}: {}.", names.join(", ")),
+            "every test passes",
+            report,
+        )
+    };
+    match a {
+        Assertion::MutantCaught => {
+            if !obs.build.ok {
+                return Err(diff(
+                    "Your tests don't compile against this version of the code, so they never ran. A compile error doesn't count as catching a bug: test only what the description promises.",
+                    "the tests compile, then one fails",
+                    rendered(),
+                ));
+            }
+            if obs.failing().is_empty() {
+                return Err(fail(format!(
+                    "A planted bug survived: {} on a version of the code that is wrong. Add a test whose expected value that bug would change.",
+                    match obs.ran() {
+                        0 => "no test ran".to_string(),
+                        1 => "your one test passed".to_string(),
+                        n => format!("all {n} of your tests passed"),
+                    }
+                )));
+            }
+            Ok(())
+        }
+        _ if !obs.build.ok => Err(diff(
+            "Your tests don't compile.",
+            "the tests compile",
+            rendered(),
+        )),
+        Assertion::TestsPass => {
+            if obs.failing().is_empty() {
+                Ok(())
+            } else {
+                Err(failures("These tests fail on the supplied code, which is correct"))
+            }
+        }
+        Assertion::TestsRan { min, eq } => {
+            let n = obs.ran();
+            let names: Vec<String> = obs
+                .all()
+                .filter(|(_, _, o)| *o != Outcome::Ignored)
+                .map(|(_, n, _)| n.to_string())
+                .collect();
+            let shown = if names.is_empty() {
+                "none".to_string()
+            } else {
+                names.join("\n")
+            };
+            if let Some(m) = min
+                && n < *m
+            {
+                return Err(diff(
+                    format!("Only {} ran; at least {m} should. A function runs as a test only when it has `#[test]` above it.", tests(n)),
+                    format!("at least {m} tests"),
+                    shown,
+                ));
+            }
+            if let Some(e) = eq
+                && n != *e
+            {
+                return Err(diff(
+                    format!("{} ran; exactly {e} should.", tests(n)),
+                    format!("{e} tests"),
+                    shown,
+                ));
+            }
+            Ok(())
+        }
+        Assertion::TestsIgnored { eq } => {
+            let n = obs.ignored();
+            if n == *eq {
+                Ok(())
+            } else {
+                Err(diff(
+                    format!("{} listed as ignored; exactly {eq} should be.", were(n)),
+                    eq.to_string(),
+                    n.to_string(),
+                ))
+            }
+        }
+        Assertion::TestsFiltered { eq } => {
+            let n = obs.filtered();
+            if n == *eq {
+                Ok(())
+            } else {
+                Err(diff(
+                    format!("{} filtered out; exactly {eq} should be.", were(n)),
+                    eq.to_string(),
+                    n.to_string(),
+                ))
+            }
+        }
+        Assertion::TestOutcome { name, outcome } => {
+            let suffix = format!("::{name}");
+            let found = obs
+                .all()
+                .find(|(_, n, _)| *n == name.as_str() || n.ends_with(&suffix))
+                .map(|(_, _, o)| o);
+            let actual = match found {
+                Some(Outcome::Passed) => "passed",
+                Some(Outcome::Failed) => "failed",
+                Some(Outcome::Ignored) => "ignored",
+                None => "absent",
+            };
+            if actual == outcome {
+                Ok(())
+            } else {
+                let what = |o: &str| match o {
+                    "absent" => "doesn't run".to_string(),
+                    o => format!("is {o}"),
+                };
+                Err(diff(
+                    format!("The test `{name}` {}; it should be {}.", what(actual), match outcome.as_str() {
+                        "absent" => "left out of this run",
+                        o => o,
+                    }),
+                    outcome.clone(),
+                    actual,
+                ))
+            }
+        }
+        _ => Err(fail(
+            "internal: this check doesn't apply to a `cargo test` run",
+        )),
     }
 }

@@ -1,0 +1,225 @@
+# Chapter 11 lesson visuals. Test-runner output on steppers is imported from the spec
+# (its terminal panel `out` prints on the last step); these add the scenes.
+
+[[lessons]]
+id = "L11.1"
+read_more = ["ch11-01-writing-tests.md"]
+
+[[lessons.screens]]
+key = "s2"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "tree"
+layout = "tree"
+nodes = [
+  { id = "crate", label = "crate adder", sub = "src/lib.rs" },
+  { id = "add", label = "add", sub = "fn", parent = "crate", state = { badge = "pub", style = "rust" } },
+  { id = "tests", label = "tests", sub = "mod", parent = "crate", state = { hidden = true, badge = "only in cargo test" } },
+  { id = "works", label = "it_works", sub = "fn", parent = "tests", state = { hidden = true, badge = "#[test]" } },
+]
+edges = [
+  { id = "use", from = "tests", to = "add", label = "use super::*", hidden = true, style = "dashed" },
+]
+[[lessons.screens.steps]]
+n = 1
+ops = [{ panel = "tree", op = "node", id = "add", lit = true, note = "the code under test" }]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "tree", op = "node", id = "add", lit = false, note = "" },
+  { panel = "tree", op = "node", id = "tests", hidden = false, lit = true, note = "#[cfg(test)]: left out of cargo build" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "tree", op = "node", id = "tests", lit = false, note = "" },
+  { panel = "tree", op = "edge", id = "use", hidden = false },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [{ panel = "tree", op = "node", id = "works", hidden = false, lit = true, note = "the runner calls it" }]
+
+[[lessons.screens]]
+key = "s4"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "lanes"
+layout = "grid"
+nodes = [
+  { id = "exploration", label = "exploration", sub = "thread", state = { value = "running…", style = "rust" } },
+  { id = "another", label = "another", sub = "thread", state = { value = "running…", style = "rust" } },
+]
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "lanes", op = "node", id = "exploration", lit = true },
+  { panel = "lanes", op = "node", id = "another", lit = true },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "lanes", op = "node", id = "exploration", value = "ok", style = "green", lit = false },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "lanes", op = "node", id = "another", value = "panicked → FAILED", style = "red" },
+]
+
+[[lessons]]
+id = "L11.2"
+read_more = ["ch11-01-writing-tests.md"]
+
+[[lessons.screens]]
+key = "s2"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "vars"
+layout = "row"
+nodes = [
+  { id = "result", label = "result", sub = "u64", state = { hidden = true } },
+  { id = "card", label = "assert_eq!(result, 4)", sub = "check", state = { hidden = true } },
+]
+[[lessons.screens.steps]]
+n = 1
+ops = [{ panel = "vars", op = "node", id = "result", hidden = false, value = "5", lit = true, note = "add_two has a bug: a + 3" }]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "vars", op = "node", id = "result", lit = false },
+  { panel = "vars", op = "node", id = "card", hidden = false, value = "left: 5 · right: 4", style = "red", lit = true },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [{ panel = "vars", op = "node", id = "card", value = "assert_ne!(result, 4) passes when result is not 4", style = "plain", lit = false }]
+
+[[lessons.screens]]
+key = "s5"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "grid"
+layout = "grid"
+nodes = [
+  { id = "bug1", label = "Bug 1", sub = "if s > pass_mark", state = { value = "—" } },
+  { id = "bug2", label = "Bug 2", sub = "for &s in &scores[1..]", state = { value = "—" } },
+  { id = "bug3", label = "Bug 3", sub = "if s <= pass_mark", state = { value = "—" } },
+]
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "grid", op = "node", id = "bug1", value = "[50, 70, 90]: passes (2)" },
+  { panel = "grid", op = "node", id = "bug2", value = "[50, 70, 90]: passes (2)" },
+  { panel = "grid", op = "node", id = "bug3", value = "[50, 70, 90]: FAILS (1)", style = "red", badge = "caught" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "grid", op = "node", id = "bug1", value = "[60]: FAILS (0)", style = "red", badge = "caught" },
+  { panel = "grid", op = "node", id = "bug2", value = "[60]: FAILS (0)", style = "red", badge = "caught" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "grid", op = "node", id = "bug2", value = "[]: FAILS (panics)" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "grid", op = "node", id = "bug2", value = "[80, 10]: FAILS (0)", note = "every bug caught" },
+]
+
+[[lessons]]
+id = "L11.3"
+read_more = ["ch11-01-writing-tests.md"]
+
+[[lessons.screens]]
+key = "s2"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "vars"
+layout = "row"
+nodes = [
+  { id = "value", label = "value", sub = "i32", state = { value = "200" } },
+  { id = "returned", label = "returned", sub = "Guess", state = { hidden = true } },
+]
+[[lessons.screens.steps]]
+n = 1
+ops = [{ panel = "vars", op = "node", id = "value", lit = true, note = "200 < 1 is false: no panic" }]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "vars", op = "node", id = "value", lit = false },
+  { panel = "vars", op = "node", id = "returned", hidden = false, value = "Guess { value: 200 }", style = "red", note = "should panic → did not panic → FAILED" },
+]
+
+[[lessons]]
+id = "L11.4"
+read_more = ["ch11-02-running-tests.md"]
+
+[[lessons.screens]]
+key = "s2"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "lanes"
+layout = "grid"
+nodes = [
+  { id = "a", label = "test_a", sub = "thread 1", state = { value = "running", style = "rust" } },
+  { id = "b", label = "test_b", sub = "thread 2", state = { value = "running", style = "rust" } },
+  { id = "c", label = "test_c", sub = "thread 3", state = { value = "running", style = "rust" } },
+  { id = "one", label = "1 thread", sub = "--test-threads=1", state = { hidden = true } },
+]
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "lanes", op = "node", id = "a", lit = true },
+  { panel = "lanes", op = "node", id = "b", lit = true },
+  { panel = "lanes", op = "node", id = "c", lit = true },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "lanes", op = "node", id = "a", value = "write test-output.txt", style = "red", badge = "same file!" },
+  { panel = "lanes", op = "node", id = "b", value = "write test-output.txt", style = "red", badge = "same file!" },
+  { panel = "lanes", op = "node", id = "c", lit = false },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "lanes", op = "node", id = "a", hidden = true },
+  { panel = "lanes", op = "node", id = "b", hidden = true },
+  { panel = "lanes", op = "node", id = "c", hidden = true },
+  { panel = "lanes", op = "node", id = "one", hidden = false, lit = true, value = "test_a → test_b → test_c", style = "green" },
+]
+
+[[lessons]]
+id = "L11.5"
+read_more = ["ch11-03-test-organization.md"]
+
+[[lessons.screens]]
+key = "s3"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "tree"
+layout = "tree"
+nodes = [
+  { id = "pkg", label = "adder/", kind = "folder", sub = "package" },
+  { id = "lib", label = "src/lib.rs", kind = "file", parent = "pkg", state = { badge = "crate adder" } },
+  { id = "tests", label = "tests/", kind = "folder", parent = "pkg" },
+  { id = "it", label = "integration_test.rs", kind = "file", parent = "tests", state = { badge = "separate crate" } },
+  { id = "fn", label = "it_adds_two", sub = "fn", parent = "it", state = { hidden = true, badge = "#[test]" } },
+]
+edges = [
+  { id = "use", from = "it", to = "lib", label = "use adder::add_two", hidden = true, style = "dashed" },
+]
+[[lessons.screens.steps]]
+n = 1
+ops = [{ panel = "tree", op = "node", id = "it", lit = true, note = "compiled only by cargo test" }]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "tree", op = "node", id = "it", lit = false, note = "" },
+  { panel = "tree", op = "edge", id = "use", hidden = false },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [{ panel = "tree", op = "node", id = "fn", hidden = false, lit = true }]

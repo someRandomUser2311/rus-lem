@@ -1,0 +1,20 @@
+[[tests]]
+key = "t09"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["ret:Result<(),String>"], inside = "cfg_test", message = "Write at least one test that returns `Result<(), String>`." },
+  { check = "uses", what = ["try"], inside = "cfg_test", message = "Use `?` in the `Result` test on a call that must succeed." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in these tests." },
+]
+
+[[wrong]]
+name = "is-err-checks"
+fails = ["t07"]
+
+[[wrong]]
+name = "no-zero"
+fails = ["t05"]
+
+[[wrong]]
+name = "question-mark-on-error"
+fails = ["t01"]

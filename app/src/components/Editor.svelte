@@ -6,7 +6,7 @@
   import { rust } from '@codemirror/lang-rust'
   import { bracketMatching, HighlightStyle, indentOnInput, syntaxHighlighting } from '@codemirror/language'
   import { EditorState, type Extension } from '@codemirror/state'
-  import { drawSelection, EditorView, highlightActiveLine, highlightActiveLineGutter, keymap, lineNumbers } from '@codemirror/view'
+  import { Decoration, drawSelection, EditorView, highlightActiveLine, highlightActiveLineGutter, keymap, lineNumbers, ViewPlugin, type DecorationSet, type ViewUpdate } from '@codemirror/view'
   import { tags as t } from '@lezer/highlight'
   import { onDestroy } from 'svelte'
   import type { SourceFile } from '../lib/bindings/SourceFile'
@@ -19,6 +19,7 @@
     lsp = null,
     onchange,
     readonly = false,
+    locked = {},
   }: {
     files: SourceFile[]
     active: string
@@ -26,6 +27,8 @@
     lsp?: LspSession | null
     onchange: (files: SourceFile[]) => void
     readonly?: boolean
+    /** Per file: the first `len` characters are supplied code that can't be edited; `all`: none of the file can. */
+    locked?: Record<string, { len: number; all: boolean }>
   } = $props()
 
   let host: HTMLDivElement | undefined = $state()
@@ -64,9 +67,51 @@
       '.cm-tooltip-autocomplete > ul > li[aria-selected] .cm-completionDetail': { color: 'rgba(255,255,255,.8)' },
       '.cm-tooltip.cm-completionInfo, .cm-tooltip-hover': { padding: '8px 12px', maxWidth: '520px', fontSize: '13px', lineHeight: '1.5' },
       '.cm-diagnostic': { fontFamily: 'var(--sans)', fontSize: '13px' },
+      '.cm-supplied': { backgroundColor: 'rgba(255,255,255,.035)', opacity: '.78' },
     },
     { dark: true },
   )
+
+  /** Keeps the first `len` characters as they are, tinted; with `all`, the whole file. */
+  function lockedPrefix(len: number, all: boolean): Extension {
+    const tint = Decoration.line({ class: 'cm-supplied' })
+    const build = (view: EditorView): DecorationSet => {
+      const marks = []
+      for (const { from, to } of view.visibleRanges) {
+        for (let pos = from; pos <= to; ) {
+          const line = view.state.doc.lineAt(pos)
+          if (!all && line.to >= len) break
+          marks.push(tint.range(line.from))
+          pos = line.to + 1
+        }
+      }
+      return Decoration.set(marks)
+    }
+    return [
+      all
+        ? EditorState.readOnly.of(true)
+        : EditorState.transactionFilter.of(tr => {
+            // Typing at the very end of the supplied part is allowed: it goes below it.
+            let touches = false
+            tr.changes.iterChangedRanges(fromA => {
+              if (fromA < len) touches = true
+            })
+            return touches ? [] : tr
+          }),
+      ViewPlugin.fromClass(
+        class {
+          decorations: DecorationSet
+          constructor(view: EditorView) {
+            this.decorations = build(view)
+          }
+          update(u: ViewUpdate) {
+            if (u.docChanged || u.viewportChanged) this.decorations = build(u.view)
+          }
+        },
+        { decorations: v => v.decorations },
+      ),
+    ]
+  }
 
   function extensionsFor(path: string): Extension[] {
     const isRust = path.endsWith('.rs')
@@ -93,6 +138,8 @@
       EditorView.contentAttributes.of({ spellcheck: 'false', autocorrect: 'off', autocapitalize: 'off' }),
     ]
     if (isRust) ext.push(rust())
+    const lock = locked[path]
+    if (lock) ext.push(lockedPrefix(lock.len, lock.all))
     if (completion) {
       ext.push(closeBrackets())
       if (!lsp) ext.push(basicCompletion())

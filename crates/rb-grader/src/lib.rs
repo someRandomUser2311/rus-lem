@@ -4,6 +4,7 @@
 //! against that run's observation.
 
 mod assert;
+mod tests_run;
 
 use anyhow::Result;
 use rb_content::{Assertion, BuildMode, Case, Problem, Run, SourceFile, TestCase, expand};
@@ -181,6 +182,8 @@ pub(crate) enum Observation {
         per_file: Vec<(String, Result<rb_srccheck::SourceInfo, String>)>,
     },
     Manifest(Result<toml::Value, String>),
+    /// Test-writing problems: what `cargo test` did.
+    Tests(tests_run::TestsObs),
 }
 
 /// The executables built for a grade.
@@ -406,12 +409,15 @@ impl Grader<'_> {
         mut on_event: impl FnMut(GradeEvent),
     ) -> Result<GradeResult> {
         let start = Instant::now();
-        let dir = self.fresh_dir(&problem.id)?;
-        write_files(&dir, files)?;
         let tests = selected_tests(problem, mode, part);
         let part = problem
             .checkpoints
             .then(|| part.unwrap_or(problem.parts.len() as u32));
+        if !problem.subject.is_empty() {
+            return self.grade_tests(problem, files, mode, part, &tests, start, on_event);
+        }
+        let dir = self.fresh_dir(&problem.id)?;
+        write_files(&dir, files)?;
 
         // Compile if any selected test needs to run or build the program.
         let mut compile = Compiled {
@@ -506,6 +512,156 @@ impl Grader<'_> {
         let _ = std::fs::remove_dir_all(&dir);
 
         let verdict = if cancelled {
+            Verdict::Cancelled
+        } else {
+            verdict(mode, &results)
+        };
+        Ok(GradeResult {
+            mode,
+            part,
+            verdict,
+            compile,
+            tests: results,
+            ms: start.elapsed().as_millis() as u64,
+        })
+    }
+
+    /// Test-writing problems: the learner's tests run against the subject and each mutant
+    /// (in parallel, each in its own package and target folder); rule tests look at the
+    /// learner's part of the code only.
+    #[allow(clippy::too_many_arguments)]
+    fn grade_tests(
+        &self,
+        problem: &Problem,
+        files: &[SourceFile],
+        mode: Mode,
+        part: Option<u32>,
+        tests: &[&TestCase],
+        start: Instant,
+        mut on_event: impl FnMut(GradeEvent),
+    ) -> Result<GradeResult> {
+        let not_run = |compile: Compiled| GradeResult {
+            mode,
+            part,
+            verdict: Verdict::CompileError,
+            compile,
+            tests: tests
+                .iter()
+                .map(|t| result(t, TestStatus::NotRun, None, None, None, 0))
+                .collect(),
+            ms: start.elapsed().as_millis() as u64,
+        };
+        let parts = match problem.learner_parts(files) {
+            Ok(p) => p,
+            Err(why) => {
+                return Ok(not_run(Compiled {
+                    ok: false,
+                    rendered: format!("error: {why}\n"),
+                    ..Default::default()
+                }));
+            }
+        };
+        let dir = self.fresh_dir(&problem.id)?;
+        let mut runs: Vec<&Run> = Vec::new();
+        for t in tests {
+            if matches!(t.run, Run::Tests { .. }) && !runs.contains(&&t.run) {
+                runs.push(&t.run);
+            }
+        }
+        // The supplied code first: its build is the one shown, and decides compile errors.
+        runs.sort_by_key(|r| matches!(r, Run::Tests { mutant: Some(_), .. }));
+        on_event(GradeEvent::Phase {
+            text: "Building and running your tests".into(),
+        });
+        let width = std::thread::available_parallelism()
+            .map_or(2, |n| n.get())
+            .clamp(1, 4);
+        let mut observed: Vec<Option<(Result<tests_run::TestsObs>, u64)>> =
+            (0..runs.len()).map(|_| None).collect();
+        for (chunk_i, chunk) in runs.chunks(width).enumerate() {
+            if self.cancelled() {
+                break;
+            }
+            std::thread::scope(|scope| {
+                let handles: Vec<_> = chunk
+                    .iter()
+                    .enumerate()
+                    .map(|(i, run)| {
+                        let n = chunk_i * width + i;
+                        let rdir = dir.join(format!("run-{n}"));
+                        let parts = &parts;
+                        scope.spawn(move || {
+                            let t0 = Instant::now();
+                            let Run::Tests { mutant, command } = run else {
+                                unreachable!()
+                            };
+                            let pkg = problem.assemble(parts, mutant.as_deref());
+                            let r = std::fs::create_dir_all(&rdir)
+                                .map_err(anyhow::Error::from)
+                                .and_then(|_| self.run_tests(problem, &pkg, command, &rdir));
+                            (n, r, t0.elapsed().as_millis() as u64)
+                        })
+                    })
+                    .collect();
+                for h in handles {
+                    if let Ok((n, r, ms)) = h.join() {
+                        observed[n] = Some((r, ms));
+                    }
+                }
+            });
+        }
+        let mut cache: HashMap<Run, (Observation, u64)> = HashMap::new();
+        let mut compile = Compiled {
+            ok: true,
+            ..Default::default()
+        };
+        let mut shown = false;
+        for (run, o) in runs.iter().zip(observed) {
+            let Some((r, ms)) = o else { continue };
+            let obs = r?;
+            if !shown && matches!(run, Run::Tests { mutant: None, .. }) {
+                compile = obs.build.clone();
+                shown = true;
+            }
+            cache.insert((*run).clone(), (Observation::Tests(obs), ms));
+        }
+        on_event(GradeEvent::Compiled {
+            compile: compile.clone(),
+        });
+        if !compile.ok {
+            let _ = std::fs::remove_dir_all(&dir);
+            return Ok(not_run(compile));
+        }
+        let programs = Programs {
+            plain: None,
+            harness: None,
+            calls: HashMap::new(),
+            fixture: None,
+        };
+        let ctx = assert::Ctx {
+            grader: self,
+            problem,
+            dir: &dir,
+            checkers: Default::default(),
+        };
+        let mut results = Vec::new();
+        for t in tests {
+            if !cache.contains_key(&t.run) {
+                let t0 = Instant::now();
+                let obs = if self.cancelled() {
+                    Observation::NotRunnable("Cancelled.".into())
+                } else {
+                    self.observe(problem, &t.run, &dir, &programs, &parts)?
+                };
+                cache.insert(t.run.clone(), (obs, t0.elapsed().as_millis() as u64));
+            }
+            let (obs, ms) = &cache[&t.run];
+            let r = check(problem, t, obs, *ms, &ctx);
+            on_event(GradeEvent::Test { result: r.clone() });
+            results.push(r);
+        }
+        let _ = std::fs::remove_dir_all(&dir);
+        let verdict = if self.cancelled() {
             Verdict::Cancelled
         } else {
             verdict(mode, &results)
@@ -1107,6 +1263,15 @@ impl Grader<'_> {
                     }
                     _ => Observation::CompileFailed(c),
                 }
+            }
+            Run::Tests { mutant, command } => {
+                let parts = problem
+                    .learner_parts(files)
+                    .unwrap_or_else(|_| files.to_vec());
+                let pkg = problem.assemble(&parts, mutant.as_deref());
+                let rdir = dir.join("tests-run");
+                std::fs::create_dir_all(&rdir)?;
+                Observation::Tests(self.run_tests(problem, &pkg, command, &rdir)?)
             }
             Run::Build { command } => {
                 let c = self.cargo(problem, dir, command)?;

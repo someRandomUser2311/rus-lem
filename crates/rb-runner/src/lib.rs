@@ -178,9 +178,22 @@ impl Toolchain {
         vendor: Option<&Path>,
         cancel: Option<&AtomicBool>,
     ) -> Result<Compiled> {
+        self.cargo_args(dir, &[sub], target_dir, vendor, cancel)
+    }
+
+    /// [`Toolchain::cargo`] with more arguments (`["test", "--no-run", "--test", "shelf"]`).
+    /// Test builds list every test executable in [`Compiled::tests`].
+    pub fn cargo_args(
+        &self,
+        dir: &Path,
+        args: &[&str],
+        target_dir: Option<&Path>,
+        vendor: Option<&Path>,
+        cancel: Option<&AtomicBool>,
+    ) -> Result<Compiled> {
         let mut cmd = Command::new(&self.cargo);
         self.env(&mut cmd);
-        cmd.current_dir(dir).arg(sub).args([
+        cmd.current_dir(dir).args(args).args([
             "--message-format=json-diagnostic-rendered-ansi",
             "--offline",
             "--color=always",
@@ -216,6 +229,17 @@ impl Toolchain {
                 Some("compiler-artifact") => {
                     if let Some(exe) = v["executable"].as_str() {
                         c.executable = Some(PathBuf::from(exe));
+                        if v["profile"]["test"].as_bool() == Some(true) {
+                            // The target's source file, relative to the package: `src/lib.rs`,
+                            // `tests/shelf.rs`.
+                            let src = v["target"]["src_path"].as_str().unwrap_or("");
+                            let label = Path::new(src)
+                                .strip_prefix(dir.canonicalize().unwrap_or(dir.to_path_buf()))
+                                .or_else(|_| Path::new(src).strip_prefix(dir))
+                                .map(|p| p.to_string_lossy().replace('\\', "/"))
+                                .unwrap_or_else(|_| src.to_string());
+                            c.tests.push((label, PathBuf::from(exe)));
+                        }
                     }
                 }
                 _ => {}
@@ -286,6 +310,10 @@ pub struct Compiled {
     pub log: String,
     #[ts(type = "string | null")]
     pub executable: Option<PathBuf>,
+    /// Test builds: each test executable, with its target's source file.
+    #[serde(skip)]
+    #[ts(skip)]
+    pub tests: Vec<(String, PathBuf)>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]

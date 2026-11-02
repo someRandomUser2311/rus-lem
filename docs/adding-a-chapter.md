@@ -76,6 +76,14 @@ Unless a test states otherwise (`exit_code`, `stderr_contains`, `stderr_empty`),
 - `checkpoints = true` and `parts = [...]`: each part is graded on its own submission (tests carry `part = n`); the problem is Accepted with the last part. Reference solutions of earlier parts go in `part-<n>/`.
 - `checkers/<name>.rs`: a checker program for output a fixed expectation can't judge (random results). It gets the stdin and stdout file paths and exits 0 to pass, otherwise prints why.
 
+**Test-writing problems** (kind `test-writing`, from Chapter 11): the learner writes the tests.
+
+- The spec's `**Provided code**` fences are the code under test (`subject`), supplied and read-only: the editor locks it, and the learner's tests go below it in the same file or in `tests/*.rs`. `Cargo.toml` is locked too. A milestone whose provided code is an earlier package gives it as `problems/<ID>/subject/` instead.
+- Starter, reference solution, `part-<n>/` and `wrong/<name>/` files hold **only the learner's tests**; course-check puts each below the provided code of the same path.
+- `**Mutants**` table: `| M01 | title | `` `src/fees.rs`: `before` → `after` `` | a test that catches it |`. Each `before` must occur exactly once; several replacements are separated by `;`. A change too big for a cell goes in `mutants/<ID>/<files>` as whole files.
+- Test rows: `` `cargo test -- --include-ignored` `` on the provided code → `Every test passes; At least 3 tests run` (also `N tests run`, `N tests ignored`, `N tests filtered out`, `` `name` is ignored ``/`passes`/`fails`/`doesn't run`); a mutant ID → `A test fails` (the tests compile against it and one fails or times out; a compile error doesn't count). Rule rows look at the learner's tests only (facts such as `attr:test`, `stray_test`, `should_panic_expected`, `should_panic_bare`, `assert_msg`, `assert_bare`, `cfg_test`). Checkpoint rows start with `Part N:`.
+- Weaker suites go in `wrong/`: each names the mutant rows it lets through.
+
 **Assertions**
 
 | Group | Checks |
@@ -106,6 +114,7 @@ steps = [
 
 - **Multi-file screens:** a screen with several `**Code** (\`path\`):` blocks for different files shows them as tabs; step rows written `src/lib.rs:2` switch to that file.
 - **Panels:** `terminal` (printed output) and `scene` (boxes and arrows; `layout = "row" | "tree" | "grid"`; nodes with `kind = box | file | folder | code`, `parent`, `state`).
+- **Test output:** a screen whose code has `#[test]` functions and no `main` is checked with `cargo test`. Its `**Test output** (\`cargo test\`):` block (or `**Runtime output**`, for tests that fail on purpose) becomes a terminal panel: shown from the start on concept and compare screens, printed on the last step of a stepper. Overlay ops on a step are added to the imported ones.
 - **Ops:** `print`, `badge`, `node` (`hidden`, `style`, `lit`, `ghost`, `badge`, `note`, `value`; an empty string clears a badge or value), `edge`, `reset`. `value` shows a variable's or result's value in code font.
 - **Step extras:** `notes` (badges next to code lines) and `links` (arrows between code spans).
 - Memory diagrams, ownership and borrow arrows are scenes too: stack and heap groups, `cells` nodes, pointer edges, and `ghost` for moved values.
@@ -145,5 +154,5 @@ A new kind of run, assertion or visual is a small, one-time engine change in `rb
 | 4 | `compile_fail` runs (expected error codes) |
 | 9 | Done: panic rows, expected-failure program rows and suite cases, warning screens in lessons |
 | 10 | Done: source facts for traits and generics (`trait:NAME`, `required_fn:`/`default_fn:`, `bound:TRAIT`, `where`, `dyn`, `lifetime:NAME`, `impl_unbounded`, `borrow`, `deref`, `field_access:NAME`); steppers over a rejected program (their **Compiler output** is checked and shown on the last step); lib-plus-main lesson packages named by `main.rs`'s `use` |
-| 11 | `mutants` (the learner's tests must catch buggy versions) |
+| 11 | Done: test-writing problems (supplied read-only code, the learner's tests run against it and against mutants, `cargo test` command rows), test facts in source rules, lesson and quiz code checked with `cargo test` |
 | 17 | vendored `trpl` |

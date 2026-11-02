@@ -263,6 +263,9 @@ pub enum Panel {
         /// Show a blinking cursor where the next character will go.
         #[serde(default)]
         cursor: bool,
+        /// Shown from the start, before any step prints (a concept screen's test output).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        text: Option<String>,
     },
     /// Generic boxes-and-arrows diagram.
     Scene {
@@ -634,7 +637,28 @@ pub struct Problem {
     /// Deliberately wrong variants used by course-check.
     #[serde(default)]
     pub wrong: Vec<WrongVariant>,
+    /// Test-writing problems: the code under test, supplied and read-only. A learner file
+    /// with the same path starts with this text; the learner writes only what follows.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub subject: Vec<SourceFile>,
+    /// Test-writing problems: versions of the subject with one planted bug each, which
+    /// the learner's tests must catch.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub mutants: Vec<Mutant>,
     pub tests: Vec<TestCase>,
+}
+
+/// A buggy version of a test-writing problem's subject.
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct Mutant {
+    /// "M01"
+    pub id: String,
+    pub title: String,
+    /// What changed, as the spec writes it.
+    pub change_md: String,
+    /// Replacements for subject files (whole files); other subject files stay as they are.
+    pub files: Vec<SourceFile>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
@@ -736,6 +760,15 @@ pub enum Run {
         main: String,
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         remove: Vec<String>,
+    },
+    /// Test-writing problems: `cargo test` with these arguments (`-- --include-ignored`,
+    /// `--test contract`, `shelf`) on the subject, or on a mutant of it, with the
+    /// learner's tests added. Each test binary runs on its own, with a time limit.
+    Tests {
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        mutant: Option<String>,
+        #[serde(default)]
+        command: String,
     },
     /// Run a Cargo command and look at its result and the files it leaves.
     Build { command: String },
@@ -1104,6 +1137,25 @@ pub enum Assertion {
     FileExists {
         path: String,
     },
+    /// Tests runs: the tests compiled and every test that ran passed.
+    TestsPass,
+    /// Tests runs: how many tests ran (passed or failed, not ignored or filtered out).
+    TestsRan {
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        min: Option<u32>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        eq: Option<u32>,
+    },
+    /// Tests runs: how many tests were listed as ignored.
+    TestsIgnored { eq: u32 },
+    /// Tests runs: how many tests the filter left out.
+    TestsFiltered { eq: u32 },
+    /// Tests runs: the test with this name (its full path, or its last segments, such as
+    /// `tests::slow`) passed, failed, was ignored or didn't run (`absent`).
+    TestOutcome { name: String, outcome: String },
+    /// Mutant runs: the tests compiled against the mutant, and at least one failed or ran
+    /// out of time. A compile error doesn't count as catching the bug.
+    MutantCaught,
     /// Placeholder for a row the importer couldn't convert. Blocks bundling.
     Todo {
         note: String,
@@ -1118,9 +1170,165 @@ pub struct MacroCall {
     pub fmt: String,
 }
 
+/// Test-writing problems: a mutant's files from its "What changed" cell, one or more
+/// `` `before` → `after` `` replacements separated by `;`, in the subject file named first
+/// (`` `src/fees.rs`: … ``; the first subject file by default). Each `before` must occur
+/// exactly once (after the earlier replacements). A cell without `→` gives no files: the
+/// mutant is authored as whole files.
+pub fn apply_change(subject: &[SourceFile], change_md: &str) -> Result<Vec<SourceFile>, String> {
+    let arrows = change_md.matches('→').count();
+    if arrows == 0 {
+        return Ok(Vec::new());
+    }
+    let mut spans = code_spans(change_md);
+    let path = match spans.first() {
+        Some(p)
+            if p.ends_with(".rs") && change_md.trim_start().starts_with(&format!("`{p}`:")) =>
+        {
+            spans.remove(0)
+        }
+        _ => subject.first().map(|f| f.path.clone()).unwrap_or_default(),
+    };
+    if spans.len() != arrows * 2 {
+        return Err(format!("{arrows} `→` but {} code spans", spans.len()));
+    }
+    let base = subject
+        .iter()
+        .find(|f| f.path == path)
+        .ok_or_else(|| format!("no provided file `{path}`"))?;
+    let mut text = base.text.clone();
+    for pair in spans.chunks(2) {
+        let (before, after) = (&pair[0], &pair[1]);
+        let found = text.matches(before.as_str()).count();
+        if found != 1 {
+            return Err(format!(
+                "`{before}` occurs {found} times in `{path}` (exactly once needed)"
+            ));
+        }
+        text = text.replacen(before.as_str(), after, 1);
+    }
+    Ok(vec![SourceFile { path, text }])
+}
+
+/// The contents of the `code spans` in a Markdown line, trimmed (`` `a \| b` `` keeps the bar).
+fn code_spans(s: &str) -> Vec<String> {
+    let mut out = Vec::new();
+    let mut rest = s;
+    while let Some(i) = rest.find('`') {
+        let run = rest[i..].chars().take_while(|c| *c == '`').count();
+        let after = &rest[i + run..];
+        let fence = "`".repeat(run);
+        let mut search = 0;
+        let mut end = None;
+        while let Some(j) = after[search..].find(&fence) {
+            let at = search + j;
+            let next = after[at + run..].chars().next();
+            if next != Some('`') {
+                end = Some(at);
+                break;
+            }
+            search = at + run + after[at + run..].chars().take_while(|c| *c == '`').count();
+        }
+        let Some(end) = end else { break };
+        out.push(after[..end].trim().to_string());
+        rest = &after[end + run..];
+    }
+    out
+}
+
+/// Test-writing problems: the learner's files from their parts. A part for a subject file
+/// goes below the subject text, after a blank line; other parts are files of their own.
+/// Subject files without a part are the subject text alone.
+pub fn with_subject(subject: &[SourceFile], parts: Vec<SourceFile>) -> Vec<SourceFile> {
+    if subject.is_empty() {
+        return parts;
+    }
+    let mut out: Vec<SourceFile> = subject
+        .iter()
+        .map(|s| SourceFile {
+            path: s.path.clone(),
+            text: match parts.iter().find(|p| p.path == s.path) {
+                Some(p) => format!("{}\n{}", s.text, p.text),
+                None => s.text.clone(),
+            },
+        })
+        .collect();
+    out.extend(
+        parts
+            .into_iter()
+            .filter(|p| !subject.iter().any(|s| s.path == p.path)),
+    );
+    out
+}
+
 impl Problem {
     pub fn file(&self, path: &str) -> Option<&SourceFile> {
         self.starter.iter().find(|f| f.path == path)
+    }
+
+    /// Test-writing problems: the learner's part of each file, with the supplied subject
+    /// text taken off the front. Fails, naming the file, when a subject file is missing or
+    /// its supplied part was changed.
+    pub fn learner_parts(&self, files: &[SourceFile]) -> Result<Vec<SourceFile>, String> {
+        let mut out = Vec::new();
+        for s in &self.subject {
+            let Some(f) = files.iter().find(|f| f.path == s.path) else {
+                return Err(format!("`{}` is missing; it holds the code under test.", s.path));
+            };
+            let Some(rest) = f.text.strip_prefix(s.text.as_str()) else {
+                return Err(format!(
+                    "The supplied code at the top of `{}` was changed. It is read-only: write your tests below it.",
+                    s.path
+                ));
+            };
+            // A supplied file without a test region (`Cargo.toml`) is read-only as a whole.
+            let has_region = self
+                .starter
+                .iter()
+                .any(|f| f.path == s.path && f.text.len() > s.text.len());
+            if !has_region && !rest.trim().is_empty() {
+                return Err(format!(
+                    "`{}` is supplied and read-only; put your tests in the other files.",
+                    s.path
+                ));
+            }
+            out.push(SourceFile {
+                path: s.path.clone(),
+                text: rest.to_string(),
+            });
+        }
+        for f in files {
+            if !self.subject.iter().any(|s| s.path == f.path) {
+                out.push(f.clone());
+            }
+        }
+        Ok(out)
+    }
+
+    /// Test-writing problems: the package to test, with `mutant`'s files (or the subject)
+    /// followed by the learner's parts.
+    pub fn assemble(&self, parts: &[SourceFile], mutant: Option<&str>) -> Vec<SourceFile> {
+        let replaced = mutant.and_then(|id| self.mutants.iter().find(|m| m.id == id));
+        let mut out = Vec::new();
+        for s in &self.subject {
+            let base = replaced
+                .and_then(|m| m.files.iter().find(|f| f.path == s.path))
+                .unwrap_or(s);
+            let tail = parts
+                .iter()
+                .find(|p| p.path == s.path)
+                .map_or("", |p| p.text.as_str());
+            out.push(SourceFile {
+                path: s.path.clone(),
+                text: format!("{}{tail}", base.text),
+            });
+        }
+        for p in parts {
+            if !self.subject.iter().any(|s| s.path == p.path) {
+                out.push(p.clone());
+            }
+        }
+        out
     }
 }
 

@@ -1,0 +1,16 @@
+[[tests]]
+key = "t08"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["macro:assert_ne"], message = "Use `assert_ne!` at least once: `clamp_byte(-1)` must not be `255`." },
+  { check = "forbids", what = ["assert_bare"], message = "Give every `assert_eq!` and `assert_ne!` a custom message after its two values, saying which case it checks." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in these tests." },
+]
+
+[[wrong]]
+name = "far-from-edges"
+fails = ["t03", "t04"]
+
+[[wrong]]
+name = "no-messages"
+fails = ["t08"]

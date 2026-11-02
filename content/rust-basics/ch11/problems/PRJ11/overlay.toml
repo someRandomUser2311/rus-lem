@@ -1,0 +1,36 @@
+checkpoints = true
+
+[[tests]]
+key = "t16"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["should_panic_expected"], message = "Name each expected panic message: `#[should_panic(expected = \"at least one\")]`." },
+  { check = "forbids", what = ["should_panic_bare"], message = "A bare `#[should_panic]` passes on any panic. Add `expected = \"…\"`." },
+  { check = "uses", what = ["ret:Result<(),String>", "try"], inside = "cfg_test", message = "Write a `parse_count` test that returns `Result<(), String>` and uses `?`." },
+]
+
+[[tests]]
+key = "t31"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["attr:test", "should_panic_expected"], file = "tests/public_contract.rs", message = "`tests/public_contract.rs` needs tests, including a `#[should_panic(expected = \"…\")]` one." },
+  { check = "uses", what = ["use:test_lab::clamp|use:test_lab::*"], file = "tests/public_contract.rs", message = "Use the library by its crate name, `test_lab`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in these tests." },
+]
+
+[[tests]]
+key = "t32"
+run = { kind = "source" }
+asserts = [
+  { check = "rust_files", files = ["src/lib.rs", "tests/public_contract.rs"] },
+  { check = "forbids", what = ["stray_test"], file = "src/lib.rs", message = "Keep every unit test inside the `#[cfg(test)]` module." },
+]
+
+[[wrong]]
+name = "no-edges"
+fails = ["t19", "t20"]
+
+[[wrong]]
+name = "bare-panic"
+part = 3
+fails = ["t11", "t16"]

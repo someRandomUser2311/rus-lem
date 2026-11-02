@@ -1,0 +1,25 @@
+[[tests]]
+key = "t10"
+run = { kind = "source" }
+asserts = [{ check = "uses", what = ["call:can_receive"], inside = "cfg_test", message = "Test the private `can_receive` at its boundary from the test module." }]
+
+[[tests]]
+key = "t11"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["ret:Result<(),MoneyError>"], inside = "cfg_test", message = "Write a test that returns `Result<(), MoneyError>`." },
+  { check = "uses", what = ["try"], inside = "cfg_test", message = "Use `?` on a transfer that must succeed." },
+]
+
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [{ check = "forbids", what = ["call:unwrap", "call:is_ok", "call:is_err"], message = "Compare results and balances by value; no `unwrap()`, `is_ok()` or `is_err()`." }]
+
+[[wrong]]
+name = "error-only-after-overflow"
+fails = ["t03"]
+
+[[wrong]]
+name = "boundary-far-inside"
+fails = ["t06"]

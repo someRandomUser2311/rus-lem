@@ -7,4 +7,8 @@ export type Panel = { "kind": "terminal", id: string, title: string | null,
 /**
  * Show a blinking cursor where the next character will go.
  */
-cursor: boolean, } | { "kind": "scene", id: string, layout: SceneLayout, nodes: Array<SceneNode>, edges: Array<SceneEdge>, };
+cursor: boolean, 
+/**
+ * Shown from the start, before any step prints (a concept screen's test output).
+ */
+text?: string | null, } | { "kind": "scene", id: string, layout: SceneLayout, nodes: Array<SceneNode>, edges: Array<SceneEdge>, };

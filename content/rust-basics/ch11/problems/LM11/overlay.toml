@@ -1,0 +1,33 @@
+checkpoints = true
+
+[[tests]]
+key = "t10"
+run = { kind = "source" }
+asserts = [{ check = "uses", what = ["call:index_of"], inside = "cfg_test", file = "src/library.rs", message = "Test the private `index_of` from the test module in `src/library.rs`." }]
+
+[[tests]]
+key = "t17"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["use:library::Library"], file = "tests/borrowing.rs", message = "Use the crate by its name: `use library::Library;`." },
+  { check = "uses", what = ["ret:Result<(),LibraryError>", "try"], file = "tests/borrowing.rs", message = "Write the borrowing cycle as a test that returns `Result<(), LibraryError>` and uses `?`." },
+]
+
+[[tests]]
+key = "t31"
+run = { kind = "source" }
+asserts = [
+  { check = "rust_files", files = ["src/book.rs", "src/command.rs", "src/error.rs", "src/fees.rs", "src/lib.rs", "src/library.rs", "src/main.rs", "src/member.rs", "src/search.rs", "src/text.rs", "tests/borrowing.rs"] },
+  { check = "forbids", what = ["stray_test"], file = "src/fees.rs", message = "Keep unit tests inside the `#[cfg(test)]` module." },
+  { check = "forbids", what = ["stray_test"], file = "src/library.rs", message = "Keep unit tests inside the `#[cfg(test)]` module." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in these tests." },
+]
+
+[[wrong]]
+name = "no-cap-test"
+fails = ["t19"]
+
+[[wrong]]
+name = "no-reference-search"
+part = 3
+fails = ["t11", "t14"]

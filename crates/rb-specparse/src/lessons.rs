@@ -167,11 +167,16 @@ fn screen(
     let visual_md = md::block_after(lines, "**Visual (static):**").map(|b| md::text(&b));
 
     // An error screen's compiler or runtime output; a stepper's compiler output only (its
-    // runtime output is already in its terminal panels).
+    // runtime output is already in its terminal panels), unless it steps through tests: then
+    // a failing run's test output is checked too.
+    let has_tests = code.as_ref().is_some_and(|c| c.text.contains("#[test]"))
+        || files.iter().any(|f| f.text.contains("#[test]"));
     let output = |lines: &[&str]| {
         let i = lines.iter().position(|l| {
             l.starts_with("**Compiler output")
-                || (kind == ScreenKind::Error && l.starts_with("**Runtime output"))
+                || ((kind == ScreenKind::Error
+                    || (matches!(kind, ScreenKind::Stepper | ScreenKind::Concept) && has_tests))
+                    && l.starts_with("**Runtime output"))
         })?;
         md::fences(&lines[i..])
             .into_iter()
@@ -180,6 +185,9 @@ fn screen(
     };
 
     let mut steps = Vec::new();
+    // A stepper through tests prints its test output (passing, or a failing run's runtime
+    // output) on its last step.
+    let mut stepper_panels = Vec::new();
     if kind == ScreenKind::Stepper {
         for row in md::table_with_header(lines, "Step") {
             if row.len() < 4 {
@@ -201,6 +209,28 @@ fn screen(
         if steps.is_empty() {
             report.error(format!("{lesson} {}: stepper without steps", h[0]));
         }
+        if kind == ScreenKind::Stepper
+            && has_tests
+            && let Some(i) = lines
+                .iter()
+                .position(|l| l.starts_with("**Test output**") || l.starts_with("**Runtime output**"))
+            && let Some(f) = md::fences(&lines[i..]).into_iter().next()
+            && let Some(last) = steps.last_mut()
+        {
+            stepper_panels.push(Panel::Terminal {
+                id: "out".into(),
+                title: md::code_spans(lines[i]).into_iter().next().map(|c| format!("$ {c}")),
+                cursor: false,
+                text: None,
+            });
+            last.ops.push(PanelOp {
+                panel: "out".into(),
+                op: Op::Print {
+                    text: format!("{}\n", f.text.trim_end_matches('\n')),
+                },
+            });
+        }
+
         if let Some(v) = md::block_after(lines, "**Visualizer:**") {
             let v = md::text(&v);
             let v = v.split("\n|").next().unwrap_or("").trim().to_string();
@@ -213,7 +243,7 @@ fn screen(
                 code,
                 files,
                 coming_from,
-                panels: Vec::new(),
+                panels: stepper_panels,
                 steps,
                 // A stepper may walk through a program the compiler rejects.
                 diagnostic: output(lines),
@@ -227,6 +257,10 @@ fn screen(
 
     let mut diagnostic = None;
     let mut annotations = Vec::new();
+    // A concept screen whose tests fail on purpose: its runtime output is checked.
+    if kind == ScreenKind::Concept && has_tests {
+        diagnostic = output(lines);
+    }
     // A stepper may walk through a program the compiler rejects, ending on its diagnostic.
     if kind == ScreenKind::Error || kind == ScreenKind::Stepper {
         diagnostic = output(lines);
@@ -297,6 +331,24 @@ fn screen(
         }
     }
 
+    // A concept or compare screen's `**Test output** (`cargo test`):` is shown as a terminal
+    // panel from the start. A stepper through tests prints its test output (passing, or a
+    // failing run's runtime output) on its last step.
+    let mut panels = stepper_panels;
+    if matches!(kind, ScreenKind::Concept | ScreenKind::Compare)
+        && let Some(i) = lines
+            .iter()
+            .position(|l| l.starts_with("**Test output**") || l.starts_with("**Runtime output**"))
+        && let Some(f) = md::fences(&lines[i..]).into_iter().next()
+    {
+        panels.push(Panel::Terminal {
+            id: "out".into(),
+            title: md::code_spans(lines[i]).into_iter().next().map(|c| format!("$ {c}")),
+            cursor: false,
+            text: Some(format!("{}\n", f.text.trim_end_matches('\n'))),
+        });
+    }
+
     Some(Screen {
         key: String::new(),
         kind,
@@ -305,7 +357,7 @@ fn screen(
         code,
         files,
         coming_from,
-        panels: Vec::new(),
+        panels,
         steps,
         diagnostic,
         annotations,

@@ -1,0 +1,18 @@
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [
+  { check = "count", what = "attr:test", eq = 3, message = "Write exactly three tests: `cheap_small`, `cheap_zero` and `ignored_boundary`." },
+  { check = "uses", what = ["test_fn:cheap_small", "test_fn:cheap_zero", "test_fn:ignored_boundary"], inside = "cfg_test", message = "Name the three tests `cheap_small`, `cheap_zero` and `ignored_boundary`, inside the test module." },
+  { check = "count", what = "attr:ignore", eq = 1, message = "Ignore exactly one test, `ignored_boundary`." },
+  { check = "uses", what = ["ignore_reason"], message = "Give the ignored test a reason: `#[ignore = \"boundary check\"]`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in these tests." },
+]
+
+[[wrong]]
+name = "not-ignored"
+fails = ["t01", "t02", "t05", "t12"]
+
+[[wrong]]
+name = "no-boundary"
+fails = ["t01", "t02", "t03", "t04", "t05", "t09", "t12"]

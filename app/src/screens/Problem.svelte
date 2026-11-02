@@ -143,17 +143,31 @@
   }
 
   // Multi-file Cargo problems: the learner creates module files (`src/text.rs`) and may
-  // delete the ones they created; starter files stay.
-  const canAddFiles = $derived(!!p && p.cargo && p.kind === 'multi-file')
+  // delete the ones they created; starter files stay. Test-writing problems: test files
+  // under `tests/` instead.
+  const testWriting = $derived(!!p && p.subject.length > 0)
+  const canAddFiles = $derived(!!p && p.cargo && (p.kind === 'multi-file' || testWriting))
   let newPath = $state<string | null>(null)
   let newPathError = $state('')
   const MODULE_PATH = /^src\/([a-z_][a-z0-9_]*\/){0,3}[a-z_][a-z0-9_]*\.rs$/
+  const TEST_PATH = /^tests\/([a-z_][a-z0-9_]*\/)?[a-z_][a-z0-9_]*\.rs$/
+  // Test-writing problems: the supplied code at the top of a file is read-only.
+  const locked = $derived.by(() => {
+    const out: Record<string, { len: number; all: boolean }> = {}
+    for (const s of p?.subject ?? []) {
+      const starter = p?.starter.find(f => f.path === s.path)
+      out[s.path] = { len: s.text.length, all: !starter || starter.text === s.text }
+    }
+    return out
+  })
 
   function addFile() {
     if (newPath === null) return
     const path = newPath.trim()
-    if (!MODULE_PATH.test(path)) {
-      newPathError = 'Use a path like src/text.rs or src/fees/rate.rs (lowercase letters, digits and _).'
+    if (testWriting ? !TEST_PATH.test(path) : !MODULE_PATH.test(path)) {
+      newPathError = testWriting
+        ? 'Use a path like tests/shelf.rs or tests/common/mod.rs (lowercase letters, digits and _).'
+        : 'Use a path like src/text.rs or src/fees/rate.rs (lowercase letters, digits and _).'
       return
     }
     if (files.some(f => f.path === path)) {
@@ -304,7 +318,7 @@
         <nav class="tabs files">
           {#each files as f}
             <span class="filetab" class:on={active === f.path}>
-              <button class:on={active === f.path} onclick={() => (active = f.path)}>{f.path}</button>
+              <button class:on={active === f.path} onclick={() => (active = f.path)}>{f.path}{#if locked[f.path]?.all}<span class="ro" title="Supplied, read-only"> · read-only</span>{/if}</button>
               {#if canAddFiles && !p?.starter.some(s => s.path === f.path)}
                 <button class="del" title="Delete {f.path}" aria-label="Delete {f.path}" disabled={!!running} onclick={() => removeFile(f.path)}>×</button>
               {/if}
@@ -312,7 +326,7 @@
           {/each}
           {#if canAddFiles}
             {#if newPath === null}
-              <button class="add" title="Create a module file" disabled={!!running} onclick={() => { newPath = 'src/'; newPathError = '' }}>+ New file</button>
+              <button class="add" title={testWriting ? 'Create a test file' : 'Create a module file'} disabled={!!running} onclick={() => { newPath = testWriting ? 'tests/' : 'src/'; newPathError = '' }}>+ New file</button>
             {:else}
               <!-- svelte-ignore a11y_autofocus -->
               <input
@@ -321,7 +335,7 @@
                 autofocus
                 spellcheck="false"
                 aria-label="New file path"
-                placeholder="src/text.rs"
+                placeholder={testWriting ? 'tests/shelf.rs' : 'src/text.rs'}
                 onkeydown={e => { if (e.key === 'Enter') addFile(); else if (e.key === 'Escape') { newPath = null; newPathError = '' } }}
               />
               <button class="add" onclick={addFile}>Create</button>
@@ -331,9 +345,12 @@
           <span class="spacer"></span>
           {#if lsp}<span class="ra on" title="rust-analyzer is running">rust-analyzer</span>{:else if lspError}<span class="ra" title={lspError}>rust-analyzer unavailable</span>{/if}
         </nav>
+        {#if testWriting}
+          <p class="locknote">{locked[active]?.all ? 'This file is supplied and read-only.' : locked[active] ? 'The shaded code at the top is supplied and read-only. Write your tests below it.' : 'Write your tests in this file.'}</p>
+        {/if}
         <div class="editor-wrap">
           {#key lsp}
-            <Editor bind:this={editor} {files} bind:active completion={app.settings.assistCompletion} {lsp} {onchange} />
+            <Editor bind:this={editor} {files} bind:active completion={app.settings.assistCompletion} {lsp} {onchange} {locked} />
           {/key}
         </div>
       </section>
@@ -452,6 +469,8 @@
   .ra { font-size: 11px; color: var(--code-dim); padding-right: 6px; }
   .ra.on { color: #5BD08A; }
   .editor-wrap { flex: 1; min-height: 0; }
+  .locknote { margin: 0; padding: 6px 14px; font-size: 12.5px; color: var(--code-dim); border-bottom: 1px solid var(--code-line); }
+  .ro { font-family: var(--sans); font-size: 11px; color: var(--code-dim); }
   .pane { flex: 1; padding: 18px 20px 32px; }
   .pane :global(.prose) { font-size: 15.5px; }
   .pane h3 { font-size: 15px; margin: 20px 0 8px; }

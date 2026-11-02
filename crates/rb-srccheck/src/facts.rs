@@ -58,6 +58,12 @@
 //! | `call_path:PATH`, `path:PATH` | a call through a path of two or more segments (`crate::a::f`, `super::f`); any such path expression (`super::LIMIT`) |
 //! | `lit:N` | an integer literal with value N |
 //! | `attr:path` | a `#[path = "…"]` attribute |
+//! | `cfg_test` | an item under `#[cfg(test)]` (also a context: what's inside it) |
+//! | `attr:test`, `test_fn:NAME` | a function marked `#[test]` |
+//! | `stray_test` | a `#[test]` function outside every `#[cfg(test)]` item (fine in `tests/*.rs`) |
+//! | `attr:should_panic`, `should_panic_expected`, `should_panic_bare` | `#[should_panic]`; one with `expected = "…"`; one without |
+//! | `assert_msg`, `assert_bare` | an `assert!`, `assert_eq!` or `assert_ne!` (also `debug_` ones) with a custom failure message; one without |
+//! | `attr:ignore`, `ignore_reason` | `#[ignore]`; one with a reason (`#[ignore = "slow"]`) |
 //! | `closure` | a closure expression (`\|x\| …`) |
 //! | `trait:NAME` | a trait definition |
 //! | `required_fn:NAME`, `default_fn:NAME` | inside `trait:NAME`: a method without a body; one with a default body (also `fn:NAME`) |
@@ -350,9 +356,63 @@ impl Facts {
     }
 }
 
+/// `#[cfg(test)]`
+fn is_cfg_test(attrs: &[syn::Attribute]) -> bool {
+    attrs.iter().any(|a| {
+        a.path().is_ident("cfg") && a.parse_args::<syn::Ident>().is_ok_and(|i| i == "test")
+    })
+}
+
+impl Facts {
+    /// `#[test]`, `#[should_panic]` and `#[ignore]` on a function.
+    fn test_attrs(&mut self, name: &str, attrs: &[syn::Attribute]) {
+        for a in attrs {
+            let p = a.path();
+            if p.is_ident("test") {
+                self.fact("attr:test");
+                self.fact(format!("test_fn:{name}"));
+                if !self.ctx.iter().any(|c| c == "cfg_test") && !is_cfg_test(attrs) {
+                    self.fact("stray_test");
+                }
+            } else if p.is_ident("should_panic") {
+                self.fact("attr:should_panic");
+                if matches!(a.meta, syn::Meta::List(_)) {
+                    let mut expected = false;
+                    let _ = a.parse_nested_meta(|m| {
+                        if m.path.is_ident("expected") {
+                            expected = true;
+                            let _: syn::LitStr = m.value()?.parse()?;
+                        }
+                        Ok(())
+                    });
+                    if expected {
+                        self.fact("should_panic_expected");
+                    } else {
+                        self.fact("should_panic_bare");
+                    }
+                } else {
+                    self.fact("should_panic_bare");
+                }
+            } else if p.is_ident("ignore") {
+                self.fact("attr:ignore");
+                if matches!(a.meta, syn::Meta::NameValue(_)) {
+                    self.fact("ignore_reason");
+                }
+            }
+        }
+    }
+}
+
 impl<'ast> Visit<'ast> for Facts {
     fn visit_item_fn(&mut self, f: &'ast syn::ItemFn) {
         self.visibility(&f.sig.ident.to_string(), &f.vis);
+        self.test_attrs(&f.sig.ident.to_string(), &f.attrs);
+        if is_cfg_test(&f.attrs) {
+            self.fact("cfg_test");
+            return self.within("cfg_test", |v| {
+                v.function(&f.sig, &f.block, |v| syn::visit::visit_item_fn(v, f))
+            });
+        }
         self.function(&f.sig, &f.block, |v| syn::visit::visit_item_fn(v, f));
     }
 
@@ -369,8 +429,18 @@ impl<'ast> Visit<'ast> for Facts {
         if m.attrs.iter().any(|a| a.path().is_ident("path")) {
             self.fact("attr:path");
         }
+        let cfg_test = is_cfg_test(&m.attrs);
+        if cfg_test {
+            self.fact("cfg_test");
+        }
         match &m.content {
             None => self.fact(format!("mod_file:{name}")),
+            Some(_) if cfg_test => {
+                self.fact(format!("mod:{name}"));
+                self.within("cfg_test", |v| {
+                    v.within(format!("mod:{name}"), |v| syn::visit::visit_item_mod(v, m))
+                });
+            }
             Some(_) => {
                 self.fact(format!("mod:{name}"));
                 self.within(format!("mod:{name}"), |v| syn::visit::visit_item_mod(v, m));
@@ -888,6 +958,19 @@ impl<'ast> Visit<'ast> for Facts {
     fn visit_macro(&mut self, m: &'ast syn::Macro) {
         if let Some(last) = m.path.segments.last() {
             self.fact(format!("macro:{}", last.ident));
+            // Assertions: the arguments past the checked ones are a custom message.
+            let checked = match last.ident.to_string().trim_start_matches("debug_") {
+                "assert" => Some(1),
+                "assert_eq" | "assert_ne" => Some(2),
+                _ => None,
+            };
+            if let Some(n) = checked {
+                use syn::punctuated::Punctuated;
+                let args = m
+                    .parse_body_with(Punctuated::<Expr, syn::Token![,]>::parse_terminated)
+                    .map_or(0, |a| a.len());
+                self.fact(if args > n { "assert_msg" } else { "assert_bare" });
+            }
         }
         // Arguments of `println!`/`format!` are expressions too.
         use syn::punctuated::Punctuated;
@@ -1043,6 +1126,40 @@ mod tests {
         assert!(has(&f, "shorthand:title", &["fn:new", "struct_lit:Book"]));
         assert!(!has(&f, "shorthand:id", &["fn:fork"]));
         assert!(has(&f, "update", &["fn:fork", "struct_lit:Book"]));
+    }
+
+    #[test]
+    fn test_attribute_facts() {
+        let f = facts(
+            "pub fn double(n: u16) -> u32 { n as u32 * 2 }
+             #[cfg(test)]
+             mod tests {
+                 use super::*;
+                 #[test] fn two() { assert_eq!(double(2), 4); }
+                 #[test] #[should_panic(expected = \"zero\")] fn zero() { panic!(\"zero\") }
+                 #[test] #[should_panic] fn any() { panic!() }
+                 #[test] #[ignore = \"slow\"] fn slow() {}
+                 fn helper() {}
+             }
+             #[test] fn outside() {}",
+        );
+        assert!(has(&f, "cfg_test", &[]));
+        assert!(has(&f, "attr:test", &["cfg_test", "mod:tests"]));
+        assert!(has(&f, "test_fn:two", &["cfg_test", "mod:tests"]));
+        assert!(has(&f, "call:double", &["cfg_test", "mod:tests", "fn:two"]));
+        assert!(has(&f, "should_panic_expected", &["cfg_test", "mod:tests"]));
+        assert!(has(&f, "attr:should_panic", &["cfg_test", "mod:tests"]));
+        assert!(has(&f, "ignore_reason", &["cfg_test", "mod:tests"]));
+        assert!(!has(&f, "test_fn:helper", &[]));
+        assert!(has(&f, "test_fn:outside", &[]));
+        assert!(!has(&f, "test_fn:outside", &["cfg_test"]));
+        assert_eq!(f.iter().filter(|x| x.what == "stray_test").count(), 1);
+        assert_eq!(f.iter().filter(|x| x.what == "attr:test").count(), 5);
+        assert_eq!(f.iter().filter(|x| x.what == "should_panic_expected").count(), 1);
+        assert_eq!(f.iter().filter(|x| x.what == "should_panic_bare").count(), 1);
+        let g = facts("fn t() { assert_eq!(1, 1, \"one is {}\", 1); assert!(true); assert_ne!(1, 2); assert!(1 < 2, \"why\"); }");
+        assert_eq!(g.iter().filter(|x| x.what == "assert_msg").count(), 2);
+        assert_eq!(g.iter().filter(|x| x.what == "assert_bare").count(), 2);
     }
 
     #[test]

@@ -45,6 +45,9 @@ pub struct ProblemView {
     /// Text of the hints the learner has opened (index = hint number − 1).
     pub hints: Vec<Option<String>>,
     pub starter: Vec<SourceFile>,
+    /// Test-writing problems: the supplied code under test. The learner's file with the
+    /// same path starts with it, and the editor keeps that part read-only.
+    pub subject: Vec<SourceFile>,
     /// The learner's saved files, if any.
     pub draft: Option<Vec<SourceFile>>,
     pub visible_tests: Vec<VisibleTest>,
@@ -112,6 +115,7 @@ pub fn problem_view(
         hint_count: p.hints.len(),
         hints,
         starter: p.starter.clone(),
+        subject: p.subject.clone(),
         draft,
         hidden_count: p.tests.iter().filter(|t| !t.visible).count(),
         visible_tests,
@@ -141,6 +145,15 @@ pub fn redact(mut r: GradeResult, p: &Problem, revealed: &[String]) -> GradeResu
         }
         t.expected = None;
         t.actual = None;
+        if t.category == "mutant" && t.status != TestStatus::NotRun {
+            if t.status != TestStatus::Passed {
+                t.message = Some(format!(
+                    "Hidden test {}: a planted bug survived your tests. The bug is named after it survives twice.",
+                    t.n
+                ));
+            }
+            continue;
+        }
         if t.status != TestStatus::Passed && t.status != TestStatus::NotRun {
             let what = match t.status {
                 TestStatus::TimeLimit => "ran out of time",

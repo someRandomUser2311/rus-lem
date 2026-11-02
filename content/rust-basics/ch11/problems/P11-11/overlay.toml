@@ -1,0 +1,25 @@
+[[tests]]
+key = "t10"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["ret:Result<(),Error>"], inside = "cfg_test", message = "Write at least one test that returns `Result<(), Error>`." },
+  { check = "uses", what = ["try"], inside = "cfg_test", message = "Use `?` in that test on calls that must succeed." },
+]
+
+[[tests]]
+key = "t11"
+run = { kind = "source" }
+asserts = [{ check = "forbids", what = ["call:is_ok", "call:is_err", "call:unwrap"], message = "Compare whole results with `assert_eq!`: `is_err()` would accept the wrong error variant." }]
+
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [{ check = "forbids", what = ["stray_test"], file = "src/lib.rs", message = "Keep every `#[test]` function inside the `#[cfg(test)]` module." }]
+
+[[wrong]]
+name = "is-err-checks"
+fails = ["t07", "t09", "t11"]
+
+[[wrong]]
+name = "no-edges"
+fails = ["t03", "t04", "t08"]

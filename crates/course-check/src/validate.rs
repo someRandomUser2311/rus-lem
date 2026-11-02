@@ -133,6 +133,9 @@ pub fn static_errors(course: &Course, ch: &Chapter) -> Vec<String> {
                 e.push(format!("{} #{}: constraint rows must be hidden", p.id, t.n));
             }
         }
+        if !p.subject.is_empty() {
+            test_writing_errors(p, &mut e);
+        }
         for w in &p.wrong {
             if w.fails.is_empty() {
                 e.push(format!(
@@ -166,6 +169,62 @@ pub fn static_errors(course: &Course, ch: &Chapter) -> Vec<String> {
         }
     }
     e
+}
+
+/// Test-writing problems: enough mutants, each a real change with exactly one mutant row,
+/// mutant rows hidden, and a wrong variant (a weaker test suite) for some of them.
+fn test_writing_errors(p: &rb_content::Problem, e: &mut Vec<String>) {
+    let min = match p.level {
+        Level::WarmUp => 3,
+        Level::Easy | Level::Medium => 5,
+        _ => 8,
+    };
+    if p.mutants.len() < min {
+        e.push(format!(
+            "{}: {} mutants (at least {min} for this level)",
+            p.id,
+            p.mutants.len()
+        ));
+    }
+    for m in &p.mutants {
+        if m.files.is_empty() {
+            e.push(format!(
+                "{} {}: no change (write `before` → `after`, or author mutants/{}/)",
+                p.id, m.id, m.id
+            ));
+        }
+        for f in &m.files {
+            match p.subject.iter().find(|s| s.path == f.path) {
+                None => e.push(format!("{} {}: `{}` isn't a supplied file", p.id, m.id, f.path)),
+                Some(s) if s.text == f.text => {
+                    e.push(format!("{} {}: `{}` is unchanged", p.id, m.id, f.path))
+                }
+                _ => {}
+            }
+        }
+        let rows = p
+            .tests
+            .iter()
+            .filter(|t| {
+                matches!(&t.run, rb_content::Run::Tests { mutant: Some(id), .. } if id == &m.id)
+            })
+            .count();
+        // One row, or one per part that checks it.
+        if rows == 0 {
+            e.push(format!("{} {}: no test row", p.id, m.id));
+        }
+    }
+    for t in &p.tests {
+        if t.category == "mutant" && t.visible {
+            e.push(format!("{} #{}: mutant rows must be hidden", p.id, t.n));
+        }
+    }
+    if p.wrong.is_empty() {
+        e.push(format!(
+            "{}: no wrong variants (weaker test suites that miss named mutants)",
+            p.id
+        ));
+    }
 }
 
 pub fn run(src: &Source, chapters: &[u32], dynamic: bool, only: &[String]) -> Result<bool> {

@@ -166,7 +166,7 @@
                     {:else if screen.files?.length}
                       <CodeFiles files={screen.files} file={stepData?.file ?? diagnosticFile(screen.diagnostic)} hl={stepData?.hl ?? []} err={stepData?.err.length ? stepData.err : errLines} notes={stepData?.notes ?? []} />
                     {/if}
-                    {#if (screen.kind === 'error' || (screen.kind === 'stepper' && step === screen.steps.length)) && screen.diagnostic}
+                    {#if (screen.kind === 'error' || (screen.kind === 'stepper' && step === screen.steps.length && /^(error|warning)/.test(screen.diagnostic ?? ''))) && screen.diagnostic}
                       <ErrorExplainer diagnostic={screen.diagnostic} annotations={screen.annotations} />
                     {/if}
                     {#if panels.length}<Panels {panels} />{/if}

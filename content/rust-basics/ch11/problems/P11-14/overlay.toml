@@ -1,0 +1,38 @@
+[[tests]]
+key = "t15"
+run = { kind = "source" }
+asserts = [{ check = "uses", what = ["call:top_index"], inside = "cfg_test", message = "Test the private `top_index` from the test module." }]
+
+[[tests]]
+key = "t16"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["should_panic_expected"], message = "Name the panic message: `#[should_panic(expected = \"stack is empty\")]`." },
+  { check = "forbids", what = ["should_panic_bare"], message = "A bare `#[should_panic]` passes on any panic. Add `expected = \"…\"`." },
+]
+
+[[tests]]
+key = "t17"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["item:struct"], inside = "cfg_test", message = "Define a payload type in the test module, such as `struct Book { title: String }`." },
+  { check = "forbids", what = ["derive:Clone", "derive:Copy"], message = "The payload type must not derive `Clone` or `Copy`: the stack has to work without them." },
+]
+
+[[tests]]
+key = "t18"
+run = { kind = "source" }
+asserts = [{ check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in these tests." }]
+
+[[tests]]
+key = "t19"
+run = { kind = "source" }
+asserts = [{ check = "uses", what = ["assert_msg"], message = "Give the steps of your histories messages that say which step failed." }]
+
+[[wrong]]
+name = "single-values"
+fails = ["t04", "t05", "t08"]
+
+[[wrong]]
+name = "bare-should-panic"
+fails = ["t12", "t16"]

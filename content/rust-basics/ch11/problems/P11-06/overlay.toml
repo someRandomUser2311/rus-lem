@@ -1,0 +1,16 @@
+[[tests]]
+key = "t08"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["should_panic_expected"], message = "Name the panic message each panic test expects: `#[should_panic(expected = \"above maximum\")]`." },
+  { check = "forbids", what = ["should_panic_bare"], message = "A bare `#[should_panic]` passes on any panic, even the wrong one. Add `expected = \"…\"`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in these tests." },
+]
+
+[[wrong]]
+name = "far-panics"
+fails = ["t03", "t04"]
+
+[[wrong]]
+name = "bare-edges"
+fails = ["t05", "t08"]

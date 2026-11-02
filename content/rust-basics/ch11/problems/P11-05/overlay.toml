@@ -1,0 +1,20 @@
+[[tests]]
+key = "t10"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["call:is_ok", "call:is_err"], message = "Compare the whole `Result` with `assert_eq!`, so a wrong value or a wrong error variant fails the test." },
+  { check = "forbids", what = ["assert_bare"], message = "Give every assertion a custom message naming its case." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in these tests." },
+]
+
+[[wrong]]
+name = "ascii-only"
+fails = ["t03", "t08"]
+
+[[wrong]]
+name = "spaces-only-padding"
+fails = ["t07"]
+
+[[wrong]]
+name = "is-err-checks"
+fails = ["t09", "t10"]

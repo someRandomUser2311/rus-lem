@@ -18,6 +18,11 @@ hidden_per_part: Array<number>, hint_count: number,
  */
 hints: Array<string | null>, starter: Array<SourceFile>, 
 /**
+ * Test-writing problems: the supplied code under test. The learner's file with the
+ * same path starts with it, and the editor keeps that part read-only.
+ */
+subject: Array<SourceFile>, 
+/**
  * The learner's saved files, if any.
  */
 draft: Array<SourceFile> | null, visible_tests: Array<VisibleTest>, hidden_count: number, state: ProblemState, solution: Array<SourceFile> | null, solution_approach_md: string | null, idiomatic_md: string | null, };

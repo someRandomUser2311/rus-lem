@@ -145,7 +145,8 @@ fn problem(
     };
 
     let kind = get("Kind");
-    let mode = if kind.contains("multi-file") || kind.contains("Cargo") {
+    let test_writing = kind.contains("test-writing");
+    let mode = if kind.contains("multi-file") || kind.contains("Cargo") || test_writing {
         BuildMode::Cargo
     } else {
         BuildMode::Rustc
@@ -182,13 +183,37 @@ fn problem(
             .unwrap_or_default(),
         mode,
     );
-    let mut solution = starter_files(
+    let solution = starter_files(
         &md::block_after(lines, "**Reference solution**").unwrap_or_default(),
         mode,
     );
     if starter.is_empty() {
         report.error(format!("{id}: no starter code"));
     }
+    // Test-writing problems: the provided code under test is read-only; the starter and
+    // reference files are the learner's tests, written below it in the same file.
+    let subject = starter_files(
+        &md::block_after(lines, "**Provided code**").unwrap_or_default(),
+        mode,
+    );
+    if test_writing && subject.is_empty() {
+        // A milestone's provided code is the previous milestone's package, given in the
+        // overlay (`subject/`); course-check requires it there.
+        report.warn(format!("{id}: no **Provided code** fences; expecting subject/ in the overlay"));
+    }
+    let mutants = if test_writing {
+        mutant_rows(&id, lines, &subject, report)
+    } else {
+        Vec::new()
+    };
+    let (starter, mut solution) = if test_writing {
+        (
+            rb_content::with_subject(&subject, starter),
+            rb_content::with_subject(&subject, solution),
+        )
+    } else {
+        (starter, solution)
+    };
 
     // A file of functions without `main` is a library the tests call.
     let mut starter = starter;
@@ -200,7 +225,9 @@ fn problem(
         }
     }
     // A one-file reference solution goes in the starter's file.
-    if let ([s], [f]) = (starter.as_slice(), solution.as_mut_slice()) {
+    if let ([s], [f]) = (starter.as_slice(), solution.as_mut_slice())
+        && !test_writing
+    {
         f.path = s.path.clone();
     }
     let signatures: Vec<Signature> = starter.iter().flat_map(|f| signatures(&f.text)).collect();
@@ -260,7 +287,12 @@ fn problem(
     let test_lines = tests_region(lines);
     let fixtures = fixture_programs(lines);
     for row in md::table_with_header(&test_lines, "#") {
-        if let Some(t) = test_row(&id, &row, &tests, &signatures, &fixtures, rust_rows, report) {
+        let t = if test_writing {
+            test_writing_row(&id, &row, &mutants, report)
+        } else {
+            test_row(&id, &row, &tests, &signatures, &fixtures, rust_rows, report)
+        };
+        if let Some(t) = t {
             tests.push(t);
         }
     }
@@ -342,7 +374,178 @@ fn problem(
         solution,
         part_solutions: Default::default(),
         wrong: Vec::new(),
+        subject,
+        mutants,
         tests,
+    })
+}
+
+/// The **Mutants** table: `| M01 | title | what changed | a test that catches it |`. What
+/// changed is one or more `` `before` → `after` `` replacements, separated by `;`, in the
+/// subject file named first (`` `src/lib.rs`: … ``; the first subject file by default).
+/// Each `before` must occur exactly once. A mutant too large for a cell is authored in the
+/// overlay as whole files (`mutants/M05/src/lib.rs`), with the cell saying so.
+fn mutant_rows(id: &str, lines: &[&str], subject: &[SourceFile], report: &mut Report) -> Vec<Mutant> {
+    let Some(block) = md::block_after(lines, "**Mutants**") else {
+        report.error(format!("{id}: a test-writing problem needs a **Mutants** table"));
+        return Vec::new();
+    };
+    let mut out = Vec::new();
+    for row in md::table_with_header(&block, "#") {
+        if row.len() < 4 {
+            report.error(format!("{id}: mutant row with {} cells", row.len()));
+            continue;
+        }
+        let mid = row[0].trim().to_string();
+        // Without the provided code here (it comes from the overlay), course-check applies
+        // the change later.
+        let files = if subject.is_empty() {
+            Vec::new()
+        } else {
+            match rb_content::apply_change(subject, &row[2]) {
+                Ok(f) => f,
+                Err(e) => {
+                    report.error(format!("{id} {mid}: {e}"));
+                    continue;
+                }
+            }
+        };
+        out.push(Mutant {
+            id: mid,
+            title: row[1].clone(),
+            change_md: row[2].clone(),
+            files,
+        });
+    }
+    if out.is_empty() {
+        report.error(format!("{id}: the **Mutants** table has no rows"));
+    }
+    out
+}
+
+/// A test-writing problem's test row: `cargo test …` on the provided code (Expected:
+/// `Every test passes`, `At least 3 tests run`, `2 tests run`, `1 test ignored`, joined
+/// with `;`), or a mutant (`M01`, Expected `A test fails`). Other rows are authored.
+fn test_writing_row(id: &str, row: &[String], mutants: &[Mutant], report: &mut Report) -> Option<TestCase> {
+    if row.len() < 6 {
+        report.error(format!("{id}: test row with {} cells", row.len()));
+        return None;
+    }
+    let Ok(n) = row[0].parse::<u32>() else {
+        report.error(format!("{id}: test row number `{}` isn't a number", row[0]));
+        return None;
+    };
+    let (input, expected, checks) = (&row[3], &row[4], &row[5]);
+    let concept = md::concept_ids(checks).into_iter().next().unwrap_or_default();
+    if concept.is_empty() {
+        report.error(format!("{id} #{n}: Checks cell has no concept ID"));
+    }
+    let mut input_md = input.clone();
+    let spans = md::code_spans(input);
+    let first = spans.first().map(String::as_str).unwrap_or("");
+    let mutant = mutants.iter().find(|m| {
+        input.trim() == m.id
+            || first == m.id
+            || input.trim().ends_with(&format!(": {}", m.id))
+            || spans.iter().any(|s| s == &m.id)
+    });
+    let (run, asserts) = if let Some(m) = mutant {
+        // Shown when revealed: what the planted bug is.
+        input_md = format!("{} · {}: {}", m.id, m.title, m.change_md);
+        let asserts = if expected.trim().trim_end_matches('.') == "A test fails" {
+            vec![Assertion::MutantCaught]
+        } else {
+            vec![Assertion::Todo {
+                note: expected.clone(),
+            }]
+        };
+        (
+            Run::Tests {
+                mutant: Some(m.id.clone()),
+                command: "-- --include-ignored".into(),
+            },
+            asserts,
+        )
+    } else if let Some(command) = first.strip_prefix("cargo test") {
+        let mut asserts = Vec::new();
+        for part in expected.split(';') {
+            let p = part.trim().trim_end_matches('.');
+            let words: Vec<&str> = p.split_whitespace().collect();
+            let a = match words.as_slice() {
+                ["Every", "test", "passes"] => Some(Assertion::TestsPass),
+                ["At", "least", n, "tests" | "test", "run"] => n
+                    .parse()
+                    .ok()
+                    .map(|n| Assertion::TestsRan { min: Some(n), eq: None }),
+                [n, "tests" | "test", "run"] => n
+                    .parse()
+                    .ok()
+                    .map(|n| Assertion::TestsRan { min: None, eq: Some(n) }),
+                [n, "tests" | "test", "ignored"] => {
+                    n.parse().ok().map(|eq| Assertion::TestsIgnored { eq })
+                }
+                [n, "tests" | "test", "filtered", "out"] => {
+                    n.parse().ok().map(|eq| Assertion::TestsFiltered { eq })
+                }
+                // "`slow_check` is ignored", "`cheap_zero` passes", "`cheap_zero` doesn't run"
+                [name, rest @ ..] if name.starts_with('`') && name.ends_with('`') && name.len() > 2 => {
+                    let outcome = match rest {
+                        ["passes"] => Some("passed"),
+                        ["fails"] => Some("failed"),
+                        ["is", "ignored"] => Some("ignored"),
+                        ["doesn't", "run"] | ["is", "filtered", "out"] => Some("absent"),
+                        _ => None,
+                    };
+                    outcome.map(|o| Assertion::TestOutcome {
+                        name: name.trim_matches('`').to_string(),
+                        outcome: o.to_string(),
+                    })
+                }
+                _ => None,
+            };
+            match a {
+                Some(a) => asserts.push(a),
+                None => {
+                    asserts = vec![Assertion::Todo {
+                        note: expected.clone(),
+                    }];
+                    break;
+                }
+            }
+        }
+        (
+            Run::Tests {
+                mutant: None,
+                command: command.trim().to_string(),
+            },
+            asserts,
+        )
+    } else {
+        (
+            Run::Todo,
+            vec![Assertion::Todo {
+                note: expected.clone(),
+            }],
+        )
+    };
+    let part_of = |cell: &str| -> Option<u32> {
+        cell.split("Part ")
+            .nth(1)
+            .and_then(|s| s.split(|c: char| !c.is_ascii_digit()).next()?.parse().ok())
+    };
+    let part = part_of(&row[3]).or_else(|| part_of(checks));
+    Some(TestCase {
+        key: format!("t{n:02}"),
+        n,
+        visible: row[1] == "V",
+        category: row[2].clone(),
+        input_md,
+        expected_md: expected.clone(),
+        checks_md: checks.clone(),
+        concept,
+        part,
+        run,
+        asserts,
     })
 }
 
@@ -497,6 +700,7 @@ fn tests_region<'a>(lines: &[&'a str]) -> Vec<&'a str> {
         return Vec::new();
     };
     let ends = [
+        "**Mutants**",
         "**Random tests**",
         "**Source checks**",
         "**Notes**",
