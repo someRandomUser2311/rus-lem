@@ -1,0 +1,11 @@
+[[tests]]
+key = "t08"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:greeting"], within = "boxed_greeting", message = "`boxed_greeting` calls `greeting(&name)`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "no-exclamation"
+fails = ["t01", "t02", "t03", "t04", "t05", "t06", "t07"]

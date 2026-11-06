@@ -1,0 +1,11 @@
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call_path:Rc::clone|call:clone", "call_path:Rc::downgrade|call:downgrade|path:Rc::downgrade"], within = "link", message = "Own the child with `Rc::clone`; observe the parent with `Rc::downgrade`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "strong-parent-count"
+fails = ["t01", "t08", "t11"]

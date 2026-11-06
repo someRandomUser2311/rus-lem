@@ -996,13 +996,14 @@ impl Grader<'_> {
             }
         }
         let src = if problem.mode == BuildMode::Cargo {
-            let Ok(lib) = std::fs::read_to_string(dir.join("src/lib.rs")) else {
+            let Some(pkg) = library_dir(dir) else {
                 return Ok((no_library(), None));
             };
-            let src = dir.join("src/__rb_harness.rs");
+            let lib = std::fs::read_to_string(pkg.join("src/lib.rs"))?;
+            let src = pkg.join("src/__rb_harness.rs");
             std::fs::write(
                 &src,
-                library_harness_source(&lib, &crate_name(dir), &unique, &problem.helpers),
+                library_harness_source(&lib, &crate_name(&pkg), &unique, &problem.helpers),
             )?;
             src
         } else {
@@ -1382,6 +1383,23 @@ impl Grader<'_> {
                 per_file: Vec::new(),
             },
         })
+    }
+}
+
+/// The package whose library the tests call: the package itself, or in a workspace
+/// without a root library, its one member that has `src/lib.rs`.
+fn library_dir(dir: &Path) -> Option<PathBuf> {
+    if dir.join("src/lib.rs").exists() {
+        return Some(dir.to_path_buf());
+    }
+    let members: Vec<PathBuf> = std::fs::read_dir(dir)
+        .ok()?
+        .filter_map(|e| e.ok().map(|e| e.path()))
+        .filter(|p| p.join("src/lib.rs").exists() && p.join("Cargo.toml").exists())
+        .collect();
+    match members.as_slice() {
+        [one] => Some(one.clone()),
+        _ => None,
     }
 }
 

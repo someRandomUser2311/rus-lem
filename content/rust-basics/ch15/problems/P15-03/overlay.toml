@@ -1,0 +1,8 @@
+[[tests]]
+key = "t06"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:read_number"], within = "read_wrapped", message = "Pass the wrapper to `read_number` and let deref coercion convert it." },
+  { check = "forbids", what = ["field_access:0"], within = "read_wrapped", message = "Reach the number through `Deref`, not through `.0`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]

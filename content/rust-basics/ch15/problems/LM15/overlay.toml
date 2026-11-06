@@ -1,0 +1,11 @@
+checkpoints = true
+
+[[tests]]
+key = "t17"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call_path:Rc::downgrade|call:downgrade", "call:ptr_eq"], within = "join", message = "`join` stores a weak handle and compares members by identity." },
+  { check = "uses", what = ["call:upgrade"], within = "member_names", message = "`member_names` upgrades the weak handles." },
+  { check = "uses", what = ["call:late_fee_cents"], within = "charge_late", message = "`charge_late` uses the library's fee rules." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]

@@ -1,0 +1,13 @@
+[[tests]]
+key = "t08"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:drop"], within = "cleanup_order", message = "Drop `first` early with `drop`." },
+  { check = "forbids", what = ["call:push", "call:insert"], within = "cleanup_order", message = "The log must be written only by `Drop`." },
+  { check = "forbids", what = ["call:push", "call:insert"], within = "repeated_order", message = "The log must be written only by `Drop`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "no-early-drop"
+fails = ["t01", "t02", "t04", "t08"]

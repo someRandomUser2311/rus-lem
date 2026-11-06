@@ -1,0 +1,16 @@
+[[tests]]
+key = "t17"
+run = { kind = "suite", script = "t17" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t18"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call_path:Rc::downgrade|call:downgrade|path:Rc::downgrade", "call:upgrade"], message = "Children observe parents weakly: `Rc::downgrade` and `upgrade`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "unsorted-roots"
+fails = ["t02", "t04", "t11", "t17"]

@@ -1,0 +1,12 @@
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["trait_impl:Deref", "trait_impl:DerefMut"], message = "Implement `Deref` and `DerefMut` for `Meter`." },
+  { check = "forbids", what = ["field_access:0"], within = "increase", message = "Update the reading through `*`, not through `.0`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "wrapping"
+fails = ["t03", "t08"]

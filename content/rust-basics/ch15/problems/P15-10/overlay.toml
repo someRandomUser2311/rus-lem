@@ -1,0 +1,11 @@
+[[tests]]
+key = "t08"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call_path:Rc::clone|call:clone", "call:strong_count", "call:drop"], within = "owner_counts", message = "Clone the owners, count them with `Rc::strong_count`, and `drop` the copies." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "counts-before-copies"
+fails = ["t01", "t03", "t04", "t05"]

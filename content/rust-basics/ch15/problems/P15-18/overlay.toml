@@ -1,0 +1,16 @@
+[[tests]]
+key = "t11"
+run = { kind = "suite", script = "t11" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:downgrade|call_path:Rc::downgrade|path:Rc::downgrade", "call:upgrade"], within = "live_names", message = "Observe the members with weak handles and `upgrade` them." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "keeps-everyone"
+fails = ["t01", "t02", "t05", "t07", "t09", "t11"]

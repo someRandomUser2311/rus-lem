@@ -1,0 +1,11 @@
+[[tests]]
+key = "t09"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call_path:Box::new"], within = "from_values", message = "Each node owns the rest of the list through `Box::new`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "reversed"
+fails = ["t01", "t02", "t07"]

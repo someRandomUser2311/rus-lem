@@ -1,0 +1,15 @@
+checkpoints = true
+
+[[tests]]
+key = "t22"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:ptr_eq", "call_path:Rc::downgrade|call:downgrade"], within = "attach", message = "`attach` compares by identity and links the parent weakly." },
+  { check = "uses", what = ["call:retain"], within = "detach", message = "`detach` removes the exact child with `retain`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "no-cycle-check"
+part = 2
+fails = ["t06", "t07", "t08"]

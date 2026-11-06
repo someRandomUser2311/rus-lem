@@ -1,0 +1,8 @@
+[[tests]]
+key = "t06"
+run = { kind = "source" }
+asserts = [
+  { check = "count", what = "call_path:Rc::new", eq = 1, within = "share", message = "Make one allocation with `Rc::new`." },
+  { check = "uses", what = ["call_path:Rc::clone|call:clone"], within = "share", message = "Make the second owner with `Rc::clone`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]

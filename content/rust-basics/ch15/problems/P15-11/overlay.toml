@@ -1,0 +1,13 @@
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call_path:Rc::clone|call:clone"], within = "shared_tail", message = "Share the tail with `Rc::clone`." },
+  { check = "uses", what = ["call:ptr_eq", "call:strong_count"], within = "inspect", message = "Check sharing with `Rc::ptr_eq` and `Rc::strong_count`." },
+  { check = "forbids", what = ["macro:panic"], message = "Return `None` instead of panicking." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "separate-tails"
+fails = ["t01", "t06", "t07", "t08", "t10", "t12"]

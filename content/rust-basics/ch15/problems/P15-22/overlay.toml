@@ -1,0 +1,17 @@
+[[tests]]
+key = "t17"
+run = { kind = "suite", script = "t17" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t18"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call_path:Box::new", "call:take", "call:rev"], within = "cleanup", message = "Box each resource, `take` the early one, then drop the rest in reverse." },
+  { check = "forbids", what = ["call:push"], within = "cleanup", message = "The log must be written only by `Drop`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "forward-order"
+fails = ["t01", "t02", "t05", "t06", "t08", "t09", "t10", "t12", "t14", "t17", "t18"]

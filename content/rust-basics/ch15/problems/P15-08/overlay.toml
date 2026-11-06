@@ -1,0 +1,18 @@
+[[tests]]
+key = "t11"
+run = { kind = "suite", script = "t11" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:Some"], within = "swap_in", message = "Put each new ticket in the slot with `Some(\u2026)`." },
+  { check = "forbids", what = ["call:push", "call:insert"], within = "replacement", message = "The log must be written only by `Drop`." },
+  { check = "forbids", what = ["call:push", "call:insert"], within = "swap_in", message = "The log must be written only by `Drop`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "no-final-drop"
+fails = ["t02", "t04", "t06", "t09", "t10", "t11"]
