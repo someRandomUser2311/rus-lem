@@ -1,0 +1,17 @@
+[[tests]]
+key = "t14"
+run = { kind = "suite", script = "t14" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t15"
+run = { kind = "source" }
+asserts = [{ check = "forbids", what = ["stray_test"], file = "src/lib.rs", message = "Keep your tests inside the `#[cfg(test)]` module." }, { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()`: report the error, or check before indexing." }]
+
+[[wrong]]
+name = "forgets-the-last-word"
+fails = ["t02", "t04", "t06", "t07", "t14"]
+
+[[wrong]]
+name = "underscore-is-a-letter"
+fails = ["t02", "t07", "t14"]

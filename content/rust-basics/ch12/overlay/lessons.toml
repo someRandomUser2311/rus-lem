@@ -1,0 +1,205 @@
+# Chapter 12 lesson visuals. Program and test output on steppers is imported from the spec
+# (terminal panel `out`, printed on the last step); these add the scenes.
+
+[[lessons]]
+id = "L12.1"
+read_more = ["ch12-01-accepting-command-line-arguments.md"]
+
+[[lessons.screens]]
+key = "s1"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "args"
+layout = "row"
+nodes = [
+  { id = "a0", label = "[0]", sub = "\"target/debug/minigrep\"", state = { hidden = true } },
+  { id = "a1", label = "[1]", sub = "\"test\"", state = { hidden = true } },
+  { id = "a2", label = "[2]", sub = "\"sample.txt\"", state = { hidden = true } },
+]
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "args", op = "node", id = "a0", hidden = false, note = "the program's path" },
+  { panel = "args", op = "node", id = "a1", hidden = false },
+  { panel = "args", op = "node", id = "a2", hidden = false },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [{ panel = "args", op = "node", id = "a1", lit = true, badge = "query" }]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "args", op = "node", id = "a1", lit = false },
+  { panel = "args", op = "node", id = "a2", lit = true, badge = "file_path" },
+]
+
+[[lessons]]
+id = "L12.2"
+read_more = ["ch12-02-reading-a-file.md"]
+
+[[lessons.screens]]
+key = "s1"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "io"
+layout = "row"
+nodes = [
+  { id = "fs", label = "std::fs", sub = "file system", state = { hidden = true } },
+  { id = "file", label = "poem.txt", kind = "file", state = { hidden = true } },
+  { id = "contents", label = "contents", sub = "String", state = { hidden = true } },
+]
+edges = [{ id = "read", from = "file", to = "contents", label = "read_to_string", hidden = true }]
+[[lessons.screens.steps]]
+n = 1
+ops = [{ panel = "io", op = "node", id = "fs", hidden = false, lit = true }]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "io", op = "node", id = "fs", lit = false },
+  { panel = "io", op = "node", id = "file", hidden = false },
+  { panel = "io", op = "node", id = "contents", hidden = false },
+  { panel = "io", op = "edge", id = "read", hidden = false },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [{ panel = "io", op = "node", id = "contents", style = "green", badge = "Ok", value = "the whole poem" }]
+
+[[lessons]]
+id = "L12.3"
+read_more = ["ch12-03-improving-error-handling-and-modularity.md"]
+
+[[lessons.screens]]
+key = "s1"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "flow"
+layout = "row"
+nodes = [
+  { id = "config", label = "Config", sub = "query · file_path", state = { hidden = true } },
+  { id = "err", label = "Err", sub = "\"not enough arguments\"", state = { hidden = true, style = "red" } },
+  { id = "ok", label = "Ok", sub = "Config { … }", state = { hidden = true, style = "green" } },
+  { id = "exit", label = "exit code 1", state = { hidden = true, style = "red" } },
+]
+[[lessons.screens.steps]]
+n = 1
+ops = [{ panel = "flow", op = "node", id = "config", hidden = false, lit = true }]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "flow", op = "node", id = "config", lit = false },
+  { panel = "flow", op = "node", id = "err", hidden = false, lit = true },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "flow", op = "node", id = "err", lit = false },
+  { panel = "flow", op = "node", id = "ok", hidden = false, lit = true },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "flow", op = "node", id = "ok", lit = false },
+  { panel = "flow", op = "node", id = "exit", hidden = false, lit = true },
+]
+
+[[lessons]]
+id = "L12.4"
+read_more = ["ch12-04-testing-the-librarys-functionality.md"]
+
+[[lessons.screens]]
+key = "s3"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "lines"
+layout = "grid"
+nodes = [
+  { id = "results", label = "results", sub = "Vec<&str>", state = { hidden = true, value = "[]" } },
+  { id = "l1", label = "Rust:", kind = "code", state = { hidden = true } },
+  { id = "l2", label = "safe, fast, productive.", kind = "code", state = { hidden = true } },
+  { id = "l3", label = "Pick three.", kind = "code", state = { hidden = true } },
+]
+[[lessons.screens.steps]]
+n = 1
+ops = [{ panel = "lines", op = "node", id = "results", hidden = false, lit = true }]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "lines", op = "node", id = "results", lit = false },
+  { panel = "lines", op = "node", id = "l1", hidden = false },
+  { panel = "lines", op = "node", id = "l2", hidden = false },
+  { panel = "lines", op = "node", id = "l3", hidden = false },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "lines", op = "node", id = "l2", lit = true, badge = "contains \"duct\"" },
+  { panel = "lines", op = "node", id = "results", value = "[\"safe, fast, productive.\"]" },
+]
+
+[[lessons]]
+id = "L12.5"
+read_more = ["ch12-05-working-with-environment-variables.md"]
+
+[[lessons.screens]]
+key = "s1"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "cmp"
+layout = "grid"
+nodes = [
+  { id = "test", label = "test", sub = "rUsT → \"Rust:\", \"Trust me.\"", state = { hidden = true } },
+  { id = "query", label = "query", sub = "String", state = { hidden = true } },
+  { id = "l1", label = "Rust:", kind = "code", state = { hidden = true } },
+  { id = "l4", label = "Trust me.", kind = "code", state = { hidden = true } },
+]
+[[lessons.screens.steps]]
+n = 1
+ops = [{ panel = "cmp", op = "node", id = "test", hidden = false, lit = true }]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "cmp", op = "node", id = "test", lit = false },
+  { panel = "cmp", op = "node", id = "query", hidden = false, value = "\"rust\"", lit = true },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "cmp", op = "node", id = "query", lit = false },
+  { panel = "cmp", op = "node", id = "l1", hidden = false, note = "rust:", lit = true },
+  { panel = "cmp", op = "node", id = "l4", hidden = false, note = "trust me.", lit = true },
+]
+
+[[lessons]]
+id = "L12.6"
+read_more = ["ch12-06-writing-to-stderr-instead-of-stdout.md"]
+
+[[lessons.screens]]
+key = "s2"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "streams"
+layout = "row"
+nodes = [
+  { id = "prog", label = "minigrep", sub = "program" },
+  { id = "stdout", label = "stdout", sub = "→ output.txt" },
+  { id = "stderr", label = "stderr", sub = "→ screen" },
+]
+edges = [
+  { id = "o", from = "prog", to = "stdout" },
+  { id = "e", from = "prog", to = "stderr" },
+]
+[[lessons.screens.steps]]
+n = 1
+ops = [{ panel = "streams", op = "node", id = "prog", lit = true }]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "streams", op = "node", id = "prog", lit = false },
+  { panel = "streams", op = "node", id = "stderr", lit = true, value = "Problem parsing arguments…" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "streams", op = "node", id = "prog", badge = "exit code 1", style = "red" },
+  { panel = "streams", op = "node", id = "stdout", note = "stays empty" },
+]

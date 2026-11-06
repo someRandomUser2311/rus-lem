@@ -210,10 +210,11 @@ fn screen(
             report.error(format!("{lesson} {}: stepper without steps", h[0]));
         }
         if kind == ScreenKind::Stepper
-            && has_tests
-            && let Some(i) = lines
-                .iter()
-                .position(|l| l.starts_with("**Test output**") || l.starts_with("**Runtime output**"))
+            && let Some(i) = lines.iter().position(|l| {
+                l.starts_with("**Program output**")
+                    || (has_tests
+                        && (l.starts_with("**Test output**") || l.starts_with("**Runtime output**")))
+            })
             && let Some(f) = md::fences(&lines[i..]).into_iter().next()
             && let Some(last) = steps.last_mut()
         {
@@ -336,9 +337,11 @@ fn screen(
     // failing run's runtime output) on its last step.
     let mut panels = stepper_panels;
     if matches!(kind, ScreenKind::Concept | ScreenKind::Compare)
-        && let Some(i) = lines
-            .iter()
-            .position(|l| l.starts_with("**Test output**") || l.starts_with("**Runtime output**"))
+        && let Some(i) = lines.iter().position(|l| {
+            l.starts_with("**Test output**")
+                || l.starts_with("**Runtime output**")
+                || l.starts_with("**Program output**")
+        })
         && let Some(f) = md::fences(&lines[i..]).into_iter().next()
     {
         panels.push(Panel::Terminal {

@@ -375,6 +375,26 @@ pub(crate) fn check_run(a: &Assertion, item: &RunItem, ctx: &Ctx) -> Result<(), 
                 ))
             }
         }
+        Assertion::StderrEq { text } => {
+            let err = o.stderr_str();
+            if err == *text {
+                Ok(())
+            } else {
+                Err(diff("stderr is different.", text.clone(), err))
+            }
+        }
+        Assertion::StderrStartsWith { text } => {
+            let err = o.stderr_str();
+            if err.starts_with(text.as_str()) {
+                Ok(())
+            } else {
+                Err(diff(
+                    format!("stderr should start with {text:?}."),
+                    format!("{text}…"),
+                    err,
+                ))
+            }
+        }
         Assertion::StderrContains { text } => {
             let err = o.stderr_str();
             if err.contains(text.as_str()) {

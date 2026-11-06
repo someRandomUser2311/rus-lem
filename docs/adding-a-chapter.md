@@ -21,6 +21,7 @@ The importer converts what it can read reliably:
 | Lesson fields, screen text, code, captions, Coming-from cards, error output and annotations, compare panels, summary, completion | Lesson screens (visual panels are authored, below) |
 | Every question, option, answer, accepted answer and explanation | Questions, with `verify` facts for compile/output questions |
 | Problem fields, description, examples, constraints, hints, approach, starter files | Problem |
+| Command-line rows `` `args: ["-n", "2", "poem.txt"]` `file poem.txt: "…"` `env IGNORE_CASE: "1"` `` → `stdout: "…"`, `stderr: "…"`, `stderr starts with "…"`, `exit code N` (joined with `;`); `` `cargo test` `` rows in any problem run the learner's own tests | Process runs with files and environment, and test runs |
 | Test rows `stdin: "…"` → `stdout: "…"`, `stdout line N is "…"`, `stderr is empty; exit code 0`, `the same stdout as test N`, and an expected failure `stdout: "…"; stderr contains "…"; exit code N` | Runs and assertions |
 | Function rows `crate::f(…)` → a Rust value, or `panics with "…"` (the call must panic with that text) | Calls and assertions |
 | Any other row | A `todo` assertion that blocks bundling |
@@ -60,7 +61,7 @@ fails = ["t09"]
 
 | Kind | What it does |
 |---|---|
-| `process` | Runs the program. `stdin`, plus `stdin_pieces` for large inputs (`{ text, times }`, or `{ text = "{n}\n", from, to }` for numbered lines); `times = 100` runs 100 fresh processes, all of which must pass; `fixture = { secret_number = "42" }` runs a build whose named `let` takes that value. |
+| `process` | Runs the program. `args`; `files` (`{ path, text }` or `{ path, bytes }`) and `env` run it in a fresh, empty working folder holding only those files, with only those variables set besides `PATH`. `stdin`, plus `stdin_pieces` for large inputs (`{ text, times }`, or `{ text = "{n}\n", from, to }` for numbered lines); `times = 100` runs 100 fresh processes, all of which must pass; `fixture = { secret_number = "42" }` runs a build whose named `let` takes that value. |
 | `suite` | Many inputs, each a fresh process. Either `cases = [{ stdin, fixture, stdout }]` written out, or a seeded `generator` (the course's LCG: `seed`, `cases`, `lines`, `items`, optional `fixture` draw); with `reference = true` course-check fills in each case's expected output by running the reference solution. When the reference's `main` returns `Err` on a program case (exit code 1), that case expects the same exit code and stderr. |
 | `build` | `command = "build" \| "check"`. |
 | `source`, `manifest` | Look at the code or `Cargo.toml` only. |
@@ -88,7 +89,7 @@ Unless a test states otherwise (`exit_code`, `stderr_contains`, `stderr_empty`),
 
 | Group | Checks |
 |---|---|
-| Output | `stdout_eq`, `stdout_pieces`, `stdout_matches` (regex), `same_as_reference` (suites), `checker`, `line_eq`, `line_count`, `line_chars`, `ends_with`, `contains`, `not_contains`, `not_starts_with`, `no_trailing_whitespace`, `stderr_empty`, `stderr_contains`, `exit_code` |
+| Output | `stdout_eq`, `stdout_pieces`, `stdout_matches` (regex), `same_as_reference` (suites), `checker`, `line_eq`, `line_count`, `line_chars`, `ends_with`, `contains`, `not_contains`, `not_starts_with`, `no_trailing_whitespace`, `stderr_empty`, `stderr_contains`, `stderr_eq`, `stderr_starts_with`, `exit_code` |
 | Source (by fact) | `uses`, `forbids` and `count` (exactly n) over the facts in `crates/rb-srccheck/src/facts.rs`: modules (`mod:NAME`, `mod_file:NAME`), visibility (`pub:NAME`, `pub_field:NAME`), imports (`use:crate::a::b`, `pub_use:…`, `use_glob`, `use_group`), paths (`call_path:super::f`, `path:super::X`), literals (`lit:25`), traits and bounds (`trait:NAME`, `default_fn:NAME`, `bound:Clone`, `where`, `ret:implGreet+use<>`) and more; `file = "src/fees.rs"` limits a check to one file and `a\|b` accepts either fact. `rust_files` requires an exact set of Rust files. |
 | Source | `macro_count`, `macro_sequence`, `fmt_literal_forbid`, `fmt_inline_placeholders`, `macro_mention_forbid`, `lets_unchanged`, `let_init`, `call_count`, `call_chain`, `call_in_loop`, `match_on`, `banned_keyword`, `required_keyword`, `banned_method`, `banned_arithmetic` |
 | Project | `manifest_eq`, `manifest_table_empty`, `manifest_forbid_keys`, `files_allowlist`, `build_ok`, `file_exists` |
@@ -114,6 +115,7 @@ steps = [
 
 - **Multi-file screens:** a screen with several `**Code** (\`path\`):` blocks for different files shows them as tabs; step rows written `src/lib.rs:2` switch to that file.
 - **Panels:** `terminal` (printed output) and `scene` (boxes and arrows; `layout = "row" | "tree" | "grid"`; nodes with `kind = box | file | folder | code`, `parent`, `state`).
+- **Program output:** a `**Program output** (\`cargo run -- …\`):` block shows a program's output in a terminal panel: from the start on concept screens, on the last step of a stepper. It isn't checked against a run (the run may need arguments or files).
 - **Test output:** a screen whose code has `#[test]` functions and no `main` is checked with `cargo test`. Its `**Test output** (\`cargo test\`):` block (or `**Runtime output**`, for tests that fail on purpose) becomes a terminal panel: shown from the start on concept and compare screens, printed on the last step of a stepper. Overlay ops on a step are added to the imported ones.
 - **Ops:** `print`, `badge`, `node` (`hidden`, `style`, `lit`, `ghost`, `badge`, `note`, `value`; an empty string clears a badge or value), `edge`, `reset`. `value` shows a variable's or result's value in code font.
 - **Step extras:** `notes` (badges next to code lines) and `links` (arrows between code spans).
@@ -155,4 +157,5 @@ A new kind of run, assertion or visual is a small, one-time engine change in `rb
 | 9 | Done: panic rows, expected-failure program rows and suite cases, warning screens in lessons |
 | 10 | Done: source facts for traits and generics (`trait:NAME`, `required_fn:`/`default_fn:`, `bound:TRAIT`, `where`, `dyn`, `lifetime:NAME`, `impl_unbounded`, `borrow`, `deref`, `field_access:NAME`); steppers over a rejected program (their **Compiler output** is checked and shown on the last step); lib-plus-main lesson packages named by `main.rs`'s `use` |
 | 11 | Done: test-writing problems (supplied read-only code, the learner's tests run against it and against mutants, `cargo test` command rows), test facts in source rules, lesson and quiz code checked with `cargo test` |
+| 12 | Done: command-line rows (arguments, files, environment variables, exact or prefix stderr), `cargo test` rows in any problem, program output in lessons |
 | 17 | vendored `trpl` |

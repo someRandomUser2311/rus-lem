@@ -722,7 +722,7 @@ fn check_problem(grader: &Grader, p: &Problem) -> Result<ProblemReport> {
                 r.verdict,
                 failed.join("; "),
                 if r.verdict == Verdict::CompileError {
-                    format!("{}{}", strip_ansi(&r.compile.rendered), r.compile.log)
+                    format!("{}{}{}", strip_ansi(&r.compile.rendered), r.compile.log, if std::env::var_os("RB_DEBUG").is_some() { format!("{:#?}", r.compile.diagnostics) } else { String::new() })
                 } else {
                     String::new()
                 }

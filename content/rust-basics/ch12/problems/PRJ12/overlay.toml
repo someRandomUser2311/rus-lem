@@ -1,0 +1,18 @@
+checkpoints = true
+
+[[tests]]
+key = "t25"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:var", "call:read_to_string", "call:exit"], within = "main", message = "`main` reads `IGNORE_CASE` with `env::var`, the file with `fs::read_to_string`, and exits with `process::exit` on errors." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()`: report the error instead." },
+]
+
+[[wrong]]
+name = "numbers-in-count"
+part = 3
+fails = ["t13"]
+
+[[wrong]]
+name = "environment-ignored"
+fails = ["t18", "t25"]

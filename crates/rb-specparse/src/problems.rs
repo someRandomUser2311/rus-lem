@@ -287,7 +287,11 @@ fn problem(
     let test_lines = tests_region(lines);
     let fixtures = fixture_programs(lines);
     for row in md::table_with_header(&test_lines, "#") {
-        let t = if test_writing {
+        // `cargo test …` rows: the learner's own tests (test-first problems) are run too.
+        let runs_tests = md::code_spans(row.get(3).map_or("", |c| c.as_str()))
+            .first()
+            .is_some_and(|c| c.starts_with("cargo test"));
+        let t = if test_writing || runs_tests {
             test_writing_row(&id, &row, &mutants, report)
         } else {
             test_row(&id, &row, &tests, &signatures, &fixtures, rust_rows, report)
@@ -913,6 +917,13 @@ fn rust_row(
         ));
     }
     let code = only_span(input)?;
+    // Command-line rows (`args: […]`, `file …`, `env …`, `stdin: …`) aren't Rust.
+    if ["args:", "file ", "env ", "stdin:"]
+        .iter()
+        .any(|p| code.starts_with(p))
+    {
+        return None;
+    }
     let t = expected.trim();
     let call = if code.starts_with('{') && code.ends_with('}') {
         code.clone()
@@ -1374,6 +1385,12 @@ fn run_of(input: &str) -> Run {
         return Run::process(stdin);
     }
     let spans = md::code_spans(input);
+    if spans
+        .iter()
+        .any(|s| s.starts_with("args:") || s.starts_with("file ") || s.starts_with("env "))
+    {
+        return command_run(&spans).unwrap_or(Run::Todo);
+    }
     let first = spans.first().map(String::as_str).unwrap_or("");
     if first == "cargo run" {
         let stdin = spans
@@ -1397,6 +1414,51 @@ fn run_of(input: &str) -> Run {
         return Run::Source;
     }
     Run::Todo
+}
+
+/// A command-line run: `` `args: ["-n", "2", "poem.txt"]` ``, `` `file poem.txt: "a\nb\n"` ``
+/// (or `` `file data: bytes [255, 0]` ``), `` `env IGNORE_CASE: "1"` `` and `` `stdin: "…"` ``,
+/// each in its own code span. The program runs in a fresh folder holding only those files.
+fn command_run(spans: &[String]) -> Option<Run> {
+    let mut args = Vec::new();
+    let mut files = Vec::new();
+    let mut env = std::collections::BTreeMap::new();
+    let mut stdin = String::new();
+    for s in spans {
+        if let Some(rest) = s.strip_prefix("args:") {
+            args = serde_json::from_str::<Vec<String>>(rest.trim()).ok()?;
+        } else if let Some(rest) = s.strip_prefix("file ") {
+            let (path, value) = rest.split_once(": ")?;
+            let value = value.trim();
+            let file = match value.strip_prefix("bytes ") {
+                Some(b) => FileFixture {
+                    path: path.trim().to_string(),
+                    text: String::new(),
+                    bytes: Some(serde_json::from_str::<Vec<u8>>(b.trim()).ok()?),
+                },
+                None => FileFixture {
+                    path: path.trim().to_string(),
+                    text: md::quoted_after(value, "")?,
+                    bytes: None,
+                },
+            };
+            files.push(file);
+        } else if let Some(rest) = s.strip_prefix("env ") {
+            let (name, value) = rest.split_once(": ")?;
+            env.insert(name.trim().to_string(), md::quoted_after(value.trim(), "")?);
+        } else if let Some(text) = md::quoted_after(s, "stdin:") {
+            stdin = text;
+        }
+    }
+    Some(Run::Process {
+        stdin,
+        stdin_pieces: Vec::new(),
+        args,
+        fixture: std::collections::BTreeMap::new(),
+        times: 1,
+        files,
+        env,
+    })
 }
 
 fn asserts_of(expected: &str, earlier: &[TestCase]) -> Vec<Assertion> {
@@ -1436,12 +1498,23 @@ fn asserts_of(expected: &str, earlier: &[TestCase]) -> Vec<Assertion> {
 
 fn failure_asserts(expected: &str) -> Option<Vec<Assertion>> {
     let mut asserts = Vec::new();
-    for part in expected.split("; ") {
+    // The whole cell may be one code span: `` `stderr: "…"; exit code 2` ``.
+    let t = expected.trim();
+    let unwrapped = if t.starts_with('`') && t.ends_with('`') && md::code_spans(t).len() == 1 {
+        md::unbacktick(t)
+    } else {
+        t.to_string()
+    };
+    for part in unwrapped.split("; ") {
         let part = part.trim();
         if let Some(text) = md::quoted_after(part, "stdout:") {
             asserts.push(Assertion::StdoutEq { text });
         } else if let Some(text) = md::quoted_after(part, "stderr contains") {
             asserts.push(Assertion::StderrContains { text });
+        } else if let Some(text) = md::quoted_after(part, "stderr starts with") {
+            asserts.push(Assertion::StderrStartsWith { text });
+        } else if let Some(text) = md::quoted_after(part, "stderr:") {
+            asserts.push(Assertion::StderrEq { text });
         } else {
             let code = part.strip_prefix("exit code ")?.trim().parse().ok()?;
             asserts.push(Assertion::ExitCode { code });
@@ -1456,6 +1529,22 @@ fn failure_asserts(expected: &str) -> Option<Vec<Assertion>> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn command_line_rows() {
+        let run = run_of(r#"`args: ["-n", "2", "poem.txt"]` `file poem.txt: "a\nb\n"` `file bad: bytes [255]` `env IGNORE_CASE: "1"`"#);
+        let Run::Process { args, files, env, .. } = run else {
+            panic!("expected a process run, got {run:?}");
+        };
+        assert_eq!(args, ["-n", "2", "poem.txt"]);
+        assert_eq!(files[0].text, "a\nb\n");
+        assert_eq!(files[1].bytes, Some(vec![255]));
+        assert_eq!(env["IGNORE_CASE"], "1");
+        let a = asserts_of(r#"stderr: "head: missing file path\n"; exit code 2"#, &[]);
+        assert!(matches!(&a[0], Assertion::StderrEq { text } if text == "head: missing file path\n"));
+        let a = asserts_of(r#"stderr starts with "head: absent: "; exit code 1"#, &[]);
+        assert!(matches!(&a[0], Assertion::StderrStartsWith { text } if text == "head: absent: "));
+    }
 
     #[test]
     fn function_rows_become_calls() {

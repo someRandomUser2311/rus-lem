@@ -1,0 +1,20 @@
+[[tests]]
+key = "t18"
+run = { kind = "suite", script = "t18" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t19"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:var", "call:exit"], within = "main", message = "Read `IGNORE_CASE` with `env::var` and exit with the outcome's code through `process::exit`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()`: report the error, or check before indexing." },
+]
+
+[[wrong]]
+name = "always-prefixes"
+fails = ["t02", "t06", "t07", "t17"]
+
+[[wrong]]
+name = "empty-value-is-unset"
+fails = ["t05"]

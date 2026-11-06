@@ -724,6 +724,12 @@ pub enum Run {
         /// Fresh processes to run; every one must pass the assertions.
         #[serde(default = "one")]
         times: u32,
+        /// Files in the program's working folder, a fresh empty one for each run.
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        files: Vec<FileFixture>,
+        /// Environment variables the program sees, besides `PATH` (nothing else is set).
+        #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+        env: BTreeMap<String, String>,
     },
     /// Many generated inputs, each a fresh process. `generator` describes them; `cases` holds
     /// them with the reference solution's output, filled in by course-check.
@@ -793,8 +799,23 @@ impl Run {
             args: Vec::new(),
             fixture: BTreeMap::new(),
             times: 1,
+            files: Vec::new(),
+            env: BTreeMap::new(),
         }
     }
+}
+
+/// A file a process run finds in its working folder.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct FileFixture {
+    /// Relative to the working folder (`poem.txt`, `notes/a.txt`).
+    pub path: String,
+    #[serde(default)]
+    pub text: String,
+    /// Raw contents instead of `text` (for bytes that aren't valid UTF-8).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bytes: Option<Vec<u8>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, TS)]
@@ -981,6 +1002,14 @@ pub enum Assertion {
     StderrEmpty,
     /// stderr contains this text (panic messages).
     StderrContains {
+        text: String,
+    },
+    /// stderr is exactly this text.
+    StderrEq {
+        text: String,
+    },
+    /// stderr starts with this text (an error message whose end comes from the OS).
+    StderrStartsWith {
         text: String,
     },
     ExitCode {

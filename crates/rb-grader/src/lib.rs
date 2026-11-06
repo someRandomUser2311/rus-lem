@@ -1082,6 +1082,21 @@ impl Grader<'_> {
         args: &[String],
         fixture: &BTreeMap<String, String>,
     ) -> Result<Output> {
+        self.execute_in(problem, exe, dir, stdin, args, fixture, &BTreeMap::new())
+    }
+
+    /// [`Grader::execute`] with environment variables for the program.
+    #[allow(clippy::too_many_arguments)]
+    fn execute_in(
+        &self,
+        problem: &Problem,
+        exe: &Path,
+        dir: &Path,
+        stdin: &str,
+        args: &[String],
+        fixture: &BTreeMap<String, String>,
+        vars: &BTreeMap<String, String>,
+    ) -> Result<Output> {
         let limits = Limits {
             timeout: Duration::from_millis(problem.time_limit_ms),
             max_output: 32 << 20,
@@ -1089,6 +1104,7 @@ impl Grader<'_> {
         let env: Vec<(String, String)> = fixture
             .iter()
             .map(|(k, v)| (format!("RB_FIXTURE_{k}"), v.clone()))
+            .chain(vars.iter().map(|(k, v)| (k.clone(), v.clone())))
             .collect();
         let run = || {
             self.toolchain
@@ -1131,6 +1147,8 @@ impl Grader<'_> {
                 args,
                 fixture,
                 times,
+                files: fixture_files,
+                env,
             } => {
                 let exe = match exe_for(!fixture.is_empty()) {
                     Ok(e) => e,
@@ -1142,7 +1160,26 @@ impl Grader<'_> {
                     if self.cancelled() {
                         break;
                     }
-                    let out = self.execute(problem, &exe, dir, &input, args, fixture)?;
+                    // A program with arguments, files or settings runs in a fresh folder
+                    // holding only its files, as a command-line tool would.
+                    let out = if fixture_files.is_empty() && args.is_empty() && env.is_empty() {
+                        self.execute(problem, &exe, dir, &input, args, fixture)?
+                    } else {
+                        let cwd = dir.join(".cwd");
+                        let _ = std::fs::remove_dir_all(&cwd);
+                        std::fs::create_dir_all(&cwd)?;
+                        for f in fixture_files {
+                            let p = cwd.join(&f.path);
+                            if let Some(parent) = p.parent() {
+                                std::fs::create_dir_all(parent)?;
+                            }
+                            match &f.bytes {
+                                Some(b) => std::fs::write(&p, b)?,
+                                None => std::fs::write(&p, &f.text)?,
+                            }
+                        }
+                        self.execute_in(problem, &exe, &cwd, &input, args, fixture, env)?
+                    };
                     let stop = !out.success();
                     items.push(RunItem {
                         stdin: input.clone(),
@@ -1478,6 +1515,8 @@ fn check(
                 a,
                 Assertion::ExitCode { .. }
                     | Assertion::StderrContains { .. }
+                    | Assertion::StderrEq { .. }
+                    | Assertion::StderrStartsWith { .. }
                     | Assertion::StderrEmpty
             )
         });
@@ -1498,7 +1537,10 @@ fn check(
                 let expects_exit = t.asserts.iter().any(|a| {
                     matches!(
                         a,
-                        Assertion::ExitCode { .. } | Assertion::StderrContains { .. }
+                        Assertion::ExitCode { .. }
+                            | Assertion::StderrContains { .. }
+                            | Assertion::StderrEq { .. }
+                            | Assertion::StderrStartsWith { .. }
                     )
                 });
                 let status = if o.code != Some(0) && !expects_exit && !expects_failure {

@@ -1,0 +1,21 @@
+[[tests]]
+key = "t16"
+run = { kind = "suite", script = "t16" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t17"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["macro:eprintln", "call:exit"], within = "main", message = "Report failures in `main` with `eprintln!` and leave with `process::exit`." },
+  { check = "uses", what = ["try"], within = "run", message = "Let `run` pass a read error on with `?`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()`: report the error, or check before indexing." },
+]
+
+[[wrong]]
+name = "parse-accepts-plus"
+fails = ["t10"]
+
+[[wrong]]
+name = "usage-on-stdout"
+fails = ["t07", "t08", "t09", "t10", "t11", "t12"]

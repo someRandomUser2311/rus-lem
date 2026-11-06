@@ -1,0 +1,20 @@
+[[tests]]
+key = "t21"
+run = { kind = "suite", script = "t21" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t22"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["macro:eprintln", "call:exit"], within = "main", message = "Report errors in `main` with `eprintln!` and leave with `process::exit`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()`: report the error, or check before indexing." },
+]
+
+[[wrong]]
+name = "reads-the-file-first"
+fails = ["t18"]
+
+[[wrong]]
+name = "end-not-capped"
+fails = ["t06", "t21"]

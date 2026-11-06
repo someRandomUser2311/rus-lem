@@ -1,0 +1,15 @@
+[[tests]]
+key = "t10"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:len"], within = "build", message = "Check `args.len()` before reading `args[1]` and `args[2]`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()`: handle the error, or check before indexing." },
+]
+
+[[wrong]]
+name = "no-upper-limit"
+fails = ["t06", "t09"]
+
+[[wrong]]
+name = "indexes-first"
+fails = ["t02", "t04", "t05"]

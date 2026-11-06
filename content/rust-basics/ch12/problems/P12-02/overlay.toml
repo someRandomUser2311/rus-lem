@@ -1,0 +1,16 @@
+[[tests]]
+key = "t10"
+run = { kind = "source" }
+asserts = [{ check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()`: handle the error, or check before indexing." }]
+
+[[wrong]]
+name = "drops-every-separator"
+fails = ["t03"]
+
+[[wrong]]
+name = "dash-is-a-flag"
+fails = ["t04", "t08"]
+
+[[wrong]]
+name = "no-empty-check"
+fails = ["t05"]

@@ -1,0 +1,15 @@
+[[tests]]
+key = "t07"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:args"], within = "main", message = "Read the arguments in `main` with `env::args()`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()`: handle the error, or check before indexing." },
+]
+
+[[wrong]]
+name = "includes-program-path"
+fails = ["t02", "t03", "t04", "t05", "t06"]
+
+[[wrong]]
+name = "counts-from-zero"
+fails = ["t01", "t02", "t04", "t05", "t06"]

@@ -1,0 +1,19 @@
+checkpoints = true
+
+[[tests]]
+key = "t25"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:var", "call:exit"], within = "main", message = "`main` reads `SORT` with `env::var` and leaves with `process::exit` on errors." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()`: report the error instead." },
+]
+
+[[wrong]]
+name = "year-ignores-case"
+part = 1
+fails = ["t03"]
+
+[[wrong]]
+name = "skipped-lines-not-counted"
+part = 2
+fails = ["t11"]

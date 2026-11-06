@@ -1,0 +1,12 @@
+[[tests]]
+key = "t10"
+run = { kind = "source" }
+asserts = [{ check = "forbids", what = ["stray_test"], file = "src/lib.rs", message = "Keep your tests inside the `#[cfg(test)]` module." }, { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()`: report the error, or check before indexing." }]
+
+[[wrong]]
+name = "only-the-given-test"
+fails = ["t02"]
+
+[[wrong]]
+name = "ignores-case"
+fails = ["t03", "t04"]

@@ -1,0 +1,15 @@
+[[tests]]
+key = "t09"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:read_to_string", "try"], within = "line_count", message = "Read the file with `fs::read_to_string` and pass its error on with `?`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()`: handle the error, or check before indexing." },
+]
+
+[[wrong]]
+name = "counts-line-feeds"
+fails = ["t03", "t06"]
+
+[[wrong]]
+name = "unwraps-the-read"
+fails = ["t07", "t08", "t09"]
