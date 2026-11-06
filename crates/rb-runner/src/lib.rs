@@ -222,6 +222,8 @@ impl Toolchain {
         };
         for line in o.stdout_str().lines() {
             let Ok(v) = serde_json::from_str::<serde_json::Value>(line) else {
+                c.text.push_str(line);
+                c.text.push('\n');
                 continue;
             };
             match v["reason"].as_str() {
@@ -245,6 +247,8 @@ impl Toolchain {
                 _ => {}
             }
         }
+        c.exit = o.code;
+        c.timed_out = o.timed_out;
         // Cargo's own progress and errors ("Compiling …", manifest errors) go to stderr.
         c.log.push_str(&o.stderr_str());
         if o.timed_out {
@@ -314,6 +318,17 @@ pub struct Compiled {
     #[serde(skip)]
     #[ts(skip)]
     pub tests: Vec<(String, PathBuf)>,
+    /// Lines on stdout that weren't Cargo messages, such as `cargo test --doc`'s report.
+    #[serde(skip)]
+    #[ts(skip)]
+    pub text: String,
+    /// Cargo's exit code, and whether it ran out of time.
+    #[serde(skip)]
+    #[ts(skip)]
+    pub exit: Option<i32>,
+    #[serde(skip)]
+    #[ts(skip)]
+    pub timed_out: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]

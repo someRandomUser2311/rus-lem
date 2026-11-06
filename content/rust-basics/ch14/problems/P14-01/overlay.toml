@@ -1,0 +1,12 @@
+[[tests]]
+key = "t08"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["doc_crate"], file = "src/lib.rs", message = "Start `src/lib.rs` with a crate-level `//!` comment." },
+  { check = "uses", what = ["doc:capped_add", "doc_heading:Examples", "doc_heading:Panics", "doc_code"], message = "Document `capped_add` with `///`: a summary, an `# Examples` section with a code example, and a `# Panics` section." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "wrong-doc-example"
+fails = ["t02"]

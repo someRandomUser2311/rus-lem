@@ -1,0 +1,10 @@
+[[tests]]
+key = "t10"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["pub_use:detail::Label", "pub_use:detail::bracket"], message = "Re-export both items at the root: `pub use detail::{Label, bracket};`." },
+  { check = "uses", what = ["doc:Label", "doc:bracket"], message = "Document `Label` and `bracket` with `///` comments and examples." },
+  { check = "forbids", what = ["pub:detail"], message = "Keep `detail` private; the re-export is the public way in." },
+  { check = "count", what = "struct:Label", eq = 1, message = "Keep one `Label` type; re-export it instead of defining another." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]

@@ -182,7 +182,7 @@ fn split_command(command: &str) -> (Vec<String>, Vec<String>) {
     let mut i = 0;
     while i < before.len() {
         let w = &before[i];
-        if w == "--test" || w == "--bin" {
+        if matches!(w.as_str(), "--test" | "--bin" | "-p" | "--package") {
             cargo.push(w.clone());
             if let Some(name) = before.get(i + 1) {
                 cargo.push(name.clone());
@@ -216,6 +216,9 @@ impl Grader<'_> {
         std::fs::create_dir_all(&pkg)?;
         write_files(&pkg, files)?;
         let (cargo_args, binary_args) = split_command(command);
+        if cargo_args.iter().any(|a| a == "--doc") {
+            return self.run_doc_tests(&pkg, &cargo_args, &binary_args, dir);
+        }
         let mut args: Vec<&str> = vec!["test", "--no-run"];
         // Unit and integration tests only (every target with tests): doc tests are Chapter 14's.
         if !cargo_args.iter().any(|a| a == "--test" || a == "--lib") {
@@ -270,6 +273,59 @@ impl Grader<'_> {
         }
         Ok(TestsObs { build, targets })
     }
+
+    /// Doc tests can't be built ahead of time (`--no-run` skips them), so Cargo builds and
+    /// runs them in one go; its report becomes one target, `doc tests`.
+    fn run_doc_tests(
+        &self,
+        pkg: &Path,
+        cargo_args: &[String],
+        binary_args: &[String],
+        dir: &Path,
+    ) -> Result<TestsObs> {
+        let mut args: Vec<&str> = vec!["test"];
+        args.extend(cargo_args.iter().map(String::as_str));
+        if !binary_args.is_empty() {
+            args.push("--");
+            args.extend(binary_args.iter().map(String::as_str));
+        }
+        let target = dir.join("target");
+        let mut build = self.toolchain.cargo_args(
+            pkg,
+            &args,
+            Some(&target),
+            self.vendor.as_deref(),
+            self.cancel,
+        )?;
+        let (tests, mut summary) = parse_libtest(&build.text);
+        let ran = summary.is_some();
+        // A workspace prints one summary per package: count the tests themselves then.
+        if build.text.matches("test result:").count() > 1 {
+            summary = None;
+        }
+        // A failing doc test also makes Cargo fail; only a missing report means the
+        // library itself didn't compile.
+        let mut targets = Vec::new();
+        if ran {
+            let out = Output {
+                stdout: build.text.clone().into_bytes(),
+                stderr: Vec::new(),
+                code: build.exit,
+                signal: None,
+                timed_out: build.timed_out,
+                output_limit: false,
+                elapsed: Duration::ZERO,
+            };
+            targets.push(TargetRun {
+                label: String::from("doc tests"),
+                out,
+                tests,
+                summary,
+            });
+        }
+        build.ok = ran;
+        Ok(TestsObs { build, targets })
+    }
 }
 
 #[cfg(test)]
@@ -309,5 +365,12 @@ mod tests {
             )
         );
         assert_eq!(split_command(""), (vec![], vec![]));
+        assert_eq!(
+            split_command("-p course-core --doc"),
+            (
+                vec!["-p".to_string(), "course-core".to_string(), "--doc".to_string()],
+                vec![]
+            )
+        );
     }
 }

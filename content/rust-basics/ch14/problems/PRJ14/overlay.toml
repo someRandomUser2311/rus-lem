@@ -1,0 +1,56 @@
+checkpoints = true
+
+[[tests]]
+key = "t01"
+asserts = [
+  { check = "manifest_eq", key = "workspace.members", value = "[\"core\", \"cli\"]" },
+]
+
+[[tests]]
+key = "t02"
+asserts = [
+  { check = "manifest_eq", key = "cli/Cargo.toml:dependencies.analysis-core.path", value = "../core" },
+]
+
+[[tests]]
+key = "t03"
+asserts = [
+  { check = "build_ok" },
+]
+
+[[tests]]
+key = "t04"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:filter", "call:map", "call:sum"], within = "paid_total", message = "Restore `paid_total` as a `filter`, `map`, `sum` pipeline." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[tests]]
+key = "t06"
+asserts = [
+  { check = "build_ok" },
+]
+
+[[tests]]
+key = "t07"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["doc_crate"], file = "core/src/lib.rs", message = "Start `core/src/lib.rs` with a crate-level `//!` comment." },
+  { check = "uses", what = ["doc:product_totals", "doc:report", "doc_heading:Examples", "doc_code"], message = "Document `product_totals` and `report` with `///` and an `# Examples` code example." },
+]
+
+[[tests]]
+key = "t19"
+asserts = [
+  { check = "build_ok" },
+]
+
+[[tests]]
+key = "t22"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:report", "call:paid_total"], within = "main", message = "`main` prints `report` and the `paid_total`." },
+  { check = "forbids", what = ["float"], message = "Keep money in integer cents." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]

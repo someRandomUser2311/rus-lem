@@ -1,0 +1,46 @@
+checkpoints = true
+
+[[tests]]
+key = "t05"
+asserts = [
+  { check = "manifest_eq", key = "workspace.members", value = "[\"core\", \"app\"]" },
+]
+
+[[tests]]
+key = "t06"
+asserts = [
+  { check = "manifest_eq", key = "app/Cargo.toml:dependencies.library.path", value = "../core" },
+]
+
+[[tests]]
+key = "t08"
+asserts = [
+  { check = "build_ok" },
+]
+
+[[tests]]
+key = "t09"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["doc_crate", "doc_heading:Examples", "doc_code"], file = "core/src/lib.rs", message = "Give `core/src/lib.rs` a crate-level `//!` comment with an `# Examples` code example." },
+  { check = "uses", what = ["doc:sort_key"], file = "core/src/text.rs", message = "Document `sort_key` with `///` and an `# Examples` example." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[tests]]
+key = "t11"
+asserts = [
+  { check = "manifest_eq", key = "profile.dev.opt-level", value = "1" },
+]
+
+[[tests]]
+key = "t12"
+asserts = [
+  { check = "build_ok" },
+]
+
+[[tests]]
+key = "t14"
+asserts = [
+  { check = "manifest_forbid_keys", keys = ["app/Cargo.toml:profile"] },
+]

@@ -1,0 +1,29 @@
+[[tests]]
+key = "t10"
+asserts = [
+  { check = "manifest_eq", key = "workspace.members", value = "[\"core\", \"cli\"]" },
+]
+
+[[tests]]
+key = "t11"
+asserts = [
+  { check = "manifest_eq", key = "cli/Cargo.toml:dependencies.course-core.path", value = "../core" },
+]
+
+[[tests]]
+key = "t13"
+asserts = [
+  { check = "build_ok" },
+]
+
+[[tests]]
+key = "t14"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:late_fee", "call:format_cents"], within = "main", message = "`main` computes the fee with `late_fee` and formats it with `format_cents` from `course_core`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "untrimmed-days"
+fails = ["t04"]

@@ -922,6 +922,10 @@ fn facts_shown(what: &str) -> String {
         "closure" => "a closure (`|x| …`)".into(),
         "closure_move" => "a `move` closure".into(),
         "range" => "a range (`a..b` or `a..=b`)".into(),
+        "doc_crate" => "a crate-level `//!` doc comment".into(),
+        "doc" => format!("`///` documentation on `{arg}`"),
+        "doc_heading" => format!("a `# {arg}` section in a doc comment"),
+        "doc_code" => "a code example (a ``` fence) in a doc comment".into(),
         _ => format!("`{what}`"),
     }
 }

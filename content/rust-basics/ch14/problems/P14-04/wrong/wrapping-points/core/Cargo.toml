@@ -1,0 +1,7 @@
+[package]
+name = "score-core"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+score-models = { path = "../models" }

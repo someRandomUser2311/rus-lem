@@ -149,7 +149,8 @@
   const canAddFiles = $derived(!!p && p.cargo && (p.kind === 'multi-file' || testWriting))
   let newPath = $state<string | null>(null)
   let newPathError = $state('')
-  const MODULE_PATH = /^src\/([a-z_][a-z0-9_]*\/){0,3}[a-z_][a-z0-9_]*\.rs$/
+  // A source file, also inside a workspace member (`cli/src/main.rs`), or a member's manifest.
+  const MODULE_PATH = /^([a-z][a-z0-9_-]*\/)?(src\/([a-z_][a-z0-9_]*\/){0,3}[a-z_][a-z0-9_]*\.rs|Cargo\.toml)$/
   const TEST_PATH = /^tests\/([a-z_][a-z0-9_]*\/)?[a-z_][a-z0-9_]*\.rs$/
   // Test-writing problems: the supplied code at the top of a file is read-only.
   const locked = $derived.by(() => {
@@ -167,7 +168,7 @@
     if (testWriting ? !TEST_PATH.test(path) : !MODULE_PATH.test(path)) {
       newPathError = testWriting
         ? 'Use a path like tests/shelf.rs or tests/common/mod.rs (lowercase letters, digits and _).'
-        : 'Use a path like src/text.rs or src/fees/rate.rs (lowercase letters, digits and _).'
+        : 'Use a path like src/text.rs, src/fees/rate.rs, or in a workspace cli/src/main.rs or cli/Cargo.toml (lowercase letters, digits, _ and - for the folder).'
       return
     }
     if (files.some(f => f.path === path)) {

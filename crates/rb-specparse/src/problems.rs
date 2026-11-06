@@ -924,6 +924,10 @@ fn rust_row(
     {
         return None;
     }
+    // Manifest rows (`Cargo.toml`, `cli/Cargo.toml`) and Cargo command rows aren't Rust.
+    if code == "Cargo.toml" || code.ends_with("/Cargo.toml") || code.starts_with("cargo ") {
+        return None;
+    }
     let t = expected.trim();
     let call = if code.starts_with('{') && code.ends_with('}') {
         code.clone()
@@ -1399,12 +1403,17 @@ fn run_of(input: &str) -> Run {
             .unwrap_or_default();
         return Run::process(stdin);
     }
-    if first == "cargo build" || first == "cargo check" {
+    if first == "cargo build"
+        || first == "cargo check"
+        || first.starts_with("cargo build ")
+        || first.starts_with("cargo check ")
+        || first.starts_with("cargo doc")
+    {
         return Run::Build {
             command: first.trim_start_matches("cargo ").to_string(),
         };
     }
-    if first == "Cargo.toml" {
+    if first == "Cargo.toml" || first.ends_with("/Cargo.toml") {
         return Run::Manifest;
     }
     if input.contains("learner's source")

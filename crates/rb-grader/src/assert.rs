@@ -631,7 +631,10 @@ pub(crate) fn check(a: &Assertion, obs: &Observation, problem: &Problem) -> Resu
                 .as_ref()
                 .map_err(|e| fail(format!("`Cargo.toml` isn't valid TOML: {e}")))?;
             let get = |key: &str| -> Option<&toml::Value> {
-                let mut v = m;
+                let (mut v, key) = match key.split_once(':') {
+                    Some((file, rest)) => (m.get("@files")?.get(file)?, rest),
+                    None => (m, key),
+                };
                 for part in key.split('.') {
                     v = v.get(part)?;
                 }
@@ -640,6 +643,8 @@ pub(crate) fn check(a: &Assertion, obs: &Observation, problem: &Problem) -> Resu
             match a {
                 Assertion::ManifestEq { key, value } => match get(key) {
                     Some(toml::Value::String(s)) if s == value => Ok(()),
+                    // Arrays, numbers and booleans compare by their TOML text: `["core", "cli"]`.
+                    Some(other) if !other.is_str() && other.to_string() == *value => Ok(()),
                     Some(other) => Err(diff(
                         format!("In `Cargo.toml`, `{key}` should be {value:?}."),
                         format!("{key} = {value:?}"),

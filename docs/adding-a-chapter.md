@@ -159,4 +159,5 @@ A new kind of run, assertion or visual is a small, one-time engine change in `rb
 | 11 | Done: test-writing problems (supplied read-only code, the learner's tests run against it and against mutants, `cargo test` command rows), test facts in source rules, lesson and quiz code checked with `cargo test` |
 | 12 | Done: command-line rows (arguments, files, environment variables, exact or prefix stderr), `cargo test` rows in any problem, program output in lessons |
 | 13 | Done: source facts `closure_move` (a `move` closure) and `range` (any `a..b` or `a..=b` expression) |
+| 14 | Done: workspaces (a starter may list `member/Cargo.toml` and `member/src/…` files, and learners can create them); `` `cargo test --doc` `` rows (Cargo runs the doc tests directly) and `-p NAME` in `cargo test` rows; `cargo doc …` and `cargo build …` rows with arguments (`build_ok`); manifest rows for a member's manifest (`` `cli/Cargo.toml` ``, key `cli/Cargo.toml:dependencies.x.path`) and non-string values compared as TOML text (`["core", "cli"]`); source facts `doc_crate`, `doc:NAME`, `doc_heading:TEXT`, `doc_code` |
 | 17 | vendored `trpl` |

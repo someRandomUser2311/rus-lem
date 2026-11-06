@@ -1,0 +1,27 @@
+[[tests]]
+key = "t12"
+asserts = [
+  { check = "build_ok" },
+]
+
+[[tests]]
+key = "t14"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["pub_use:query::first_named", "pub_use:query::render", "pub_use:catalog_models::Record"], message = "The root of `catalog-core` re-exports `first_named`, `render` and `Record`." },
+  { check = "uses", what = ["doc_crate"], file = "core/src/lib.rs", message = "Start `core/src/lib.rs` with a crate-level `//!` comment." },
+  { check = "uses", what = ["doc:first_named", "doc:render", "doc_heading:Examples", "doc_code"], message = "Document `first_named` and `render` with `///` and an `# Examples` code example." },
+  { check = "forbids", what = ["pub:query"], message = "Keep `query` private; re-export its functions instead." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[tests]]
+key = "t15"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:first_named", "call:render"], within = "main", message = "`main` uses `first_named` and `render` from `catalog_core`." },
+]
+
+[[wrong]]
+name = "last-match"
+fails = ["t01", "t11", "t17"]

@@ -1,0 +1,8 @@
+[package]
+name = "catalog-cli"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+catalog-models = { path = "../models" }
+catalog-core = { path = "../core" }

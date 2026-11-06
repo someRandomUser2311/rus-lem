@@ -58,6 +58,8 @@
 //! | `call_path:PATH`, `path:PATH` | a call through a path of two or more segments (`crate::a::f`, `super::f`); any such path expression (`super::LIMIT`) |
 //! | `lit:N` | an integer literal with value N |
 //! | `attr:path` | a `#[path = "…"]` attribute |
+//! | `doc_crate`, `doc:NAME` | a crate-level `//!` comment; `///` comments on a function, method, struct or enum |
+//! | `doc_heading:TEXT`, `doc_code` | in a doc comment: a Markdown heading (`# Examples`: `doc_heading:Examples`); a code fence |
 //! | `cfg_test` | an item under `#[cfg(test)]` (also a context: what's inside it) |
 //! | `attr:test`, `test_fn:NAME` | a function marked `#[test]` |
 //! | `stray_test` | a `#[test]` function outside every `#[cfg(test)]` item (fine in `tests/*.rs`) |
@@ -91,6 +93,10 @@ pub struct Fact {
 
 pub fn collect(file: &syn::File) -> Vec<Fact> {
     let mut v = Facts::default();
+    if file.attrs.iter().any(|a| a.path().is_ident("doc")) {
+        v.fact("doc_crate");
+        v.doc_text("crate", &file.attrs);
+    }
     v.visit_file(file);
     // Recursion: a function that reaches itself through calls to the file's functions.
     let fns: BTreeSet<&String> = v.calls.keys().collect();
@@ -364,6 +370,31 @@ fn is_cfg_test(attrs: &[syn::Attribute]) -> bool {
 }
 
 impl Facts {
+    /// Documentation comments on an item: `doc:NAME`, and inside them `doc_heading:TEXT`
+    /// (a Markdown heading such as `# Examples`) and `doc_code` (a code fence).
+    fn docs(&mut self, name: &str, attrs: &[syn::Attribute]) {
+        if attrs.iter().any(|a| a.path().is_ident("doc")) {
+            self.fact(format!("doc:{name}"));
+            self.doc_text(name, attrs);
+        }
+    }
+
+    fn doc_text(&mut self, _name: &str, attrs: &[syn::Attribute]) {
+        for a in attrs.iter().filter(|a| a.path().is_ident("doc")) {
+            if let syn::Meta::NameValue(nv) = &a.meta
+                && let syn::Expr::Lit(syn::ExprLit { lit: syn::Lit::Str(s), .. }) = &nv.value
+            {
+                let line = s.value();
+                let line = line.trim();
+                if let Some(h) = line.strip_prefix("# ") {
+                    self.fact(format!("doc_heading:{}", h.trim()));
+                } else if line.starts_with("```") {
+                    self.fact("doc_code");
+                }
+            }
+        }
+    }
+
     /// `#[test]`, `#[should_panic]` and `#[ignore]` on a function.
     fn test_attrs(&mut self, name: &str, attrs: &[syn::Attribute]) {
         for a in attrs {
@@ -405,6 +436,7 @@ impl Facts {
 
 impl<'ast> Visit<'ast> for Facts {
     fn visit_item_fn(&mut self, f: &'ast syn::ItemFn) {
+        self.docs(&f.sig.ident.to_string(), &f.attrs);
         self.visibility(&f.sig.ident.to_string(), &f.vis);
         self.test_attrs(&f.sig.ident.to_string(), &f.attrs);
         if is_cfg_test(&f.attrs) {
@@ -417,6 +449,7 @@ impl<'ast> Visit<'ast> for Facts {
     }
 
     fn visit_impl_item_fn(&mut self, f: &'ast syn::ImplItemFn) {
+        self.docs(&f.sig.ident.to_string(), &f.attrs);
         self.fact("item:fn");
         self.visibility(&f.sig.ident.to_string(), &f.vis);
         self.function(&f.sig, &f.block, |v| syn::visit::visit_impl_item_fn(v, f));
@@ -482,6 +515,7 @@ impl<'ast> Visit<'ast> for Facts {
 
     fn visit_item_struct(&mut self, s: &'ast syn::ItemStruct) {
         let name = s.ident.to_string();
+        self.docs(&name, &s.attrs);
         self.visibility(&name, &s.vis);
         self.fact(format!("struct:{name}"));
         match &s.fields {
@@ -505,6 +539,7 @@ impl<'ast> Visit<'ast> for Facts {
 
     fn visit_item_enum(&mut self, e: &'ast syn::ItemEnum) {
         let name = e.ident.to_string();
+        self.docs(&name, &e.attrs);
         self.visibility(&name, &e.vis);
         self.fact(format!("enum:{name}"));
         self.within(format!("enum:{name}"), |v| {

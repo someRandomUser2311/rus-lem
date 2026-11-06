@@ -1036,8 +1036,10 @@ impl Grader<'_> {
         } else {
             self.shared_target.as_deref()
         };
+        // A command may carry arguments: `doc --workspace --no-deps`.
+        let args: Vec<&str> = command.split_whitespace().collect();
         self.toolchain
-            .cargo(dir, command, target, self.vendor.as_deref(), self.cancel)
+            .cargo_args(dir, &args, target, self.vendor.as_deref(), self.cancel)
     }
 
     /// A second build whose fixture bindings read their values from the environment.
@@ -1320,10 +1322,26 @@ impl Grader<'_> {
             }
             Run::Source => {
                 // Files the learner edits plus the full source for code checks.
+                // Inner `//!` comments and `#![…]` attributes are only valid at the top of a
+                // file, so they're neutralised when the files are joined into one text; each
+                // file's own parse below still sees them.
                 let rust: String = files
                     .iter()
                     .filter(|f| f.path.ends_with(".rs"))
-                    .map(|f| f.text.as_str())
+                    .map(|f| {
+                        f.text
+                            .lines()
+                            .map(|l| {
+                                let t = l.trim_start();
+                                if t.starts_with("//!") || t.starts_with("#![") {
+                                    format!("// {t}")
+                                } else {
+                                    l.to_string()
+                                }
+                            })
+                            .collect::<Vec<_>>()
+                            .join("\n")
+                    })
                     .collect::<Vec<_>>()
                     .join("\n");
                 Observation::Source {
@@ -1342,7 +1360,21 @@ impl Grader<'_> {
                     .find(|f| f.path == "Cargo.toml")
                     .map(|f| f.text.as_str())
                     .unwrap_or("");
-                Observation::Manifest(toml::from_str::<toml::Value>(m).map_err(|e| e.to_string()))
+                // Every other manifest (a workspace's members) is reachable as
+                // `core/Cargo.toml:dependencies.course-core.path`.
+                let parsed = toml::from_str::<toml::Value>(m).map(|mut root| {
+                    let mut others = toml::map::Map::new();
+                    for f in files.iter().filter(|f| f.path.ends_with("/Cargo.toml")) {
+                        if let Ok(v) = toml::from_str::<toml::Value>(&f.text) {
+                            others.insert(f.path.clone(), v);
+                        }
+                    }
+                    if let Some(t) = root.as_table_mut() {
+                        t.insert("@files".into(), toml::Value::Table(others));
+                    }
+                    root
+                });
+                Observation::Manifest(parsed.map_err(|e| e.to_string()))
             }
             Run::Todo => Observation::Source {
                 info: Err("this test hasn't been converted yet".into()),

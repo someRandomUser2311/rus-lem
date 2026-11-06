@@ -1,0 +1,7 @@
+[package]
+name = "course-cli"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+course-core = { path = "../core" }

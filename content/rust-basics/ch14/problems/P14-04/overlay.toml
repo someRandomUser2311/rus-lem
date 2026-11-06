@@ -1,0 +1,31 @@
+[[tests]]
+key = "t10"
+asserts = [
+  { check = "manifest_eq", key = "core/Cargo.toml:dependencies.score-models.path", value = "../models" },
+]
+
+[[tests]]
+key = "t11"
+asserts = [
+  { check = "manifest_eq", key = "cli/Cargo.toml:dependencies.score-core.path", value = "../core" },
+]
+
+[[tests]]
+key = "t12"
+asserts = [
+  { check = "build_ok" },
+]
+
+[[tests]]
+key = "t13"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["pub_use:score_models::Score"], message = "`score-core` re-exports the shared type: `pub use score_models::Score;`." },
+  { check = "count", what = "struct:Score", eq = 1, message = "Keep one `Score` struct, in `score-models`; `score-core` re-exports it." },
+  { check = "uses", what = ["call:revise"], within = "main", message = "`main` passes the score to `score_core::revise`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "wrapping-points"
+fails = ["t04", "t05"]
