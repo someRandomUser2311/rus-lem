@@ -1,0 +1,12 @@
+[[tests]]
+key = "t11"
+run = { kind = "suite", script = "t11" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call_path:Arc::clone|call:clone", "call:spawn", "call:lock", "call:join"], within = "shared_total", message = "Give each thread an `Arc::clone` and add under the lock." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]

@@ -1,0 +1,17 @@
+[[tests]]
+key = "t17"
+run = { kind = "suite", script = "t17" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t18"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:scope", "call:spawn", "call:merge"], within = "parallel_sorted", message = "Sort chunks in scoped threads and merge the runs." },
+  { check = "forbids", what = ["call:sort", "call:sort_unstable"], within = "merge", message = "`merge` merges; it doesn't sort." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "concatenate"
+fails = ["t01", "t02", "t08", "t09", "t10", "t11", "t13", "t14", "t17"]

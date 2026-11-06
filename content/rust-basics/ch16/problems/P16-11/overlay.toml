@@ -1,0 +1,7 @@
+[[tests]]
+key = "t08"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:is_poisoned", "call:into_inner", "call:clear_poison"], within = "recover", message = "Recover the poisoned guard, repair, then `clear_poison`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]

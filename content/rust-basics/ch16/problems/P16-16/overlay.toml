@@ -1,0 +1,9 @@
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["bound:Send", "bound:Sync"], message = "Check the traits with bounds." },
+  { check = "uses", what = ["call:spawn", "call:borrow_mut"], within = "move_cell", message = "Move the cell into a thread and change it there." },
+  { check = "forbids", what = ["unsafe"], message = "No `unsafe`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]

@@ -1,0 +1,19 @@
+checkpoints = true
+
+[[tests]]
+key = "t21"
+run = { kind = "suite", script = "t21" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t22"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call_path:Arc::clone|call:clone", "call:lock", "call:pop_front", "call:send", "call:drop"], within = "count_all", message = "A pool with a shared queue and per-worker maps." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "case-folded"
+part = 1
+fails = ["t03"]

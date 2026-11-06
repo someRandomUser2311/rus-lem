@@ -1,0 +1,16 @@
+[[tests]]
+key = "t11"
+run = { kind = "suite", script = "t11" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:clone", "call:send", "call:drop"], within = "group_totals", message = "Clone a sender per thread and drop the original." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "unsorted"
+fails = ["t01", "t05", "t11"]

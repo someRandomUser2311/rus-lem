@@ -1,0 +1,8 @@
+[[tests]]
+key = "t08"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:scope", "call:spawn", "call:join"], within = "split_sum", message = "Borrow the halves in `thread::scope`." },
+  { check = "forbids", what = ["call:to_vec", "call:clone"], message = "Borrow the slice; don't copy it." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]

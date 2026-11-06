@@ -1,0 +1,7 @@
+[[tests]]
+key = "t06"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:spawn", "call:join"], within = "worker_value", message = "Run the work with `thread::spawn` and `join` it." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]

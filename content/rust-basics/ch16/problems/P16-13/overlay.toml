@@ -1,0 +1,7 @@
+[[tests]]
+key = "t08"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:ptr_eq", "call_path:Arc::clone|call:clone"], within = "shared_text", message = "Share with `Arc::clone` and compare with `Arc::ptr_eq`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]

@@ -1,0 +1,7 @@
+[[tests]]
+key = "t08"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:clone", "call:send", "call:sort_by_key|call:sort_by|call:sort"], within = "merged", message = "Clone the sender for the second producer and sort by tag." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]

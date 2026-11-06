@@ -1,0 +1,19 @@
+checkpoints = true
+
+[[tests]]
+key = "t15"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:scope"], within = "search_many", message = "Search in `thread::scope`." },
+  { check = "uses", what = ["call:spawn", "call:send", "call:drop"], within = "load_many", message = "Load in spawned threads that send tagged results." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[tests]]
+key = "t02"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["bound:Send", "bound:Sync"], message = "Check shareability with `Send + Sync` bounds." },
+  { check = "forbids", what = ["unsafe"], message = "No `unsafe`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
