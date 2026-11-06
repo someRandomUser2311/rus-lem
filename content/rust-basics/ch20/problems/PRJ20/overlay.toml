@@ -1,0 +1,20 @@
+checkpoints = true
+
+[[tests]]
+key = "t20"
+run = { kind = "suite", script = "t20" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t21"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["trait_impl:Add", "item:type"], message = "Operator traits and the `Parsed` alias." },
+  { check = "forbids", what = ["unsafe"], message = "No `unsafe`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "cm-factor"
+part = 2
+fails = ["t06", "t07", "t12"]

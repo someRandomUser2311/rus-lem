@@ -1,0 +1,12 @@
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["arm_guard"], within = "window", message = "Guard the slice pattern." },
+  { check = "uses", what = ["arm_guard"], within = "shape", message = "Guard the slice patterns." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "any-ends"
+fails = ["t05", "t12"]

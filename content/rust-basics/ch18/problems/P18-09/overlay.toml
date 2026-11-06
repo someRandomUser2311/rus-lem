@@ -1,0 +1,12 @@
+[[tests]]
+key = "t08"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:take"], within = "request_review", message = "Replace the state through `take`." },
+  { check = "uses", what = ["call:take"], within = "approve", message = "Replace the state through `take`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "approve-draft"
+fails = ["t02"]

@@ -1,0 +1,22 @@
+checkpoints = true
+
+[[tests]]
+key = "t23"
+run = { kind = "suite", script = "t23" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t24"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:select", "call:sleep"], within = "download", message = "Race the download against the limit." },
+  { check = "uses", what = ["call:spawn_task", "call:channel", "call:drop", "call:recv"], within = "download_all", message = "One task per job, reporting through a channel." },
+  { check = "uses", what = ["call:block_on|call:run"], within = "run", message = "Drive the downloads with `trpl::block_on`." },
+  { check = "forbids", what = ["call_path:std::thread::sleep", "call_path:thread::sleep"], message = "Wait with `trpl::sleep`; `std::thread::sleep` blocks the whole runtime." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "never-empty"
+part = 2
+fails = ["t11"]

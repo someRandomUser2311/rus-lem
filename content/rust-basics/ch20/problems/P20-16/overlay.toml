@@ -1,0 +1,11 @@
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["macro:vec"], message = "Build the vector without `vec!`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "first-twice"
+fails = ["t02", "t05", "t07", "t09", "t10"]

@@ -1,0 +1,12 @@
+[[tests]]
+key = "t06"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["while_let"], within = "pop_all", message = "Drain the stack with `while let`." },
+  { check = "uses", what = ["while_let"], within = "pop_until", message = "Pop with `while let`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "no-stop"
+fails = ["t02", "t05"]

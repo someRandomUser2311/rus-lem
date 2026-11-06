@@ -1,0 +1,17 @@
+[[tests]]
+key = "t17"
+run = { kind = "suite", script = "t17" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t18"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:select", "call:sleep", "call:join_all"], message = "Race each fetch against a sleep and run them all with `trpl::join_all`." },
+  { check = "forbids", what = ["call_path:std::thread::sleep", "call_path:thread::sleep"], message = "Wait with `trpl::sleep`; `std::thread::sleep` blocks the whole runtime." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "empty-ok"
+fails = ["t03", "t15", "t17"]

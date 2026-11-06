@@ -1,0 +1,12 @@
+[[tests]]
+key = "t08"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["closure"], within = "to_strings", message = "Pass a named function, not a closure." },
+  { check = "forbids", what = ["closure"], within = "wrap_all", message = "Pass the constructor, not a closure." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "adds-two"
+fails = ["t01"]

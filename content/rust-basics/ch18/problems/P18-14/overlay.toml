@@ -1,0 +1,17 @@
+[[tests]]
+key = "t18"
+run = { kind = "suite", script = "t18" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t19"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["dyn", "call:take"], message = "Keep the state as a `Box<dyn State>` and replace it through `take`." },
+  { check = "uses", what = ["required_fn:approve", "required_fn:reject"], inside = "trait:State", message = "`State` declares `approve` and `reject`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "same-reviewer-twice"
+fails = ["t04", "t05", "t11"]

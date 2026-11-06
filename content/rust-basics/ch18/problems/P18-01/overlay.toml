@@ -1,0 +1,11 @@
+[[tests]]
+key = "t06"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["pub_field:value", "pub_field:max"], message = "Keep `Score`'s fields private." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "no-cap"
+fails = ["t02", "t04"]

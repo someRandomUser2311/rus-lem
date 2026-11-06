@@ -1,0 +1,17 @@
+[[tests]]
+key = "t17"
+run = { kind = "suite", script = "t17" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t18"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["call:clone"], message = "Move the strings out of the events; don't clone." },
+  { check = "uses", what = ["pat:Login", "pat_range_incl"], within = "reduce", message = "Match `Event` patterns with ranges." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "repeat-spenders"
+fails = ["t05", "t15"]

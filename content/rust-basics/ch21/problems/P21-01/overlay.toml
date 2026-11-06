@@ -1,0 +1,11 @@
+[[tests]]
+key = "t06"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:bind", "try"], within = "bind_local", message = "Bind with `TcpListener::bind` and pass errors on with `?`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "addr-with-port"
+fails = ["t02"]

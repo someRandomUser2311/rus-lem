@@ -1,0 +1,13 @@
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:select"], within = "timeout_value", message = "Race the future against a sleep with `trpl::select`." },
+  { check = "uses", what = ["call:sleep"], within = "delayed", message = "Wait with `trpl::sleep`." },
+  { check = "forbids", what = ["call_path:std::thread::sleep", "call_path:thread::sleep"], message = "Wait with `trpl::sleep`; `std::thread::sleep` blocks the whole runtime." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "err-zero"
+fails = ["t02", "t04", "t07", "t09"]

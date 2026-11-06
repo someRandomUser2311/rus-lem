@@ -1,0 +1,11 @@
+[[tests]]
+key = "t08"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["required_fn:duplicate", "where"], inside = "trait:Shape", message = "Keep `duplicate` in `Shape`, with `where Self: Sized`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "wrapping"
+fails = ["t05"]

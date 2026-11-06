@@ -1,0 +1,11 @@
+[[tests]]
+key = "t08"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["bound:Sized"], within = "describe", message = "Relax the bound with `?Sized`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "chars-not-bytes"
+fails = ["t06"]

@@ -1,0 +1,11 @@
+[[tests]]
+key = "t06"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["trait_impl:Iterator"], message = "Implement `Iterator` for `Countdown`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "stops-early"
+fails = ["t01", "t03", "t05"]

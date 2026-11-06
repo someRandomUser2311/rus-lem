@@ -1,0 +1,12 @@
+[[tests]]
+key = "t18"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["item:type", "dyn"], message = "A `type` alias for the boxed step." },
+  { check = "uses", what = ["closure_move"], within = "make_limit", message = "Return a `move` closure." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "exclusive-limit"
+fails = ["t06", "t10", "t16"]

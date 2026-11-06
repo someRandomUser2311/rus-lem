@@ -1,0 +1,13 @@
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["unsafe", "call:swap"], within = "swap_at", message = "Swap with `ptr::swap`." },
+  { check = "uses", what = ["unsafe", "call:read", "call:write"], within = "rotate_three", message = "Rotate with `ptr::read` and `ptr::write`." },
+  { check = "forbids", what = ["call:rotate_left", "call:rotate_right"], message = "Don't use `rotate_left`/`rotate_right`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "rotate-backwards"
+fails = ["t02", "t10"]

@@ -1,0 +1,12 @@
+[[tests]]
+key = "t08"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["unsafe", "call:from_raw_parts_mut"], within = "split_two", message = "Build the halves with `from_raw_parts_mut`." },
+  { check = "forbids", what = ["call:split_at_mut"], message = "Don't use the standard `split_at_mut`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "none-at-end"
+fails = ["t04", "t05"]

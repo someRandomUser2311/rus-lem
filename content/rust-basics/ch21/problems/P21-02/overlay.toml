@@ -1,0 +1,12 @@
+[[tests]]
+key = "t08"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:read_line"], within = "read_head", message = "Read line by line with `read_line`." },
+  { check = "uses", what = ["lit:8192"], within = "read_head", message = "Enforce the 8192-byte limit." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "no-limit"
+fails = ["t05", "t08"]

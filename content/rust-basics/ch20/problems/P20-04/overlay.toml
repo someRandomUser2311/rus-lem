@@ -1,0 +1,12 @@
+[[tests]]
+key = "t08"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["item:static", "call:fetch_add"], message = "Use an atomic static." },
+  { check = "forbids", what = ["unsafe"], message = "No `unsafe`: a synchronized static needs none." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "double-count"
+fails = ["t01", "t03", "t04", "t07"]

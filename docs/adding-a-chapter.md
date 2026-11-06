@@ -161,4 +161,6 @@ A new kind of run, assertion or visual is a small, one-time engine change in `rb
 | 13 | Done: source facts `closure_move` (a `move` closure) and `range` (any `a..b` or `a..=b` expression) |
 | 14 | Done: workspaces (a starter may list `member/Cargo.toml` and `member/src/…` files, and learners can create them); `` `cargo test --doc` `` rows (Cargo runs the doc tests directly) and `-p NAME` in `cargo test` rows; `cargo doc …` and `cargo build …` rows with arguments (`build_ok`); manifest rows for a member's manifest (`` `cli/Cargo.toml` ``, key `cli/Cargo.toml:dependencies.x.path`) and non-string values compared as TOML text (`["core", "cli"]`); source facts `doc_crate`, `doc:NAME`, `doc_heading:TEXT`, `doc_code` |
 | 15 | Done: function rows in a workspace call the library of its one member with a `src/lib.rs` (`core/src/lib.rs`) when the root has none |
-| 17 | vendored `trpl` |
+| 17 | Done: vendored `trpl`; lesson and quiz programs that use `trpl::` (like `rand::`) are built with Cargo |
+| 19 | Done: a destructuring `let` records its struct and variant patterns (`pat:NAME`), as `match` arms do |
+| 21 | Done: rows that open local TCP connections (`127.0.0.1` only); validate these chapters outside any network sandbox |

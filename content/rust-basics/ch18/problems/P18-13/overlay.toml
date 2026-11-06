@@ -1,0 +1,18 @@
+[[tests]]
+key = "t18"
+run = { kind = "suite", script = "t18" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t19"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["pub_field:items"], message = "Keep `items` private." },
+  { check = "uses", what = ["call:checked_add"], within = "total_cents", message = "Add with `checked_add`." },
+  { check = "uses", what = ["default_fn:line_cents"], inside = "trait:Item", message = "`line_cents` is a default method of `Item`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "saturating-total"
+fails = ["t10", "t19"]

@@ -1,0 +1,11 @@
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["recv:own", "ret:DraftPost"], within = "reject", message = "`reject` consumes the post and returns a `DraftPost`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "no-count"
+fails = ["t02", "t05", "t11"]

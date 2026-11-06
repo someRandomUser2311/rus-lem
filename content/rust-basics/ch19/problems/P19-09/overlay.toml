@@ -1,0 +1,11 @@
+[[tests]]
+key = "t08"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["field_access:0", "field_access:1", "field_access:2", "field_access:3", "field_access:4"], message = "Ignore with `_` and `..` instead of field access." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "counts-all"
+fails = ["t01", "t06", "t07"]

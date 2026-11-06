@@ -1,0 +1,13 @@
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["arm_guard"], within = "check", message = "Compare with a match guard." },
+  { check = "uses", what = ["match"], within = "at_limit", message = "Match the constant `LIMIT`." },
+  { check = "forbids", what = ["if"], within = "at_limit", message = "Use the constant as a pattern, not an `if`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "binds-expected"
+fails = ["t02", "t04", "t10", "t12"]

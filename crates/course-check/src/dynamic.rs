@@ -344,8 +344,16 @@ fn verify_panic(
 }
 
 /// Programs that use `rand` are built as a Cargo package with the vendored crates.
-fn uses_rand(code: &str) -> bool {
-    code.contains("rand::")
+/// The vendored crates a single-file program uses, as `Cargo.toml` dependency lines.
+fn program_deps(code: &str) -> String {
+    let mut deps = String::new();
+    if code.contains("rand::") {
+        deps.push_str("rand = \"0.10.1\"\n");
+    }
+    if code.contains("trpl::") {
+        deps.push_str("trpl = \"0.3.0\"\n");
+    }
+    deps
 }
 
 fn verify_program(
@@ -361,11 +369,12 @@ fn verify_program(
     let dir = dir.join(id.replace('.', "_"));
     std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
     let dir = dir.as_path();
-    let (c, exe) = if uses_rand(code) {
+    let deps = program_deps(code);
+    let (c, exe) = if !deps.is_empty() {
         std::fs::create_dir_all(dir.join("src")).map_err(|e| e.to_string())?;
         std::fs::write(
             dir.join("Cargo.toml"),
-            "[package]\nname = \"main\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\nrand = \"0.10.1\"\n",
+            format!("[package]\nname = \"main\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\n{deps}"),
         )
         .map_err(|e| e.to_string())?;
         std::fs::write(dir.join("src/main.rs"), code).map_err(|e| e.to_string())?;

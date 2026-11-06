@@ -1,0 +1,12 @@
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["trait_impl:Add", "trait_impl:Mul"], message = "Implement the operator traits." },
+  { check = "uses", what = ["op:+"], within = "total_mm", message = "Add the parts with `+`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "meters-unscaled"
+fails = ["t01", "t04", "t08", "t10", "t11"]

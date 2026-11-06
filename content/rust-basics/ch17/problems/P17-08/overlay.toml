@@ -1,0 +1,16 @@
+[[tests]]
+key = "t11"
+run = { kind = "suite", script = "t11" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:spawn_task", "call:clone", "call:drop", "call:recv"], within = "task_messages", message = "Give each task a cloned sender and drop the original." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "not-upper"
+fails = ["t01", "t03", "t05", "t06", "t09", "t10", "t11"]

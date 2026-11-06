@@ -1,0 +1,12 @@
+[[tests]]
+key = "t08"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["pub_field:list", "pub_field:sum"], message = "Keep the fields private." },
+  { check = "forbids", what = ["call:sum", "call:iter", "call:fold", "for"], within = "average", message = "`average` uses the cached sum; don't add the list up again." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "stale-sum"
+fails = ["t04"]

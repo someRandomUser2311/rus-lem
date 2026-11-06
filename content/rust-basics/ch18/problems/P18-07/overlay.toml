@@ -1,0 +1,11 @@
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:create"], within = "make", message = "Build each plugin with its type's `create`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "skip-unknown"
+fails = ["t02", "t10"]

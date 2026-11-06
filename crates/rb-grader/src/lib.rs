@@ -995,15 +995,38 @@ impl Grader<'_> {
                 unique.push(c);
             }
         }
+        let mut extra: Vec<String> = vec!["-A".into(), "dead_code".into()];
         let src = if problem.mode == BuildMode::Cargo {
             let Some(pkg) = library_dir(dir) else {
                 return Ok((no_library(), None));
             };
             let lib = std::fs::read_to_string(pkg.join("src/lib.rs"))?;
+            let name = crate_name(&pkg);
+            if has_dependencies(&pkg) {
+                // Build the dependencies with Cargo, then link them into the harness.
+                let built = self.cargo(problem, dir, "build --lib")?;
+                if !built.ok {
+                    return Ok((built, None));
+                }
+                for (lib_name, file) in &built.libs {
+                    if *lib_name == name {
+                        continue;
+                    }
+                    if let Some(parent) = file.parent() {
+                        let l = format!("dependency={}", parent.display());
+                        if !extra.contains(&l) {
+                            extra.push("-L".into());
+                            extra.push(l);
+                        }
+                    }
+                    extra.push("--extern".into());
+                    extra.push(format!("{lib_name}={}", file.display()));
+                }
+            }
             let src = pkg.join("src/__rb_harness.rs");
             std::fs::write(
                 &src,
-                library_harness_source(&lib, &crate_name(&pkg), &unique, &problem.helpers),
+                library_harness_source(&lib, &name, &unique, &problem.helpers),
             )?;
             src
         } else {
@@ -1026,7 +1049,12 @@ impl Grader<'_> {
         });
         let c = self
             .toolchain
-            .compile_rustc(&src, &exe, self.edition, &["-A", "dead_code"])?;
+            .compile_rustc(
+                &src,
+                &exe,
+                self.edition,
+                &extra.iter().map(String::as_str).collect::<Vec<_>>(),
+            )?;
         let harness = c.ok.then_some((exe, index));
         Ok((c, harness))
     }
@@ -1404,6 +1432,15 @@ fn library_dir(dir: &Path) -> Option<PathBuf> {
 }
 
 /// The package's library crate name: its `Cargo.toml` package name with `-` as `_`.
+/// Whether a package's manifest lists any `[dependencies]`.
+fn has_dependencies(dir: &Path) -> bool {
+    std::fs::read_to_string(dir.join("Cargo.toml"))
+        .ok()
+        .and_then(|t| toml::from_str::<toml::Value>(&t).ok())
+        .and_then(|m| m.get("dependencies")?.as_table().map(|t| !t.is_empty()))
+        .unwrap_or(false)
+}
+
 fn crate_name(dir: &Path) -> String {
     std::fs::read_to_string(dir.join("Cargo.toml"))
         .ok()

@@ -67,6 +67,9 @@
 //! | `assert_msg`, `assert_bare` | an `assert!`, `assert_eq!` or `assert_ne!` (also `debug_` ones) with a custom failure message; one without |
 //! | `attr:ignore`, `ignore_reason` | `#[ignore]`; one with a reason (`#[ignore = "slow"]`) |
 //! | `closure` | a closure expression (`\|x\| …`) |
+//! | `async_fn`, `async_fn:NAME` | an `async fn` |
+//! | `async_block`, `async_move` | an `async { … }` block; an `async move { … }` one (also `async_block`) |
+//! | `await` | a `.await` |
 //! | `trait:NAME` | a trait definition |
 //! | `required_fn:NAME`, `default_fn:NAME` | inside `trait:NAME`: a method without a body; one with a default body (also `fn:NAME`) |
 //! | `bound`, `bound:TRAIT` | a trait bound, in generics, a `where` clause or an `impl TRAIT` type (`T: Clone + Display`: `bound:Clone`, `bound:Display`) |
@@ -434,9 +437,20 @@ impl Facts {
     }
 }
 
+impl Facts {
+    /// `async fn NAME` gives `async_fn` and `async_fn:NAME`.
+    fn async_sig(&mut self, sig: &syn::Signature) {
+        if sig.asyncness.is_some() {
+            self.fact("async_fn");
+            self.fact(format!("async_fn:{}", sig.ident));
+        }
+    }
+}
+
 impl<'ast> Visit<'ast> for Facts {
     fn visit_item_fn(&mut self, f: &'ast syn::ItemFn) {
         self.docs(&f.sig.ident.to_string(), &f.attrs);
+        self.async_sig(&f.sig);
         self.visibility(&f.sig.ident.to_string(), &f.vis);
         self.test_attrs(&f.sig.ident.to_string(), &f.attrs);
         if is_cfg_test(&f.attrs) {
@@ -450,6 +464,7 @@ impl<'ast> Visit<'ast> for Facts {
 
     fn visit_impl_item_fn(&mut self, f: &'ast syn::ImplItemFn) {
         self.docs(&f.sig.ident.to_string(), &f.attrs);
+        self.async_sig(&f.sig);
         self.fact("item:fn");
         self.visibility(&f.sig.ident.to_string(), &f.vis);
         self.function(&f.sig, &f.block, |v| syn::visit::visit_impl_item_fn(v, f));
@@ -494,6 +509,19 @@ impl<'ast> Visit<'ast> for Facts {
                 self.fact(format!("use:::{t}"));
             }
         }
+    }
+
+    fn visit_expr_await(&mut self, a: &'ast syn::ExprAwait) {
+        self.fact("await");
+        syn::visit::visit_expr_await(self, a);
+    }
+
+    fn visit_expr_async(&mut self, a: &'ast syn::ExprAsync) {
+        self.fact("async_block");
+        if a.capture.is_some() {
+            self.fact("async_move");
+        }
+        syn::visit::visit_expr_async(self, a);
     }
 
     fn visit_expr_range(&mut self, r: &'ast syn::ExprRange) {
@@ -695,6 +723,10 @@ impl<'ast> Visit<'ast> for Facts {
                 Some(n) => self.within(format!("let:{n}"), |v| v.visit_local_init(init)),
                 None => self.visit_local_init(init),
             }
+        }
+        // A destructuring `let` names struct and variant patterns (`let Line { .. } = l;`).
+        if name.is_none() && !l.init.as_ref().is_some_and(|i| i.diverge.is_some()) {
+            self.visit_pat(&l.pat);
         }
         self.pattern_lets(&l.pat);
         if let syn::Pat::Type(t) = &l.pat {

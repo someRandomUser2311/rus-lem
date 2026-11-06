@@ -1,0 +1,11 @@
+[[tests]]
+key = "t08"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["field_access:0", "field_access:1"], message = "Destructure the pairs instead of using `.0` and `.1`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "unswapped"
+fails = ["t01", "t06"]

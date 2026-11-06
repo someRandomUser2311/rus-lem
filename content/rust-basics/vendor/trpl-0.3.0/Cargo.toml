@@ -1,0 +1,20 @@
+[package]
+edition = "2024"
+name = "trpl"
+version = "0.3.0"
+description = "Rusticoder's copy of the Rust Book support crate, without the web helpers"
+license = "MIT OR Apache-2.0"
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies.futures]
+version = "0.3"
+
+[dependencies.tokio]
+version = "1"
+features = ["fs", "rt-multi-thread", "sync", "time"]
+default-features = false
+
+[dependencies.tokio-stream]
+version = "0.1"

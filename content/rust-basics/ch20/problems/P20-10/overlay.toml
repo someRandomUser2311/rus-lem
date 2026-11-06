@@ -1,0 +1,13 @@
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["bound:Display"], inside = "trait:OutlinePrint", message = "`OutlinePrint` has `Display` as a supertrait." },
+  { check = "uses", what = ["default_fn:outline"], message = "`outline` is a default method." },
+  { check = "uses", what = ["trait_impl:Display"], message = "Implement `Display`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "byte-width"
+fails = ["t06"]

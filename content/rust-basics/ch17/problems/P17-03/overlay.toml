@@ -1,0 +1,7 @@
+[[tests]]
+key = "t06"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:block_on|call:run"], within = "run_sum", message = "Drive the future with `trpl::block_on`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]

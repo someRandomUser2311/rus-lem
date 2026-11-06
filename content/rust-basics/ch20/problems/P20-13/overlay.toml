@@ -1,0 +1,13 @@
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["match"], within = "sum_valid", message = "Use `continue` in a `match` arm." },
+  { check = "uses", what = ["loop", "break_value"], within = "first_big", message = "Use `loop` with `break` values." },
+  { check = "uses", what = ["let_else"], within = "parse_all", message = "Use `let \u2026 else`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "inclusive-limit"
+fails = ["t07"]

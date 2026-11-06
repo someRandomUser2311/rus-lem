@@ -1,0 +1,12 @@
+[[tests]]
+key = "t08"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["recv:own"], within = "request_review", message = "`request_review` takes `self` by value." },
+  { check = "uses", what = ["recv:own"], within = "approve", message = "`approve` takes `self` by value." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "drops-text"
+fails = ["t01", "t03", "t04", "t05", "t06", "t07"]

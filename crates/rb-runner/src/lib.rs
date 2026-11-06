@@ -229,6 +229,19 @@ impl Toolchain {
             match v["reason"].as_str() {
                 Some("compiler-message") => c.push(&v["message"]),
                 Some("compiler-artifact") => {
+                    let kinds = v["target"]["kind"].as_array().cloned().unwrap_or_default();
+                    let is_lib = kinds.iter().any(|k| {
+                        matches!(k.as_str(), Some("lib" | "rlib" | "proc-macro"))
+                    });
+                    if is_lib && v["profile"]["test"].as_bool() != Some(true) {
+                        let name = v["target"]["name"].as_str().unwrap_or("").replace('-', "_");
+                        let files = v["filenames"].as_array().cloned().unwrap_or_default();
+                        if let Some(f) = files.iter().filter_map(|f| f.as_str()).find(|f| {
+                            f.ends_with(".rlib") || f.ends_with(".dylib") || f.ends_with(".so") || f.ends_with(".dll")
+                        }) {
+                            c.libs.push((name, PathBuf::from(f)));
+                        }
+                    }
                     if let Some(exe) = v["executable"].as_str() {
                         c.executable = Some(PathBuf::from(exe));
                         if v["profile"]["test"].as_bool() == Some(true) {
@@ -322,6 +335,11 @@ pub struct Compiled {
     #[serde(skip)]
     #[ts(skip)]
     pub text: String,
+    /// Library artifacts Cargo built (crate name, `.rlib` or proc-macro file), so a
+    /// harness compiled with plain rustc can link a package's dependencies.
+    #[serde(skip)]
+    #[ts(skip)]
+    pub libs: Vec<(String, PathBuf)>,
     /// Cargo's exit code, and whether it ran out of time.
     #[serde(skip)]
     #[ts(skip)]

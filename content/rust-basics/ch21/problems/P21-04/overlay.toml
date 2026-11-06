@@ -1,0 +1,11 @@
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["arm_guard", "match"], within = "route", message = "Match the words as a slice, with a guard for `/echo/`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "no-405"
+fails = ["t04", "t05"]

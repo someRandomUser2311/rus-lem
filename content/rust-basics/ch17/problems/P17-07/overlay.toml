@@ -1,0 +1,11 @@
+[[tests]]
+key = "t08"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:channel", "async_move", "call:recv", "call:join"], within = "messages", message = "Move the sender into the sending block and join the two blocks." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "split-space"
+fails = ["t02", "t03", "t05", "t06"]

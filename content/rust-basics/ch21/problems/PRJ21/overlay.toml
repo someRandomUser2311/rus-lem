@@ -1,0 +1,17 @@
+checkpoints = true
+
+[[tests]]
+key = "t20"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["trait_impl:Drop"], message = "Implement `Drop` for the pool." },
+  { check = "uses", what = ["call:incoming", "call:take"], within = "serve", message = "Accept `take(max_requests)` connections." },
+  { check = "uses", what = ["call:write_all"], message = "Write responses with `write_all`." },
+  { check = "forbids", what = ["unsafe"], message = "No `unsafe` in this problem." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "no-echo"
+part = 1
+fails = ["t01", "t05"]

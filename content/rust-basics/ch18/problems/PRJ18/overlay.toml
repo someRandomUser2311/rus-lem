@@ -1,0 +1,21 @@
+checkpoints = true
+
+[[tests]]
+key = "t21"
+run = { kind = "suite", script = "t21" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t22"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["dyn", "call:take"], message = "Keep the state as a `Box<dyn State>` and replace it through `take`." },
+  { check = "uses", what = ["recv:own"], within = "request_review", message = "The typed `request_review` takes `self`." },
+  { check = "uses", what = ["recv:own"], within = "approve", message = "The typed `approve` takes `self`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "reject-publishes"
+part = 1
+fails = ["t03"]

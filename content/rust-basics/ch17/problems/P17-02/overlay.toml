@@ -1,0 +1,12 @@
+[[tests]]
+key = "t08"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["async_fn:decorated"], message = "Write `decorated` as an `async fn`." },
+  { check = "uses", what = ["async_move"], within = "shout", message = "Return an `async move` block from `shout`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "untrimmed"
+fails = ["t01", "t04", "t05"]

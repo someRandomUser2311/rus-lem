@@ -1,0 +1,20 @@
+checkpoints = true
+
+[[tests]]
+key = "t21"
+run = { kind = "suite", script = "t21" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t22"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["pat_or"], within = "parse", message = "Match the words with `|` patterns." },
+  { check = "uses", what = ["arm_guard"], within = "size", message = "Classify sizes with a guard." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "no-delete-alias"
+part = 1
+fails = ["t02"]

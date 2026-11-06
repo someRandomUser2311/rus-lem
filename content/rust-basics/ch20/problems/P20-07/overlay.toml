@@ -1,0 +1,11 @@
+[[tests]]
+key = "t08"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["trait_impl:Add", "trait_impl:Sub", "trait_impl:Neg", "trait_impl:AddAssign"], message = "Implement the four operator traits." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "wrapping-neg"
+fails = ["t07"]

@@ -1,0 +1,11 @@
+[[tests]]
+key = "t18"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["unsafe"], message = "No `unsafe`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "no-field-names"
+fails = ["t02", "t09", "t10", "t17"]

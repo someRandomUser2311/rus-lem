@@ -1,0 +1,17 @@
+[[tests]]
+key = "t17"
+run = { kind = "suite", script = "t17" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t18"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:channel", "call:spawn_task", "call:select", "call:sleep"], within = "timed_receive", message = "A producer task sends; the consumer races each `recv` against a sleep." },
+  { check = "forbids", what = ["call_path:std::thread::sleep", "call_path:thread::sleep"], message = "Wait with `trpl::sleep`; `std::thread::sleep` blocks the whole runtime." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "closed-is-timeout"
+fails = ["t01", "t03", "t04", "t05", "t09", "t10", "t11", "t13", "t15", "t16", "t17"]

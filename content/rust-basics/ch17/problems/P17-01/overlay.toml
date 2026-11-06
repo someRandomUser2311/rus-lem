@@ -1,0 +1,11 @@
+[[tests]]
+key = "t06"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["async_fn:increment"], message = "Write `increment` as an `async fn`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "wrapping"
+fails = ["t03"]

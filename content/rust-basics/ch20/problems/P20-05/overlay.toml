@@ -1,0 +1,13 @@
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:lock"], within = "run_batch", message = "Lock the static `Mutex` for the whole batch." },
+  { check = "uses", what = ["call:fetch_add"], within = "run_batch", message = "Count batches with the atomic." },
+  { check = "forbids", what = ["unsafe"], message = "No `unsafe`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "no-clear"
+fails = ["t03", "t04", "t06", "t07", "t09", "t10", "t11"]

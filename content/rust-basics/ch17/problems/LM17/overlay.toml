@@ -1,0 +1,13 @@
+checkpoints = true
+
+[[tests]]
+key = "t17"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:sleep"], within = "fetch_catalog", message = "Wait with `trpl::sleep`." },
+  { check = "uses", what = ["call:select"], within = "sync_branch", message = "Race the fetch against the limit." },
+  { check = "uses", what = ["call:join_all"], within = "sync_all", message = "Sync every branch with `trpl::join_all`." },
+  { check = "uses", what = ["call:block_on|call:run"], within = "sync_report", message = "Drive the sync with `trpl::block_on`." },
+  { check = "forbids", what = ["call_path:std::thread::sleep", "call_path:thread::sleep"], message = "Wait with `trpl::sleep`; `std::thread::sleep` blocks the whole runtime." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]

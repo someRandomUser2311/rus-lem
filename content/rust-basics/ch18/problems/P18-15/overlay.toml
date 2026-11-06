@@ -1,0 +1,13 @@
+[[tests]]
+key = "t18"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["recv:ref", "call:clone"], within = "next_edition", message = "`next_edition` borrows the post and clones its text." },
+  { check = "uses", what = ["recv:own"], within = "request_review", message = "`request_review` takes `self`." },
+  { check = "uses", what = ["recv:own"], within = "approve", message = "`approve` takes `self`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "same-edition"
+fails = ["t01", "t04", "t05", "t07", "t10", "t11", "t14", "t16", "t17"]

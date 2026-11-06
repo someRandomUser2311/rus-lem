@@ -1,0 +1,12 @@
+[[tests]]
+key = "t08"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["pat:Line", "pat:Point"], within = "length2", message = "Destructure the `Line` and its `Point`s." },
+  { check = "uses", what = ["pat:Point"], within = "on_axis", message = "Match `Point` patterns." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "no-widen"
+fails = ["t04"]

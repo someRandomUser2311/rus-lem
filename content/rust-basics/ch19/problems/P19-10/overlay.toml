@@ -1,0 +1,12 @@
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["pat:Order"], within = "items_and_customer", message = "Take the items with a `let Order { \u2026 }` pattern." },
+  { check = "uses", what = ["pat:Order"], within = "notes", message = "Match `Order` patterns." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "always-plural"
+fails = ["t04"]

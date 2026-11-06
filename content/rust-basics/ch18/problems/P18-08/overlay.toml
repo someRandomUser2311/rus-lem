@@ -1,0 +1,12 @@
+[[tests]]
+key = "t06"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:content"], within = "content", message = "`Post::content` asks its state." },
+  { check = "uses", what = ["fn:content"], inside = "impl:Published", message = "`Published` overrides `content`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "always-shown"
+fails = ["t02", "t03", "t05", "t06"]

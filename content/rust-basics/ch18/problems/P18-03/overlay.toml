@@ -1,0 +1,11 @@
+[[tests]]
+key = "t06"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:draw"], within = "render", message = "Call `draw` through the trait object." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "no-angles"
+fails = ["t01", "t02", "t03", "t04", "t05"]
