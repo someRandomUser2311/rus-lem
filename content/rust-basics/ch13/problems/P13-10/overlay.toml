@@ -1,0 +1,13 @@
+[[tests]]
+key = "t11"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["trait_impl:Iterator"], message = "Implement `Iterator` for `Counter`." },
+  { check = "uses", what = ["call:new"], within = "collect_counter", message = "`collect_counter` loops over a `Counter::new(start, end)`." },
+  { check = "forbids", what = ["range"], within = "collect_counter", message = "`collect_counter` uses your `Counter`, not a range." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "no-done-check"
+fails = ["t02", "t06", "t10"]

@@ -1,0 +1,18 @@
+[[tests]]
+key = "t13"
+run = { kind = "suite", script = "t13" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t14"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["trait_impl:Iterator"], message = "Implement `Iterator` for `Steps`." },
+  { check = "uses", what = ["call:new"], within = "step_values", message = "`step_values` loops over a `Steps::new(start, end, step)`." },
+  { check = "forbids", what = ["call:checked_add", "call:wrapping_add", "call:saturating_add", "call:overflowing_add", "call:step_by"], message = "Avoid overflow by comparing `end - current` with `step` before adding, not with checked or wrapping arithmetic or `step_by`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "adds-first"
+fails = ["t02", "t07", "t08", "t09", "t13"]

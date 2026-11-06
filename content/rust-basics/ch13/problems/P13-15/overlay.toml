@@ -1,0 +1,13 @@
+[[tests]]
+key = "t10"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:collect"], within = "unique_letters", message = "Build the vector, the string and the set with `collect`." },
+  { check = "uses", what = ["type:HashSet"], message = "Count distinct characters with a `HashSet<char>`." },
+  { check = "forbids", what = ["call:to_string", "call:to_owned", "call_path:String::from"], message = "Rebuild the string by collecting characters, not by copying `text`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "counts-bytes"
+fails = ["t06", "t07", "t08"]

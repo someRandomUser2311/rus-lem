@@ -1,0 +1,11 @@
+[[tests]]
+key = "t09"
+run = { kind = "source" }
+asserts = [
+  { check = "forbids", what = ["call:clone", "call:to_string", "call:to_owned"], message = "Move each `String` through; don't copy text with `clone`, `to_string` or `to_owned`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "clones"
+fails = ["t07", "t09"]

@@ -1,0 +1,17 @@
+[[tests]]
+key = "t17"
+run = { kind = "suite", script = "t17" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t18"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:enumerate", "call:filter_map", "call:collect"], within = "parse_records", message = "Number the lines with `enumerate`, skip and parse with `filter_map`, and `collect` the results." },
+  { check = "forbids", what = ["for", "while", "loop"], within = "parse_records", message = "Use the pipeline instead of a loop." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "numbers-after-skipping"
+fails = ["t05", "t17", "t18"]

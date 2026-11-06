@@ -1,0 +1,12 @@
+[[tests]]
+key = "t09"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:into_iter", "call:filter", "call:collect"], within = "shoes_in_size", message = "Use `into_iter`, `filter` with a closure that captures `size`, and `collect`." },
+  { check = "forbids", what = ["call:clone"], message = "Move the shoes; don't clone them." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "at-least-size"
+fails = ["t01", "t08"]

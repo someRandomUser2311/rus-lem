@@ -1,0 +1,11 @@
+[[tests]]
+key = "t09"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["closure"], within = "bonus", message = "Write a closure inside `bonus` that adds the captured `amount`, and call it." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "subtracts"
+fails = ["t01", "t02", "t03", "t06", "t07", "t08"]

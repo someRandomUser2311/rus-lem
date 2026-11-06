@@ -1,0 +1,18 @@
+[[tests]]
+key = "t16"
+run = { kind = "suite", script = "t16" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t18"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["trait_impl:Iterator"], message = "Implement `Iterator` for `Words`." },
+  { check = "uses", what = ["call:split_whitespace"], within = "next", message = "`next` splits each line with `split_whitespace` as it reaches it." },
+  { check = "forbids", what = ["call:collect", "call:flat_map", "call:flatten", "call:to_string", "call:to_owned", "call_path:String::from", "call:clone"], within = "next", message = "`next` walks the lines itself and borrows every word; no collecting, flattening or copying." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "one-line-lookahead"
+fails = ["t01", "t14", "t16"]

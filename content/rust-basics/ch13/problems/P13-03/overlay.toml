@@ -1,0 +1,11 @@
+[[tests]]
+key = "t10"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["closure", "op:+="], within = "running", message = "Keep the total outside a closure and change it from inside the closure with `+=`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "records-start"
+fails = ["t01", "t03", "t04", "t06", "t07", "t08"]

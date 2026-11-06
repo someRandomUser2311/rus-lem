@@ -1,0 +1,17 @@
+[[tests]]
+key = "t17"
+run = { kind = "suite", script = "t17" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t18"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:filter", "call:fold", "call:collect", "call:sort_by"], within = "revenue", message = "Build the report from `filter`, `fold`, `collect` and `sort_by`." },
+  { check = "forbids", what = ["for", "while", "loop"], within = "revenue", message = "Use the pipeline instead of a loop." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "filters-after-grouping"
+fails = ["t01", "t05", "t13", "t17"]

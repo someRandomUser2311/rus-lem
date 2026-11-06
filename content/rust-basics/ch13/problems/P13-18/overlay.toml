@@ -1,0 +1,12 @@
+[[tests]]
+key = "t10"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:map", "call:filter", "call:collect"], within = "selected", message = "Write one chain: `iter`, `map`, `filter`, `collect`." },
+  { check = "forbids", what = ["for", "while", "loop"], within = "selected", message = "Use the iterator chain instead of a loop." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "filters-before-doubling"
+fails = ["t01", "t04", "t09"]

@@ -920,6 +920,8 @@ fn facts_shown(what: &str) -> String {
         "lit" => format!("the literal `{arg}`"),
         "attr" => format!("a `#[{arg}]` attribute"),
         "closure" => "a closure (`|x| …`)".into(),
+        "closure_move" => "a `move` closure".into(),
+        "range" => "a range (`a..b` or `a..=b`)".into(),
         _ => format!("`{what}`"),
     }
 }

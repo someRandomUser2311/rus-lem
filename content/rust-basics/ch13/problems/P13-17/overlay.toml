@@ -1,0 +1,17 @@
+[[tests]]
+key = "t11"
+run = { kind = "suite", script = "t11" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:position"], within = "first_above", message = "Search with `position`, counting calls in a captured variable." },
+  { check = "forbids", what = ["for", "while", "loop"], within = "first_above", message = "Let `position` do the searching; no loop." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "counts-everything"
+fails = ["t01", "t04", "t08", "t10", "t11"]

@@ -1,0 +1,22 @@
+checkpoints = true
+
+[[tests]]
+key = "t22"
+run = { kind = "suite", script = "t22" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t23"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:fold", "call:sort_by"], within = "product_totals", message = "`product_totals` groups with `fold` and orders with `sort_by`." },
+  { check = "uses", what = ["call:take"], within = "top_products", message = "`top_products` takes a prefix with `take`." },
+  { check = "uses", what = ["call:product_totals"], within = "report", message = "`report` reuses `product_totals`." },
+  { check = "forbids", what = ["for", "while", "loop", "float"], message = "Write every analysis as an iterator pipeline, with integer money: no loops and no floating point." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "multiplies-before-widening"
+part = 1
+fails = ["t03"]

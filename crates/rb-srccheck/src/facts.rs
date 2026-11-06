@@ -463,8 +463,16 @@ impl<'ast> Visit<'ast> for Facts {
         }
     }
 
+    fn visit_expr_range(&mut self, r: &'ast syn::ExprRange) {
+        self.fact("range");
+        syn::visit::visit_expr_range(self, r);
+    }
+
     fn visit_expr_closure(&mut self, c: &'ast syn::ExprClosure) {
         self.fact("closure");
+        if c.capture.is_some() {
+            self.fact("closure_move");
+        }
         syn::visit::visit_expr_closure(self, c);
     }
 

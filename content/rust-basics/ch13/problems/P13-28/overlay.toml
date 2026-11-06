@@ -1,0 +1,16 @@
+[[tests]]
+key = "t17"
+run = { kind = "suite", script = "t17" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t18"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:validate", "call:checked_add"], within = "transact", message = "Add each delta with `checked_add`, then call `validate`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "commits-each-step"
+fails = ["t02", "t05", "t07", "t17"]

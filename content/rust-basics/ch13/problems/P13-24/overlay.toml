@@ -1,0 +1,17 @@
+[[tests]]
+key = "t11"
+run = { kind = "suite", script = "t11" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:next"], within = "build", message = "Take each argument with `next()`." },
+  { check = "forbids", what = ["call:collect", "index", "call:clone"], message = "Pull the arguments one by one and move them into the `Config`: no `collect`, indexing or `clone`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "allows-extra"
+fails = ["t05", "t11"]

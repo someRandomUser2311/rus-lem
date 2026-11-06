@@ -1,0 +1,27 @@
+checkpoints = true
+
+[[tests]]
+key = "t25"
+run = { kind = "suite", script = "t25" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t26"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:next"], within = "build", message = "`build` takes each argument with `next()`." },
+  { check = "uses", what = ["call:enumerate", "call:filter_map", "call:collect"], within = "load_catalog", message = "`load_catalog` is a pipeline: `enumerate`, `filter_map`, `collect`." },
+  { check = "uses", what = ["call:sort_by", "call:fold"], within = "run", message = "`run` sorts with `sort_by` and counts with `fold`." },
+  { check = "forbids", what = ["call:clone"], within = "build", message = "`build` moves the arguments into the `Config` instead of cloning them." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "decades-by-century"
+part = 3
+fails = ["t14", "t15"]
+
+[[wrong]]
+name = "authors-in-name-order"
+part = 3
+fails = ["t12"]

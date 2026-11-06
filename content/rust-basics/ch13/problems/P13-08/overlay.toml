@@ -1,0 +1,16 @@
+[[tests]]
+key = "t12"
+run = { kind = "suite", script = "t12" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t13"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["closure_move"], within = "counter", message = "Return a `move` closure that owns the label and the total." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "i32-total"
+fails = ["t06", "t07", "t08", "t12"]

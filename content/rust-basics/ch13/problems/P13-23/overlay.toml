@@ -1,0 +1,18 @@
+[[tests]]
+key = "t12"
+run = { kind = "suite", script = "t12" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t13"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:lines", "call:filter", "call:collect"], within = "search", message = "Write `search` as `lines`, `filter` and `collect`." },
+  { check = "forbids", what = ["for", "while", "loop"], within = "search", message = "Replace the loop with the iterator chain." },
+  { check = "forbids", what = ["call:to_string", "call:to_owned", "call_path:String::from", "call:clone"], message = "Return views into `contents`; don't copy lines." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "ignores-case"
+fails = ["t04", "t12"]

@@ -1,0 +1,17 @@
+[[tests]]
+key = "t12"
+run = { kind = "suite", script = "t12" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t13"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:retain", "call:sort_by", "call:then_with"], within = "rank", message = "Drop low rows with `retain`, then sort with `sort_by` and `then_with`." },
+  { check = "forbids", what = ["call:sort_unstable_by", "call:clone"], message = "Use the stable `sort_by`, and move rows rather than cloning them." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "labels-descending"
+fails = ["t01", "t07", "t10", "t11", "t12"]

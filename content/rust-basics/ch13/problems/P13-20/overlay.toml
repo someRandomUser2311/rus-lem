@@ -1,0 +1,16 @@
+[[tests]]
+key = "t13"
+run = { kind = "suite", script = "t13" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t14"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:ok_or_else", "call:map_err", "call:and_then"], within = "positive_count", message = "Handle the three error cases with `ok_or_else`, `map_err` and `and_then`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "quotes-trimmed"
+fails = ["t06", "t13"]

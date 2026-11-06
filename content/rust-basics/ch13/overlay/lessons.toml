@@ -1,0 +1,502 @@
+# Chapter 13 lesson visuals, authored from the "Visual state" columns of lessons.md.
+# Merged onto chapter.gen.json: lessons by `id`, screens by `key`, steps by `n`.
+# A "cap" panel is the spec's Borrow view: one node per binding and per closure; an edge
+# from a closure to a binding is a capture, labelled `&`, `&mut` or "owns". A "belt" panel
+# is the Iterator pipeline: the source's remaining items, each station, and the result.
+# Output is printed at the step whose line prints it.
+
+# ---------------------------------------------------------------- L13.1
+[[lessons]]
+id = "L13.1"
+read_more = ["ch13-00-functional-features.md", "ch13-01-closures.md"]
+
+# Screen 3 · Closures can use the variables around them
+[[lessons.screens]]
+key = "s3"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "cap"
+layout = "row"
+nodes = [
+  { id = "bonus", label = "bonus", sub = "i32", state = { value = "10", style = "orange" } },
+  { id = "add", label = "add_bonus", sub = "closure", state = { hidden = true, style = "blue" } },
+]
+edges = [{ id = "c", from = "add", to = "bonus", label = "&", hidden = true }]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [{ panel = "cap", op = "node", id = "bonus", lit = true }]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "cap", op = "node", id = "bonus", lit = false },
+  { panel = "cap", op = "node", id = "add", hidden = false, lit = true, badge = "captured: &bonus" },
+  { panel = "cap", op = "edge", id = "c", hidden = false },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "cap", op = "node", id = "add", value = "score = 5", badge = "" },
+  { panel = "out", op = "print", text = "15\n" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "cap", op = "node", id = "add", value = "score = 32", lit = false },
+  { panel = "cap", op = "edge", id = "c", hidden = true },
+  { panel = "out", op = "print", text = "42\nbonus is still 10\n" },
+]
+
+# Screen 5 · Capturing a mutable reference
+[[lessons.screens]]
+key = "s5"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "cap"
+layout = "row"
+nodes = [
+  { id = "list", label = "list", sub = "Vec<i32>", state = { value = "[1, 2, 3]", style = "orange" } },
+  { id = "add", label = "add_four", sub = "closure", state = { hidden = true, style = "purple" } },
+]
+edges = [{ id = "c", from = "add", to = "list", label = "&mut", hidden = true }]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "cap", op = "node", id = "list", lit = true },
+  { panel = "out", op = "print", text = "Before: [1, 2, 3]\n" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "cap", op = "node", id = "list", lit = false, badge = "borrowed mutably" },
+  { panel = "cap", op = "node", id = "add", hidden = false, lit = true, badge = "captured: &mut list" },
+  { panel = "cap", op = "edge", id = "c", hidden = false },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "cap", op = "node", id = "list", value = "[1, 2, 3, 4]" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "cap", op = "edge", id = "c", hidden = true },
+  { panel = "cap", op = "node", id = "add", lit = false, badge = "" },
+  { panel = "cap", op = "node", id = "list", badge = "" },
+  { panel = "out", op = "print", text = "After: [1, 2, 3, 4]\n" },
+]
+
+# ---------------------------------------------------------------- L13.2
+[[lessons]]
+id = "L13.2"
+read_more = ["ch13-01-closures.md"]
+
+# Screen 3 · Which traits does each closure get?
+[[lessons.screens]]
+key = "s3"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "traits"
+layout = "row"
+nodes = [
+  { id = "show", label = "show", sub = "only reads", state = { hidden = true, style = "blue" } },
+  { id = "add", label = "add", sub = "changes total", state = { hidden = true, style = "purple" } },
+  { id = "finish", label = "finish", sub = "moves label out", state = { hidden = true, style = "orange" } },
+  { id = "total", label = "total", sub = "i32", state = { value = "0" } },
+  { id = "label", label = "label", sub = "String", state = { value = "\"total\"" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "traits", op = "node", id = "show", hidden = false, lit = true, value = "Fn · FnMut · FnOnce" },
+  { panel = "out", op = "print", text = "total: 0\n" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "traits", op = "node", id = "show", lit = false },
+  { panel = "traits", op = "node", id = "add", hidden = false, lit = true, value = "FnMut · FnOnce" },
+  { panel = "traits", op = "node", id = "total", value = "5" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "traits", op = "node", id = "add", lit = false },
+  { panel = "traits", op = "node", id = "finish", hidden = false, lit = true, value = "FnOnce" },
+  { panel = "traits", op = "node", id = "label", ghost = true, badge = "moved" },
+  { panel = "out", op = "print", text = "total: 5\n" },
+]
+
+# Screen 6 · `move` forces capture by value
+[[lessons.screens]]
+key = "s6"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "own"
+layout = "row"
+nodes = [
+  { id = "name", label = "name", sub = "String", state = { style = "orange" } },
+  { id = "greet", label = "greet", sub = "move closure", state = { hidden = true } },
+  { id = "heap", label = "\"Ferris\"", sub = "heap" },
+]
+edges = [
+  { id = "n", from = "name", to = "heap", label = "owns" },
+  { id = "g", from = "greet", to = "heap", label = "owns", hidden = true },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [{ panel = "own", op = "node", id = "name", lit = true }]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "own", op = "node", id = "name", lit = false, ghost = true, badge = "moved · unusable" },
+  { panel = "own", op = "edge", id = "n", hidden = true },
+  { panel = "own", op = "node", id = "greet", hidden = false, lit = true, badge = "move" },
+  { panel = "own", op = "edge", id = "g", hidden = false },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [{ panel = "out", op = "print", text = "Hi, Ferris!\n" }]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "own", op = "node", id = "greet", lit = false },
+  { panel = "own", op = "node", id = "name", style = "red", badge = "E0382" },
+]
+
+# ---------------------------------------------------------------- L13.3
+[[lessons]]
+id = "L13.3"
+read_more = ["ch13-02-iterators.md"]
+
+# Screen 1 · An iterator hands out one item at a time
+[[lessons.screens]]
+key = "s1"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "belt"
+layout = "row"
+nodes = [
+  { id = "a", label = "&10", sub = "it" },
+  { id = "b", label = "&20", sub = "it" },
+  { id = "c", label = "&30", sub = "it" },
+  { id = "got", label = "next() returned", sub = "Option<&i32>", state = { value = "—" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "belt", op = "node", id = "a", ghost = true },
+  { panel = "belt", op = "node", id = "got", value = "Some(10)", lit = true },
+  { panel = "out", op = "print", text = "Some(10)\n" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "belt", op = "node", id = "b", ghost = true },
+  { panel = "belt", op = "node", id = "got", value = "Some(20)" },
+  { panel = "out", op = "print", text = "Some(20)\n" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "belt", op = "node", id = "c", ghost = true },
+  { panel = "belt", op = "node", id = "got", value = "Some(30)" },
+  { panel = "out", op = "print", text = "Some(30)\n" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "belt", op = "node", id = "got", value = "None", lit = false, ghost = true },
+  { panel = "out", op = "print", text = "None\n" },
+]
+
+# Screen 6 · Implementing `Iterator` for your own type
+[[lessons.screens]]
+key = "s6"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "vars"
+layout = "grid"
+nodes = [
+  { id = "count", label = "counter.count", sub = "u32", state = { value = "0" } },
+  { id = "got", label = "next() returned", sub = "Option<u32>", state = { value = "—" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [{ panel = "vars", op = "node", id = "count", lit = true }]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "vars", op = "node", id = "count", value = "1" },
+  { panel = "vars", op = "node", id = "got", value = "Some(1)", lit = true },
+  { panel = "out", op = "print", text = "Some(1)\n" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "vars", op = "node", id = "count", value = "3" },
+  { panel = "vars", op = "node", id = "got", value = "Some(3)" },
+  { panel = "out", op = "print", text = "Some(2)\nSome(3)\n" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "vars", op = "node", id = "count", lit = false },
+  { panel = "vars", op = "node", id = "got", value = "None", lit = false, ghost = true },
+  { panel = "out", op = "print", text = "None\n" },
+]
+
+# ---------------------------------------------------------------- L13.4
+[[lessons]]
+id = "L13.4"
+read_more = ["ch13-02-iterators.md"]
+
+# Screen 1 · `sum` pulls every item through
+[[lessons.screens]]
+key = "s1"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "belt"
+layout = "row"
+nodes = [
+  { id = "a", label = "3", sub = "v.iter()" },
+  { id = "b", label = "4", sub = "v.iter()" },
+  { id = "c", label = "5", sub = "v.iter()" },
+  { id = "sum", label = "sum", sub = "running total", state = { value = "0" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [{ panel = "belt", op = "node", id = "sum", lit = true }]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "belt", op = "node", id = "a", ghost = true },
+  { panel = "belt", op = "node", id = "sum", value = "3" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "belt", op = "node", id = "b", ghost = true },
+  { panel = "belt", op = "node", id = "c", ghost = true },
+  { panel = "belt", op = "node", id = "sum", value = "12" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "belt", op = "node", id = "sum", style = "green", lit = false, badge = "iterator used up" },
+  { panel = "out", op = "print", text = "12\n" },
+]
+
+# Screen 4 · `fold` carries a value along
+[[lessons.screens]]
+key = "s4"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "belt"
+layout = "row"
+nodes = [
+  { id = "a", label = "3", sub = "v.iter()" },
+  { id = "b", label = "4", sub = "v.iter()" },
+  { id = "c", label = "5", sub = "v.iter()" },
+  { id = "fold", label = "fold", sub = "acc", state = { value = "0" } },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [{ panel = "belt", op = "node", id = "fold", lit = true, badge = "starting value" }]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "belt", op = "node", id = "a", ghost = true },
+  { panel = "belt", op = "node", id = "b", ghost = true },
+  { panel = "belt", op = "node", id = "c", ghost = true },
+  { panel = "belt", op = "node", id = "fold", value = "3 → 7 → 12", badge = "" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "belt", op = "node", id = "fold", value = "12", style = "green", lit = false },
+  { panel = "out", op = "print", text = "12\n3,4,5,\n" },
+]
+
+# ---------------------------------------------------------------- L13.5
+[[lessons]]
+id = "L13.5"
+read_more = ["ch13-02-iterators.md"]
+
+# Screen 1 · `map` → `filter` → `collect`
+[[lessons.screens]]
+key = "s1"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "belt"
+layout = "row"
+nodes = [
+  { id = "src", label = "iter()", sub = "source", state = { value = "3 8 5 12" } },
+  { id = "map", label = "map", sub = "|p| p * 2" },
+  { id = "filter", label = "filter", sub = "|p| *p > 10" },
+  { id = "bin", label = "collect()", sub = "Vec<i32>", state = { value = "[]" } },
+]
+edges = [
+  { id = "e1", from = "src", to = "map" },
+  { id = "e2", from = "map", to = "filter" },
+  { id = "e3", from = "filter", to = "bin" },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [{ panel = "belt", op = "node", id = "src", lit = true }]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "belt", op = "node", id = "src", lit = false, value = "8 5 12" },
+  { panel = "belt", op = "node", id = "map", lit = true, value = "3 → 6" },
+  { panel = "belt", op = "node", id = "filter", style = "red", value = "6: dropped" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "belt", op = "node", id = "src", value = "5 12" },
+  { panel = "belt", op = "node", id = "map", value = "8 → 16" },
+  { panel = "belt", op = "node", id = "filter", style = "green", value = "16: passes" },
+  { panel = "belt", op = "node", id = "bin", value = "[16]" },
+]
+[[lessons.screens.steps]]
+n = 4
+ops = [
+  { panel = "belt", op = "node", id = "src", value = "12" },
+  { panel = "belt", op = "node", id = "map", value = "5 → 10" },
+  { panel = "belt", op = "node", id = "filter", style = "red", value = "10: dropped" },
+]
+[[lessons.screens.steps]]
+n = 5
+ops = [
+  { panel = "belt", op = "node", id = "src", value = "", badge = "None: done", ghost = true },
+  { panel = "belt", op = "node", id = "map", value = "12 → 24", lit = false },
+  { panel = "belt", op = "node", id = "filter", style = "green", value = "24: passes" },
+  { panel = "belt", op = "node", id = "bin", value = "[16, 24]" },
+  { panel = "out", op = "print", text = "[16, 24]\n" },
+]
+
+# Screen 6 · Adapters can capture variables
+[[lessons.screens]]
+key = "s6"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "belt"
+layout = "row"
+nodes = [
+  { id = "src", label = "into_iter()", sub = "Vec<Shoe>", state = { value = "10 sneaker · 13 sandal · 10 boot" } },
+  { id = "filter", label = "filter", sub = "|s| s.size == shoe_size" },
+  { id = "size", label = "shoe_size", sub = "u32", state = { value = "10" } },
+  { id = "bin", label = "collect()", sub = "Vec<Shoe>", state = { value = "[]" } },
+]
+edges = [
+  { id = "e1", from = "src", to = "filter" },
+  { id = "cap", from = "filter", to = "size", label = "&" },
+  { id = "e2", from = "filter", to = "bin" },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [
+  { panel = "belt", op = "node", id = "filter", lit = true },
+  { panel = "belt", op = "node", id = "size", lit = true, badge = "captured" },
+]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "belt", op = "node", id = "size", lit = false, badge = "" },
+  { panel = "belt", op = "node", id = "src", value = "10 boot" },
+  { panel = "belt", op = "node", id = "filter", value = "13 sandal: dropped", style = "red" },
+  { panel = "belt", op = "node", id = "bin", value = "[10 sneaker]" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "belt", op = "node", id = "src", value = "", ghost = true },
+  { panel = "belt", op = "node", id = "filter", value = "10 boot: passes", style = "green", lit = false },
+  { panel = "belt", op = "node", id = "bin", value = "[10 sneaker, 10 boot]" },
+  { panel = "out", op = "print", text = "[Shoe { size: 10, style: \"sneaker\" }, Shoe { size: 10, style: \"boot\" }]\n" },
+]
+
+# ---------------------------------------------------------------- L13.6
+[[lessons]]
+id = "L13.6"
+read_more = ["ch13-03-improving-our-io-project.md", "ch13-04-performance.md"]
+
+# Screen 4 · The new `search`, item by item
+[[lessons.screens]]
+key = "s4"
+[[lessons.screens.panels]]
+kind = "scene"
+id = "belt"
+layout = "row"
+nodes = [
+  { id = "src", label = "lines()", sub = "&str views", state = { value = "\"Rust:\" · \"safe, fast, productive.\" · \"Pick three.\"" } },
+  { id = "filter", label = "filter", sub = "contains(query)" },
+  { id = "query", label = "query", sub = "&str", state = { value = "\"duct\"" } },
+  { id = "bin", label = "collect()", sub = "Vec<&str>", state = { value = "[]" } },
+]
+edges = [
+  { id = "e1", from = "src", to = "filter" },
+  { id = "cap", from = "filter", to = "query", label = "&" },
+  { id = "e2", from = "filter", to = "bin" },
+]
+[[lessons.screens.panels]]
+kind = "terminal"
+id = "out"
+title = "Output"
+[[lessons.screens.steps]]
+n = 1
+ops = [{ panel = "belt", op = "node", id = "src", lit = true, badge = "nothing copied" }]
+[[lessons.screens.steps]]
+n = 2
+ops = [
+  { panel = "belt", op = "node", id = "src", lit = false, badge = "", value = "\"Pick three.\"" },
+  { panel = "belt", op = "node", id = "filter", lit = true, value = "\"Rust:\" dropped" },
+  { panel = "belt", op = "node", id = "bin", value = "[\"safe, fast, productive.\"]" },
+]
+[[lessons.screens.steps]]
+n = 3
+ops = [
+  { panel = "belt", op = "node", id = "src", value = "", ghost = true },
+  { panel = "belt", op = "node", id = "filter", lit = false, value = "\"Pick three.\" dropped" },
+  { panel = "out", op = "print", text = "[\"safe, fast, productive.\"]\n" },
+]

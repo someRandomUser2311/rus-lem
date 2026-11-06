@@ -1,0 +1,11 @@
+[[tests]]
+key = "t08"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:f"], within = "twice", message = "`twice` calls `f`, then calls it again with the first result." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "same-argument"
+fails = ["t01", "t02", "t03", "t04", "t06", "t07"]

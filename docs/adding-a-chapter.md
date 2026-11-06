@@ -158,4 +158,5 @@ A new kind of run, assertion or visual is a small, one-time engine change in `rb
 | 10 | Done: source facts for traits and generics (`trait:NAME`, `required_fn:`/`default_fn:`, `bound:TRAIT`, `where`, `dyn`, `lifetime:NAME`, `impl_unbounded`, `borrow`, `deref`, `field_access:NAME`); steppers over a rejected program (their **Compiler output** is checked and shown on the last step); lib-plus-main lesson packages named by `main.rs`'s `use` |
 | 11 | Done: test-writing problems (supplied read-only code, the learner's tests run against it and against mutants, `cargo test` command rows), test facts in source rules, lesson and quiz code checked with `cargo test` |
 | 12 | Done: command-line rows (arguments, files, environment variables, exact or prefix stderr), `cargo test` rows in any problem, program output in lessons |
+| 13 | Done: source facts `closure_move` (a `move` closure) and `range` (any `a..b` or `a..=b` expression) |
 | 17 | vendored `trpl` |

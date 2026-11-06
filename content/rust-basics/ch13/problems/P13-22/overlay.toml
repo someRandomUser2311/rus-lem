@@ -1,0 +1,17 @@
+[[tests]]
+key = "t11"
+run = { kind = "suite", script = "t11" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t12"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:windows", "call:map", "call:collect"], within = "window_sums", message = "Use `windows`, `map` and `collect`." },
+  { check = "forbids", what = ["for", "while", "loop"], within = "window_sums", message = "Use the iterator chain instead of a loop." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "no-zero-guard"
+fails = ["t02"]

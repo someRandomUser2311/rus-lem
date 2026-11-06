@@ -1,0 +1,18 @@
+[[tests]]
+key = "t12"
+run = { kind = "suite", script = "t12" }
+asserts = [{ check = "returns" }]
+
+[[tests]]
+key = "t13"
+run = { kind = "source" }
+asserts = [
+  { check = "uses", what = ["call:fold"], within = "capped_sum", message = "Use `fold` with a `u64` accumulator." },
+  { check = "forbids", what = ["for", "while", "loop"], within = "capped_sum", message = "Use `fold` instead of a loop." },
+  { check = "forbids", what = ["call:checked_add", "call:saturating_add", "call:wrapping_add", "call:min"], message = "Compare the contribution with `cap - acc` before adding, rather than using checked or saturating arithmetic or `min`." },
+  { check = "forbids", what = ["call:unwrap"], message = "Don't use `unwrap()` in this problem." },
+]
+
+[[wrong]]
+name = "adds-then-caps"
+fails = ["t13"]
