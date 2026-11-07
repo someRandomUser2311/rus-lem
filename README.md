@@ -64,7 +64,6 @@ cd app && npx svelte-check --tsconfig ./tsconfig.app.json      # frontend types
 | `app/src` | Svelte 5 UI: path, lesson player and visualizers, question player, coding/project screen (CodeMirror 6), progress, review, settings, onboarding. |
 | `content/rust-basics` | Course content: generated layer (`*.gen.json`) + authored overlay (TOML, solutions, wrong variants), the Rust Book chapters, and `vendor/` (crates such as `rand`, vendored with `cargo vendor` so Cargo problems build offline). |
 
-Crate downloads during development may need a proxy; pass it as an environment variable on your own commands (for example `CARGO_HTTP_PROXY=socks5h://host:port`), never in the repository's configuration.
 
 ## Credits and licence
 
