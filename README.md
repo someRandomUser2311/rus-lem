@@ -1,8 +1,8 @@
 # Rusticoder
 
-A desktop app that teaches Rust from *The Rust Programming Language*: short visual lessons, quick questions, and coding problems graded by real tests with the learner's own Rust toolchain. Fully local and offline. Tauri 2, Svelte 5, Rust.
+A desktop app that teaches Rust from [*The Rust Programming Language*](https://doc.rust-lang.org/book/) by Steve Klabnik, Carol Nichols and Chris Krycho: short visual lessons, quick questions, and coding problems graded by real tests with the learner's own Rust toolchain. Fully local and offline. Tauri 2, Svelte 5, Rust.
 
-The course content is specified in `../rust-basics-course-plan/` (the reviewed Markdown plan). Rusticoder turns it into data with `course-check`, validates it by compiling and running everything, and bundles it into the app. **Chapters 1–21 are bundled**, the whole Rust Book. Chapters listed in `course.toml` but not yet bundled show as "Coming soon" (see [docs/adding-a-chapter.md](docs/adding-a-chapter.md)); adding one needs no app code.
+The course content was specified in a separate Markdown plan (`../rust-basics-course-plan/`, not part of this repository); its imported, authored result is committed in `content/`. Rusticoder turns it into data with `course-check`, validates it by compiling and running everything, and bundles it into the app. **Chapters 1–21 are bundled**, the whole Rust Book. Chapters listed in `course.toml` but not yet bundled show as "Coming soon" (see [docs/adding-a-chapter.md](docs/adding-a-chapter.md)); adding one needs no app code.
 
 ## Requirements
 
@@ -65,3 +65,9 @@ cd app && npx svelte-check --tsconfig ./tsconfig.app.json      # frontend types
 | `content/rust-basics` | Course content: generated layer (`*.gen.json`) + authored overlay (TOML, solutions, wrong variants), the Rust Book chapters, and `vendor/` (crates such as `rand`, vendored with `cargo vendor` so Cargo problems build offline). |
 
 Crate downloads during development may need a proxy; pass it as an environment variable on your own commands (for example `CARGO_HTTP_PROXY=socks5h://host:port`), never in the repository's configuration.
+
+## Credits and licence
+
+The course is built on *The Rust Programming Language* (the Rust Book) by Steve Klabnik, Carol Nichols and Chris Krycho, with contributions from the Rust Community, used under its MIT / Apache-2.0 licence. The Book's text is bundled for the offline "Read more" panel. See [CREDITS.md](CREDITS.md) for the full attribution, including vendored crates. Rusticoder is not affiliated with the Rust Project or the Rust Foundation.
+
+Rusticoder itself is released under the [MIT License](LICENSE).
