@@ -2,7 +2,7 @@
 
 A desktop app that teaches Rust from [*The Rust Programming Language*](https://doc.rust-lang.org/book/) by Steve Klabnik, Carol Nichols and Chris Krycho: short visual lessons, quick questions, and coding problems graded by real tests with the learner's own Rust toolchain. Fully local and offline. Tauri 2, Svelte 5, Rust.
 
-The course content was specified in a separate Markdown plan (`../rust-basics-course-plan/`, not part of this repository); its imported, authored result is committed in `content/`. Rusticoder turns it into data with `course-check`, validates it by compiling and running everything, and bundles it into the app. **Chapters 1–21 are bundled**, the whole Rust Book. Chapters listed in `course.toml` but not yet bundled show as "Coming soon" (see [docs/adding-a-chapter.md](docs/adding-a-chapter.md)); adding one needs no app code.
+The course covers all 21 chapters of the Rust Book. Its content lives in `content/` and is bundled into the app.
 
 ## Requirements
 
