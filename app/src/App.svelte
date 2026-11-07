@@ -40,12 +40,20 @@
   <div class="shell" class:focus>
     {#if !focus}
       <nav class="side">
-        <div class="brand">🦀 <span>Rusticoder</span></div>
-        <a href="#/" class:on={r.name === 'home'}><span>🗺️</span>Learn</a>
-        {#if reviewChapter}<a href="#/review/{reviewChapter}" class:on={r.name === 'review'}><span>🔁</span>Review</a>{/if}
-        <a href="#/profile" class:on={r.name === 'profile'}><span>📈</span>Progress</a>
-        <a href="#/settings" class:on={r.name === 'settings'}><span>⚙️</span>Settings</a>
-        <div class="course">{app.info.course_title}</div>
+        <div class="brand">
+          <svg width="30" height="30" viewBox="100 100 824 824" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF8A3D" /><stop offset="1" stop-color="#D2461A" /></linearGradient></defs><rect x="100" y="100" width="824" height="824" rx="185" fill="#1E1814" /><circle cx="512" cy="512" r="292" fill="none" stroke="url(#lg)" stroke-width="64" stroke-dasharray="45.86 45.86" /><circle cx="512" cy="512" r="252" fill="none" stroke="url(#lg)" stroke-width="44" /><g fill="none" stroke="#FFF4E8" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"><polyline points="420,412 324,512 420,612" /><polyline points="604,412 700,512 604,612" /><line x1="548" y1="392" x2="476" y2="632" stroke="#FF8A3D" /></g></svg>
+          <span>Rusticoder</span>
+        </div>
+        {#snippet ico(d: string)}<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{@html d}</svg>{/snippet}
+        <div class="nav-label">Menu</div>
+        <a href="#/" class:on={r.name === 'home'}>{@render ico('<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>')}Learn</a>
+        {#if reviewChapter}<a href="#/review/{reviewChapter}" class:on={r.name === 'review'}>{@render ico('<path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/>')}Review</a>{/if}
+        <a href="#/profile" class:on={r.name === 'profile'}>{@render ico('<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>')}Progress</a>
+        <a href="#/settings" class:on={r.name === 'settings'}>{@render ico('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>')}Settings</a>
+        <div class="course">
+          <div class="course-k">Course</div>
+          <div class="course-v">{app.info.course_title}</div>
+        </div>
       </nav>
     {/if}
     <div class="main">
@@ -90,12 +98,18 @@
   .shell { height: 100%; display: grid; grid-template-columns: 220px 1fr; }
   .shell.focus { grid-template-columns: 1fr; }
   .main { min-width: 0; min-height: 0; height: 100%; overflow: hidden; }
-  .side { border-right: 1px solid var(--line); background: var(--surface); padding: 20px 14px; display: flex; flex-direction: column; gap: 6px; }
-  .brand { font-size: 22px; font-weight: 900; padding: 4px 10px 18px; color: var(--rust); letter-spacing: -.02em; }
-  .side a { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; font-weight: 800; color: var(--ink-3); text-decoration: none; border: 2px solid transparent; }
+  .side { border-right: 1px solid var(--line); background: var(--surface); padding: 22px 14px; display: flex; flex-direction: column; gap: 2px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-size: 19px; font-weight: 800; padding: 0 8px 22px; color: var(--ink); letter-spacing: -.02em; }
+  .nav-label { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 0 12px 8px; }
+  .side a { position: relative; display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; font-weight: 600; font-size: 14.5px; color: var(--ink-3); text-decoration: none; }
+  .side a :global(svg) { color: var(--muted); }
   .side a:hover { background: var(--surface-2); }
-  .side a.on { background: var(--rust-soft); color: var(--rust); border-color: var(--rust); }
-  .course { margin-top: auto; font-size: 12px; color: var(--muted); padding: 10px; }
+  .side a.on { background: var(--rust-soft); color: var(--rust); font-weight: 700; }
+  .side a.on :global(svg) { color: var(--rust); }
+  .side a.on::before { content: ''; position: absolute; left: -14px; top: 8px; bottom: 8px; width: 3px; border-radius: 0 3px 3px 0; background: var(--rust); }
+  .course { margin-top: auto; padding: 12px; border-radius: 12px; background: var(--surface-2); }
+  .course-k { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .course-v { font-size: 13px; font-weight: 700; margin-top: 2px; }
   .fatal { padding: 40px; }
   .fatal pre { white-space: pre-wrap; }
   .toasts { position: fixed; right: 20px; bottom: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 100; }
